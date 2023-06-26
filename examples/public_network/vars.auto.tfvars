@@ -1,0 +1,11 @@
+prefix               = "weka-tf"
+vpc_cidr             = "10.0.0.0/16"
+subnets_cidr         = ["10.0.1.0/24"]
+region               = "eu-west-1"
+cluster_name         = "test"
+instance_type        = "i3en.2xlarge"
+set_obs_integration  = true
+tiering_ssd_percent  = 20
+cluster_size         = 6
+availability_zones   = ["a"]
+aws_profile          = "cloud-dev"
