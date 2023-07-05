@@ -68,3 +68,8 @@ variable "aws_profile" {
   type    = string
   default = null
 }
+
+variable "allow_ssh_from_ips" {
+  type        = list(string)
+  description = "Allow ssh from ips list to weka vms"
+}

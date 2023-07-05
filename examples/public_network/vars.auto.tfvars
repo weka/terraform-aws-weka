@@ -9,3 +9,4 @@ tiering_ssd_percent  = 20
 cluster_size         = 6
 availability_zones   = ["a"]
 aws_profile          = "cloud-dev"
+allow_ssh_from_ips   = ["185.114.120.75/32", "185.114.120.77/32"] #office ips

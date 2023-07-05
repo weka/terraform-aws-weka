@@ -5,31 +5,12 @@ locals {
   private_nic_first_index = var.private_network ? 0 : 1
   public_ssh_key          = var.ssh_public_key_path == null ? tls_private_key.key[0].public_key_openssh : file(var.ssh_public_key_path)
   private_ssh_key         = var.ssh_private_key_path == null ? tls_private_key.key[0].private_key_pem : file(var.ssh_private_key_path)
-  install_weka_script_path = "${path.module}/install_weka.sh"
-
-  install_weka_script = templatefile(local.install_weka_script_path,
-    {
-      token             = var.get_weka_io_token
-      weka_version      = var.weka_version
-      install_weka_url  = var.install_weka_url
-    })
-
-  deploy_script = templatefile("${path.module}/deploy.sh", {
-    apt_repo_url = var.apt_repo_url
-    memory = var.container_number_map[var.instance_type].memory
-    compute_num = var.add_frontend_container ? var.container_number_map[var.instance_type].compute : var.container_number_map[var.instance_type].compute + 1
-    frontend_num = var.container_number_map[var.instance_type].frontend
-    drive_num = var.container_number_map[var.instance_type].drive
-    nics_num = var.container_number_map[var.instance_type].nics
-    install_dpdk    = true
-    subnet_prefixes = data.aws_subnet.subnets[0].cidr_block
+  user_data               = templatefile("${path.module}/user_data.sh", {
+    deploy_lambda = "${aws_api_gateway_deployment.gateway_deployment.invoke_url}${aws_api_gateway_resource.gateway_resource.path}"
   })
-
-  custom_data_parts = [
-    local.install_weka_script, local.deploy_script
-  ]
-  custom_data = join("\n", local.custom_data_parts)
 }
+
+data "aws_caller_identity" "current" {}
 
 data "aws_ami" "amzn_ami" {
   most_recent = true
@@ -73,7 +54,6 @@ resource "local_file" "private_key" {
   file_permission = "0600"
 }
 
-
 resource "aws_placement_group" "placement_group" {
   count      = var.placement_group_name == null ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-placement-group"
@@ -81,13 +61,20 @@ resource "aws_placement_group" "placement_group" {
 }
 
 resource "aws_launch_template" "launch_template" {
-  name = "${var.prefix}-${var.cluster_name}-backend"
+  name_prefix                          = "${var.prefix}-${var.cluster_name}-backend"
+  disable_api_stop                     = true
+  disable_api_termination              = true
+  ebs_optimized                        = true
+  image_id                             = data.aws_ami.amzn_ami.id
+  instance_initiated_shutdown_behavior = "terminate"
+  instance_type                        = var.instance_type
+  key_name                             = var.ssh_public_key_path == null ? aws_key_pair.generated_key[0].key_name : null
 
   block_device_mappings {
     device_name = "/dev/sdf"
     ebs {
-      volume_size = var.disk_size
-      volume_type = "gp3"
+      volume_size           = var.disk_size
+      volume_type           = "gp3"
       delete_on_termination = true
     }
   }
@@ -100,21 +87,9 @@ resource "aws_launch_template" "launch_template" {
     name = aws_iam_instance_profile.instance_profile.name
   }
 
-  disable_api_stop                     = true
-  disable_api_termination              = true
-  ebs_optimized                        = true
-  image_id                             = data.aws_ami.amzn_ami.id
-  instance_initiated_shutdown_behavior = "terminate"
-  instance_type                        = var.instance_type
-  key_name                             = var.ssh_public_key_path == null ? aws_key_pair.generated_key[0].key_name : null
-
- # license_specification {
-  #  license_configuration_arn = "arn:aws:license-manager:eu-west-1:123456789012:license-configuration:lic-0123456789abcdef0123456789abcdef"
-  #}
-
   metadata_options {
     http_endpoint               = "enabled"
-    http_tokens                 = "required"
+    http_tokens                 = "optional" #required
     http_put_response_hop_limit = 1
     instance_metadata_tags      = "enabled"
   }
@@ -123,14 +98,12 @@ resource "aws_launch_template" "launch_template" {
     enabled = true
   }
 
-  dynamic "network_interfaces" {
-    for_each = range(0,local.nics)
-    content {
-      subnet_id             = data.aws_subnet.subnets[0].id
-      security_groups       = var.sg_id
-      device_index          = network_interfaces.value
-      delete_on_termination = true
-    }
+  network_interfaces {
+      associate_public_ip_address = var.private_network ? false : true
+      delete_on_termination       = true
+      device_index                = 0
+      security_groups             = var.sg_id
+      subnet_id                   = data.aws_subnet.subnets[0].id
   }
 
   placement {
@@ -142,11 +115,12 @@ resource "aws_launch_template" "launch_template" {
     resource_type = "instance"
 
     tags = {
-      Name = "${var.prefix}-${var.cluster_name}-backend"
+      Name         = "${var.prefix}-${var.cluster_name}-backend"
+      weka_cluster = var.cluster_name
+      user         = data.aws_caller_identity.current.user_id
     }
   }
-  tags       =  merge(var.tags_map, { "weka_cluster" : var.cluster_name })
-  user_data  = base64encode(local.custom_data)
+  user_data  = base64encode(local.user_data)
   depends_on = [aws_placement_group.placement_group, aws_iam_instance_profile.instance_profile]
 }
 
@@ -157,15 +131,16 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   max_size            = var.cluster_size
   min_size            = var.cluster_size
   vpc_zone_identifier = [data.aws_subnet.subnets[0].id]
+  placement_group     = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
 
   launch_template {
     id      = aws_launch_template.launch_template.id
     version = aws_launch_template.launch_template.latest_version
   }
-  #tag {
-   # key                 = "${var.prefix}-${var.cluster_name}-asg"
-    #propagate_at_launch = true
-    #value               = var.cluster_name
-  #}
-  depends_on = [aws_launch_template.launch_template]
+  tag {
+    key                 = "${var.prefix}-${var.cluster_name}-asg"
+    propagate_at_launch = true
+    value               = var.cluster_name
+  }
+  depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group]
 }

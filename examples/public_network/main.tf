@@ -11,7 +11,7 @@ module "create-network" {
   availability_zones = var.availability_zones
   subnets_cidr       = var.subnets_cidr
   aws_profile        = var.aws_profile
-  allow_ssh_from_ips = ["185.114.120.75/32"]
+  allow_ssh_from_ips = var.allow_ssh_from_ips
 }
 
 module "deploy-weka" {
