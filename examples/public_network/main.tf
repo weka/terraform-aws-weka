@@ -22,5 +22,9 @@ module "deploy-weka" {
   get_weka_io_token  = var.get_weka_io_token
   sg_id              = module.create-network.sg-id
   aws_profile        = var.aws_profile
+  cluster_name       = var.cluster_name
+  cluster_size       = var.cluster_size
+  instance_type      = var.instance_type
+  prefix             = var.prefix
   depends_on         = [module.create-network]
 }

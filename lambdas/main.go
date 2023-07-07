@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/clusterize"
@@ -10,9 +14,11 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/deploy"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
 	"github.com/weka/go-cloud-lib/protocol"
-	"os"
-	"strconv"
 )
+
+type PostEvent struct {
+	Body string `json:"body"`
+}
 
 type Vm struct {
 	Vm string `json:"vm"`
@@ -29,7 +35,7 @@ func clusterizeFinalizationHandler() (string, error) {
 	}
 }
 
-func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
+func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
@@ -54,6 +60,12 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	if stripeWidth == 0 || protectionLevel == 0 || hotspare == 0 {
 		msg := "Failed getting data protection params"
 		return msg, fmt.Errorf("%s", msg)
+	}
+
+	vm := Vm{}
+	err := json.Unmarshal([]byte(event.Body), &vm)
+	if err != nil {
+		return "Failed unmarshaling vm", err
 	}
 
 	params := clusterize.ClusterizationParams{
@@ -84,7 +96,7 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	return clusterize.Clusterize(params), nil
 }
 
-func deployHandler(ctx context.Context, vm Vm) (string, error) {
+func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 	usernameId := os.Getenv("USER_NAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
@@ -96,6 +108,12 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 	driveContainerNum, _ := strconv.Atoi(os.Getenv("NUM_DRIVE_CONTAINERS"))
 	installUrl := os.Getenv("INSTALL_URL")
 	nicsNumStr := os.Getenv("NICS_NUM")
+
+	vm := Vm{}
+	err := json.Unmarshal([]byte(event.Body), &vm)
+	if err != nil {
+		return "Failed unmarshaling vm", err
+	}
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
 
