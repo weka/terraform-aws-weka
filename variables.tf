@@ -235,10 +235,11 @@ variable "apt_repo_url" {
 }
 
 variable "install_weka_url" {
-  type        = string
-  description = "The URL of the Weka release download tar file."
-  default     = ""
+  type = string
+  default = ""
+  description = "The URL of the Weka release. Supports path to weka tar file or installation script."
 }
+
 
 variable "tags_map" {
   type        = map(string)
@@ -256,4 +257,36 @@ variable "install_cluster_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
+}
+
+variable "weka_username" {
+  type        = string
+  description = "Weka cluster username"
+  default = "admin"
+}
+
+variable "protection_level" {
+  type = number
+  default = 2
+  description = "Cluster data protection level."
+  validation {
+    condition     = var.protection_level == 2 || var.protection_level == 4
+    error_message = "Allowed protection_level values: [2, 4]."
+  }
+}
+
+variable "stripe_width" {
+  type = number
+  default = -1
+  description = "Stripe width = cluster_size - protection_level - 1 (by default)."
+  validation {
+    condition     = var.stripe_width == -1 || var.stripe_width >= 3 && var.stripe_width <= 16
+    error_message = "The stripe_width value can take values from 3 to 16."
+  }
+}
+
+variable "hotspare" {
+  type = number
+  default = 1
+  description = "Hot-spare value."
 }

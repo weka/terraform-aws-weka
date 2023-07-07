@@ -13,5 +13,8 @@ user: ${var.vm_username}
 ############################################## ec2 public ips #############################################################################
 ${local.aws_profile} aws ec2 describe-instances --instance-ids $(${local.aws_profile} aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[]| select( .Tags[].Value == "${var.cluster_name}").Instances[].InstanceId') | jq -r '.Reservations[].Instances[].PublicIpAddress'
 
+
+############################################## deploy url     #############################################################################
+${aws_lambda_function_url.deploy_lambda_url.function_url}
 EOT
 }

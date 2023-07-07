@@ -2,9 +2,9 @@ package deploy
 
 import (
 	"context"
-	"fmt"
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
+	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/aws_functions_def"
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/common"
 	"github.com/weka/go-cloud-lib/bash_functions"
 	"github.com/weka/go-cloud-lib/deploy"
@@ -12,34 +12,31 @@ import (
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
-func getGCPInstanceNameCmd() string {
+func getAWSInstanceNameCmd() string {
 	return "echo $HOSTNAME"
-}
-
-func getWekaIoToken(ctx context.Context, tokenId, region string) (token string, err error) {
-	return
 }
 
 func GetDeployScript(
 	ctx context.Context,
-	region,
-	asgName,
 	usernameId,
 	passwordId,
 	tokenId,
+	clusterName,
 	bucket,
 	instanceName,
+	nicsNum,
 	computeMemory,
 	installUrl string,
-	installDpdk bool,
-	nicsNum,
 	computeContainerNum,
 	frontendContainerNum,
 	driveContainerNum int,
-	gateways []string,
 ) (bashScript string, err error) {
-	state, err := common.GetClusterState(ctx, bucket)
+
+	log.Info().Msg("Getting deploy script")
+
+	state, err := common.GetClusterState(bucket)
 	if err != nil {
+		log.Error().Err(err).Send()
 		return
 	}
 	funcDef := aws_functions_def.NewFuncDef()
@@ -49,18 +46,18 @@ func GetDeployScript(
 
 	if !state.Clusterized {
 		var token string
-		token, err = getWekaIoToken(ctx, tokenId, region)
+		token, err = common.GetWekaIoToken(tokenId)
 		if err != nil {
 			return
 		}
 
 		deploymentParams := deploy.DeploymentParams{
 			VMName:         instanceName,
+			InstanceParams: instanceParams,
 			WekaInstallUrl: installUrl,
 			WekaToken:      token,
 			NicsNum:        nicsNum,
-			InstallDpdk:    installDpdk,
-			Gateways:       gateways,
+			InstallDpdk:    true,
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
 			FuncDef:          funcDef,
@@ -69,39 +66,25 @@ func GetDeployScript(
 		}
 		bashScript = deployScriptGenerator.GetDeployScript()
 	} else {
-		creds, err := common.GetUsernameAndPassword(ctx, usernameId, passwordId)
-		if err != nil {
-			log.Error().Msgf("Error while getting weka creds: %v", err)
-			return "", err
+		creds, err2 := common.GetUsernameAndPassword(usernameId, passwordId)
+		if err2 != nil {
+			log.Error().Msgf("Error while getting weka creds: %v", err2)
+			return "", err2
 		}
 
-		instanceNames := common.GetInstanceGroupInstanceNames(ctx, region, instanceGroup)
-		instances, err := common.GetInstances(ctx, region, instanceNames)
-		if err != nil {
-			return "", err
-		}
+		ips, err2 := common.GetBackendsPrivateIps(clusterName)
 
-		var ips []string
-		for _, instance := range instances {
-			ips = append(ips, *instance.NetworkInterfaces[0].NetworkIP)
-		}
-		if len(ips) == 0 {
-			err = fmt.Errorf("no instances found for instance group %s, can't join", instanceGroup)
-			return "", err
-		}
-
-		if err != nil {
-			log.Error().Err(err).Send()
-			return "", err
+		if err2 != nil {
+			log.Error().Err(err2).Send()
+			return "", err2
 		}
 
 		joinParams := join.JoinParams{
 			WekaUsername:   creds.Username,
 			WekaPassword:   creds.Password,
 			IPs:            ips,
-			InstallDpdk:    installDpdk,
+			InstallDpdk:    true,
 			InstanceParams: instanceParams,
-			Gateways:       gateways,
 		}
 
 		scriptBase := `
@@ -121,7 +104,7 @@ func GetDeployScript(
 		`
 		joinScriptGenerator := join.JoinScriptGenerator{
 			FailureDomainCmd:   getHashedIpCommand,
-			GetInstanceNameCmd: getGCPInstanceNameCmd(),
+			GetInstanceNameCmd: getAWSInstanceNameCmd(),
 			FindDrivesScript:   dedent.Dedent(findDrivesScript),
 			ScriptBase:         dedent.Dedent(scriptBase),
 			Params:             joinParams,

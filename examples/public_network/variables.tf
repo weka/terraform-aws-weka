@@ -32,7 +32,6 @@ variable "get_weka_io_token" {
   type = string
   sensitive = true
   description = "Get get.weka.io token for downloading weka"
-  default = ""
 }
 
 variable "cluster_name" {
