@@ -6,7 +6,7 @@ locals {
   public_ssh_key          = var.ssh_public_key_path == null ? tls_private_key.key[0].public_key_openssh : file(var.ssh_public_key_path)
   private_ssh_key         = var.ssh_private_key_path == null ? tls_private_key.key[0].private_key_pem : file(var.ssh_private_key_path)
   user_data               = templatefile("${path.module}/user_data.sh", {
-    deploy_lambda = "${aws_api_gateway_deployment.gateway_deployment.invoke_url}${aws_api_gateway_resource.gateway_resource.path}"
+    deploy_lambda = aws_lambda_function_url.deploy_lambda_url.function_url
   })
 }
 

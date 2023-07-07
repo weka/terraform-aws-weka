@@ -12,5 +12,5 @@ weka-deployment
 .DS_Store
 
 .tf-function-app/
-
-.cloud-functions/*.zip
+lambdas/lambdas
+lambdas/lambdas.zip

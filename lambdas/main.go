@@ -1,35 +1,35 @@
-package cloud_functions
+package main
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/common"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/clusterize"
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/clusterize_finalization"
 	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/deploy"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
-	"net/http"
+	"github.com/weka/go-cloud-lib/protocol"
 	"os"
 	"strconv"
 )
 
-func ClusterizeFinalization(w http.ResponseWriter, r *http.Request) {
-	region := os.Getenv("REGION")
-	instanceGroup := os.Getenv("INSTANCE_GROUP")
-	bucket := os.Getenv("BUCKET")
+type Vm struct {
+	Vm string `json:"vm"`
+}
 
-	ctx := r.Context()
-	err := clusterize_finalization.ClusterizeFinalization(ctx, region, instanceGroup, bucket)
+func clusterizeFinalizationHandler() (string, error) {
+	bucket := os.Getenv("BUCKET")
+	err := clusterize_finalization.ClusterizeFinalization(bucket)
 
 	if err != nil {
-		fmt.Fprintf(w, "%s", err)
+		return err.Error(), err
 	} else {
-		fmt.Fprintf(w, "ClusterizeFinalization completed successfully")
+		return "ClusterizeFinalization completed successfully", nil
 	}
 }
 
-func Clusterize(w http.ResponseWriter, r *http.Request) {
-	region := os.Getenv("REGION")
+func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
@@ -45,39 +45,29 @@ func Clusterize(w http.ResponseWriter, r *http.Request) {
 	obsName := os.Getenv("OBS_NAME")
 	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("NUM_FRONTEND_CONTAINERS"))
+
 	addFrontend := false
 	if addFrontendNum > 0 {
 		addFrontend = true
 	}
 
 	if stripeWidth == 0 || protectionLevel == 0 || hotspare == 0 {
-		fmt.Fprint(w, "Failed getting data protection params")
-		return
+		msg := "Failed getting data protection params"
+		return msg, fmt.Errorf("%s", msg)
 	}
-
-	var d struct {
-		Vm string `json:"vm"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		fmt.Fprint(w, "Failed decoding request")
-		return
-	}
-
-	ctx := r.Context()
 
 	params := clusterize.ClusterizationParams{
-		Region:     region,
 		UsernameId: usernameId,
 		PasswordId: passwordId,
 		Bucket:     bucket,
-		VmName:     d.Vm,
+		VmName:     vm.Vm,
 		Cluster: clusterizeCommon.ClusterParams{
 			HostsNum:    hostsNum,
 			ClusterName: clusterName,
 			Prefix:      prefix,
 			NvmesNum:    nvmesNum,
 			SetObs:      setObs,
-			InstallDpdk: installDpdk,
+			InstallDpdk: true,
 			DataProtection: clusterizeCommon.DataProtectionParams{
 				StripeWidth:     stripeWidth,
 				ProtectionLevel: protectionLevel,
@@ -85,81 +75,60 @@ func Clusterize(w http.ResponseWriter, r *http.Request) {
 			},
 			AddFrontend: addFrontend,
 		},
-		Obs: common.AwsObsParams{
+		Obs: protocol.ObsParams{
 			Name:              obsName,
 			TieringSsdPercent: tieringSsdPercent,
 		},
 	}
-	fmt.Fprint(w, clusterize.Clusterize(ctx, params))
+
+	return clusterize.Clusterize(params), nil
 }
 
-func Deploy(w http.ResponseWriter, r *http.Request) {
-	region := os.Getenv("REGION")
-	asgName := os.Getenv("ASG_NAME")
-	role := os.Getenv("ROLE")
-	passwordId := os.Getenv("PASSWORD")
-	tokenId := os.Getenv("TOKEN")
+func deployHandler(ctx context.Context, vm Vm) (string, error) {
+	usernameId := os.Getenv("USER_NAME_ID")
+	passwordId := os.Getenv("PASSWORD_ID")
+	tokenId := os.Getenv("TOKEN_ID")
 	bucket := os.Getenv("BUCKET")
-	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
+	clusterName := os.Getenv("CLUSTER_NAME")
 	computeMemory := os.Getenv("COMPUTE_MEMORY")
 	computeContainerNum, _ := strconv.Atoi(os.Getenv("NUM_COMPUTE_CONTAINERS"))
 	frontendContainerNum, _ := strconv.Atoi(os.Getenv("NUM_FRONTEND_CONTAINERS"))
 	driveContainerNum, _ := strconv.Atoi(os.Getenv("NUM_DRIVE_CONTAINERS"))
 	installUrl := os.Getenv("INSTALL_URL")
-	nics_num, _ := strconv.Atoi(os.Getenv("NICS_NUM"))
+	nicsNumStr := os.Getenv("NICS_NUM")
 
-	var d struct {
-		Vm string `json:"vm"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		fmt.Fprint(w, "Failed decoding request")
-		return
-	}
-
-	ctx := r.Context()
+	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
 
 	bashScript, err := deploy.GetDeployScript(
 		ctx,
-		region,
-		asgName,
-		instanceParams,
-		role,
+		usernameId,
 		passwordId,
 		tokenId,
+		clusterName,
 		bucket,
-		d.Vm,
-		nics_num,
+		vm.Vm,
+		nicsNumStr,
 		computeMemory,
 		installUrl,
 		computeContainerNum,
 		frontendContainerNum,
 		driveContainerNum,
-		installDpdk,
 	)
 	if err != nil {
-		_, _ = fmt.Fprintf(w, "%s", err)
-		return
+		return " ", err
 	}
-	w.Write([]byte(bashScript))
+	return bashScript, nil
 }
 
-func Status(w http.ResponseWriter, r *http.Request) {
-	region := os.Getenv("REGION")
-	bucket := os.Getenv("BUCKET")
-	asgName := os.Getenv("ASG_NAME")
-	usernameId := os.Getenv("USER_NAME_ID")
-	passwordId := os.Getenv("PASSWORD_ID")
-
-	ctx := r.Context()
-	clusterStatus, err := status.GetClusterStatus(ctx, region, bucket, asgName, usernameId, passwordId)
-	if err != nil {
-		fmt.Fprintf(w, "Failed retrieving status: %s", err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewEncoder(w).Encode(clusterStatus)
-	if err != nil {
-		fmt.Fprintf(w, "Failed decoding status: %s", err)
+func main() {
+	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
+	case "deploy":
+		lambda.Start(deployHandler)
+	case "clusterize":
+		lambda.Start(clusterizeHandler)
+	case "clusterizeFinalization":
+		lambda.Start(clusterizeFinalizationHandler)
+	default:
+		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}
 }
