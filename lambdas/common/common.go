@@ -15,6 +15,17 @@ import (
 	"time"
 )
 
+const FindDrivesScript = `
+import json
+import sys
+for d in json.load(sys.stdin)['disks']:
+	if d['isRotational']: continue
+	if d['type'] != 'DISK': continue
+	if d['isMounted']: continue
+	if d['model'] != 'Amazon EC2 NVMe Instance Storage': continue
+	print(d['devPath'])
+`
+
 type AwsObsParams struct {
 	Name              string
 	TieringSsdPercent string
@@ -94,7 +105,7 @@ func GetUsernameAndPassword(usernameId, passwordId string) (clusterCreds protoco
 		log.Error().Err(err).Send()
 		return
 	}
-	clusterCreds.Username, err = getSecret(passwordId)
+	clusterCreds.Password, err = getSecret(passwordId)
 	return
 }
 
@@ -110,13 +121,13 @@ func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
 				},
 			},
 			{
-				Name: aws.String("tag:wekactl.io/cluster_name"),
+				Name: aws.String("tag:weka_cluster_name"),
 				Values: []*string{
 					&clusterName,
 				},
 			},
 			{
-				Name: aws.String("tag:wekactl.io/hostgroup_type"),
+				Name: aws.String("tag:weka_hostgroup_type"),
 				Values: []*string{
 					aws.String("backend"),
 				},

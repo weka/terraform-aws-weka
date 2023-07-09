@@ -37,11 +37,6 @@ variable "instance_type" {
   default     = "i3en.2xlarge"
 }
 
-variable "disk_size" {
-  type    = number
-  default = 50
-}
-
 variable "ami_image" {
   type        = string
   default     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-kernel-5.10-hvm-x86_64-gp2"
