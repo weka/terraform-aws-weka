@@ -7,8 +7,8 @@ locals {
   private_ssh_key         = var.ssh_private_key_path == null ? tls_private_key.key[0].private_key_pem : file(var.ssh_private_key_path)
   user_data               = templatefile("${path.module}/user_data.sh", {
     region        = var.region
-    subnet_id     = data.aws_subnet.subnets[0].id
-    groups        = join(" ", var.sg_id)
+    subnet_id     = local.subnet_ids[0]
+    groups        = join(" ", local.sg_id)
     nics_num      = var.container_number_map[var.instance_type].nics
     deploy_lambda = aws_lambda_function_url.deploy_lambda_url.function_url
   })
@@ -24,11 +24,6 @@ data "aws_ami" "amzn_ami" {
     name   = "name"
     values = ["amzn2-ami-kernel-5.*-x86_64-gp2"]
   }
-}
-
-data "aws_subnet" "subnets" {
-  count = length(var.subnets)
-  id    = var.subnets[count.index]
 }
 
 # =============== ssh key ===================
@@ -88,7 +83,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.instance_profile.name
+    name = local.instance_profile_name
   }
 
   metadata_options {
@@ -106,8 +101,8 @@ resource "aws_launch_template" "launch_template" {
     associate_public_ip_address = var.private_network ? false : true
     delete_on_termination       = true
     device_index                = 0
-    security_groups             = var.sg_id
-    subnet_id                   = data.aws_subnet.subnets[0].id
+    security_groups             = local.sg_id
+    subnet_id                   = local.subnet_ids[0]
   }
 
   placement {
@@ -126,7 +121,7 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   user_data  = base64encode(local.user_data)
-  depends_on = [aws_placement_group.placement_group, aws_iam_instance_profile.instance_profile]
+  depends_on = [aws_placement_group.placement_group]
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
@@ -135,7 +130,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   desired_capacity    = var.cluster_size
   max_size            = var.cluster_size
   min_size            = var.cluster_size
-  vpc_zone_identifier = [data.aws_subnet.subnets[0].id]
+  vpc_zone_identifier = [local.subnet_ids[0]]
   placement_group     = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
 
   launch_template {
