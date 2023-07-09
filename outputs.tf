@@ -16,5 +16,13 @@ ${local.aws_profile} aws ec2 describe-instances --instance-ids $(${local.aws_pro
 
 ############################################## deploy url     #############################################################################
 ${aws_lambda_function_url.deploy_lambda_url.function_url}
+
+
+##############################################      state     #############################################################################
+${local.aws_profile} aws s3api get-object --bucket ${local.state_bucket_name} --key state /dev/stdout
+
+############################################## cluster password ###########################################################################
+${local.aws_profile} aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka_password.id} --query SecretString --output text
+
 EOT
 }

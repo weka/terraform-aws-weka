@@ -95,7 +95,7 @@ resource "aws_lambda_function" "deploy_lambda" {
     variables = {
       LAMBDA                  = "deploy"
       REGION                  = var.region
-      USER_NAME_ID            = aws_secretsmanager_secret.weka_username.id
+      USERNAME_ID             = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
       TOKEN_ID                = aws_secretsmanager_secret.get_weka_io_token.id
       BUCKET                  = local.state_bucket_name
@@ -129,7 +129,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       CLUSTER_NAME                = var.cluster_name
       PREFIX                      = var.prefix
       NVMES_NUM                   = var.container_number_map[var.instance_type].nvme
-      USER_NAME_ID                = aws_secretsmanager_secret.weka_username.id
+      USERNAME_ID                 = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID                 = aws_secretsmanager_secret.weka_password.id
       BUCKET                      = local.state_bucket_name
       STRIPE_WIDTH                = var.stripe_width

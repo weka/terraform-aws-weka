@@ -13,7 +13,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
           "ec2:AttachNetworkInterface",
           "ec2:CreateNetworkInterface",
           "ec2:ModifyNetworkInterfaceAttribute",
-          "ec2:DeleteNetworkInterface"
+          "ec2:DeleteNetworkInterface",
         ]
         Resource = "*"
       }
@@ -37,8 +37,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
           "logs:DescribeLogStreams"
         ]
         Resource = [
-          "arn:aws:logs:*:*:log-group:/wekaio/denise-8294e870",
-          "arn:aws:logs:*:*:log-group:/wekaio/denise-8294e870:*"
+          "*"
         ]
       }
     ]

@@ -6,6 +6,10 @@ locals {
   public_ssh_key          = var.ssh_public_key_path == null ? tls_private_key.key[0].public_key_openssh : file(var.ssh_public_key_path)
   private_ssh_key         = var.ssh_private_key_path == null ? tls_private_key.key[0].private_key_pem : file(var.ssh_private_key_path)
   user_data               = templatefile("${path.module}/user_data.sh", {
+    region        = var.region
+    subnet_id     = data.aws_subnet.subnets[0].id
+    groups        = join(" ", var.sg_id)
+    nics_num      = var.container_number_map[var.instance_type].nics
     deploy_lambda = aws_lambda_function_url.deploy_lambda_url.function_url
   })
 }
@@ -55,9 +59,9 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_placement_group" "placement_group" {
-  count      = var.placement_group_name == null ? 1 : 0
-  name       = "${var.prefix}-${var.cluster_name}-placement-group"
-  strategy   = "cluster"
+  count    = var.placement_group_name == null ? 1 : 0
+  name     = "${var.prefix}-${var.cluster_name}-placement-group"
+  strategy = "cluster"
 }
 
 resource "aws_launch_template" "launch_template" {
@@ -71,9 +75,9 @@ resource "aws_launch_template" "launch_template" {
   key_name                             = var.ssh_public_key_path == null ? aws_key_pair.generated_key[0].key_name : null
 
   block_device_mappings {
-    device_name = "/dev/sdf"
+    device_name = "/dev/sdp"
     ebs {
-      volume_size           = var.disk_size
+      volume_size           = 48 + 10 * (var.container_number_map[var.instance_type].nics - 1)
       volume_type           = "gp3"
       delete_on_termination = true
     }
@@ -99,11 +103,11 @@ resource "aws_launch_template" "launch_template" {
   }
 
   network_interfaces {
-      associate_public_ip_address = var.private_network ? false : true
-      delete_on_termination       = true
-      device_index                = 0
-      security_groups             = var.sg_id
-      subnet_id                   = data.aws_subnet.subnets[0].id
+    associate_public_ip_address = var.private_network ? false : true
+    delete_on_termination       = true
+    device_index                = 0
+    security_groups             = var.sg_id
+    subnet_id                   = data.aws_subnet.subnets[0].id
   }
 
   placement {
@@ -115,9 +119,10 @@ resource "aws_launch_template" "launch_template" {
     resource_type = "instance"
 
     tags = {
-      Name         = "${var.prefix}-${var.cluster_name}-backend"
-      weka_cluster = var.cluster_name
-      user         = data.aws_caller_identity.current.user_id
+      Name                = "${var.prefix}-${var.cluster_name}-backend"
+      weka_cluster_name   = var.cluster_name
+      weka_hostgroup_type = "backend"
+      user                = data.aws_caller_identity.current.user_id
     }
   }
   user_data  = base64encode(local.user_data)

@@ -62,6 +62,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	clusterParams.WekaPassword = creds.Password
 	clusterParams.WekaUsername = creds.Username
 	clusterParams.InstallDpdk = true
+	clusterParams.FindDrivesScript = common.FindDrivesScript
 
 	scriptGenerator := clusterize.ClusterizeScriptGenerator{
 		Params:  clusterParams,

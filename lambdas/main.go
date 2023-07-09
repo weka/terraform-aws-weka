@@ -40,7 +40,7 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
-	usernameId := os.Getenv("USER_NAME_ID")
+	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	bucket := os.Getenv("BUCKET")
 	// data protection-related vars
@@ -97,7 +97,7 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 }
 
 func deployHandler(ctx context.Context, event PostEvent) (string, error) {
-	usernameId := os.Getenv("USER_NAME_ID")
+	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
 	bucket := os.Getenv("BUCKET")

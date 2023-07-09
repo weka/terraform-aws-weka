@@ -92,16 +92,7 @@ func GetDeployScript(
 		set -ex
 		`
 
-		findDrivesScript := `
-		import json
-		import sys
-		for d in json.load(sys.stdin)['disks']:
-			if d['isRotational']: continue
-			if d['type'] != 'DISK': continue
-			if d['isMounted']: continue
-			if d['model'] != 'nvme_card': continue
-			print(d['devPath'])
-		`
+		findDrivesScript := common.FindDrivesScript
 		joinScriptGenerator := join.JoinScriptGenerator{
 			FailureDomainCmd:   getHashedIpCommand,
 			GetInstanceNameCmd: getAWSInstanceNameCmd(),
