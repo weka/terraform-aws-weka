@@ -1,30 +1,22 @@
-provider "aws" {
-  region  = var.region
-  profile = var.aws_profile
+variable "get_weka_io_token" {
+  type        = string
+  description = "Weka IO token"
 }
 
-module "create-network" {
-  source             = "../../modules/create-network"
-  vpc_cidr           = var.vpc_cidr
-  region             = var.region
-  prefix             = var.prefix
-  availability_zones = var.availability_zones
-  subnets_cidr       = var.subnets_cidr
-  aws_profile        = var.aws_profile
-  allow_ssh_from_ips = var.allow_ssh_from_ips
+provider "aws" {
+  region = "eu-west-1"
 }
 
 module "deploy-weka" {
   source             = "../../"
-  subnets            = module.create-network.subnets
-  availability_zones = var.availability_zones
-  region             = var.region
+  prefix             = "weka-tf"
+  region             = "eu-west-1"
+  cluster_name       = "test"
+  availability_zones = ["a"]
+  allow_ssh_ranges   = ["0.0.0.0/0"]
   get_weka_io_token  = var.get_weka_io_token
-  sg_id              = module.create-network.sg-id
-  aws_profile        = var.aws_profile
-  cluster_name       = var.cluster_name
-  cluster_size       = var.cluster_size
-  instance_type      = var.instance_type
-  prefix             = var.prefix
-  depends_on         = [module.create-network]
+}
+
+output "helpers_commands" {
+  value = module.deploy-weka.cluster_helpers_commands
 }

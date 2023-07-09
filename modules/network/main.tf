@@ -1,8 +1,3 @@
-provider "aws" {
-  region  = var.region
-  profile = var.aws_profile
-}
-
 # VPC
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr
@@ -93,51 +88,4 @@ resource "aws_route_table_association" "rt_association" {
   count          = length(var.subnets_cidr)
   subnet_id      = aws_subnet.subnet[count.index].id
   route_table_id = aws_route_table.rt.id
-}
-
-# Default Security Group of VPC
-resource "aws_security_group" "sg" {
-  count       = var.create_sg == true ? 1 : 0
-  name        = "${var.prefix}-sg"
-  description = "Default SG to allow traffic from the VPC"
-  vpc_id      = aws_vpc.vpc.id
-  depends_on = [
-    aws_vpc.vpc
-  ]
-
-  ingress {
-    from_port = "0"
-    to_port   = "0"
-    protocol  = "-1"
-    self      = true
-  }
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = var.allow_ssh_from_ips
-  }
-  ingress {
-    from_port   = 14000
-    to_port     = 14000
-    protocol    = "tcp"
-    cidr_blocks = var.allow_ssh_from_ips
-  }
-  egress {
-    from_port = "0"
-    to_port   = "0"
-    protocol  = "-1"
-    self      = "true"
-  }
-  egress {
-    from_port = "0"
-    to_port   = "0"
-    protocol  = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Environment = var.prefix
-    Name        = "${var.prefix}-sg"
-  }
 }

@@ -1,64 +1,5 @@
 data "aws_region" "current" {}
 
-resource "aws_iam_role" "lambda_iam_role" {
-  name               = "${var.prefix}-${var.cluster_name}-lambda-role"
-  assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
-    Statement = [
-      {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "lambda_iam_policy" {
-  name   = "${var.prefix}-${var.cluster_name}-lambda-policy"
-  policy = jsonencode({
-    Version   = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = ["arn:aws:logs:*:*:*"]
-      }, {
-        Effect = "Allow"
-        Action = [
-          "ec2:*"
-        ]
-        Resource = ["*"]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "s3:*"
-        ]
-        Resource = ["*"]
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:*"
-        ]
-        Resource = ["*"]
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
-  policy_arn = aws_iam_policy.lambda_iam_policy.arn
-  role       = aws_iam_role.lambda_iam_role.name
-}
-
 locals {
   binary_name = "lambdas"
   binary_path = "${path.module}/lambdas/${local.binary_name}"
@@ -87,7 +28,7 @@ resource "aws_lambda_function" "deploy_lambda" {
   filename         = local.lambda_zip
   source_code_hash = data.archive_file.lambda_archive_file.output_base64sha256
   handler          = local.binary_name
-  role             = aws_iam_role.lambda_iam_role.arn
+  role             = local.lambda_iam_role_arn
   memory_size      = 128
   timeout          = 20
   runtime          = "go1.x"
@@ -117,7 +58,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
   filename         = local.lambda_zip
   source_code_hash = data.archive_file.lambda_archive_file.output_base64sha256
   handler          = local.binary_name
-  role             = aws_iam_role.lambda_iam_role.arn
+  role             = local.lambda_iam_role_arn
   memory_size      = 128
   timeout          = 20
   runtime          = "go1.x"
@@ -149,7 +90,7 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   filename         = local.lambda_zip
   source_code_hash = data.archive_file.lambda_archive_file.output_base64sha256
   handler          = local.binary_name
-  role             = aws_iam_role.lambda_iam_role.arn
+  role             = local.lambda_iam_role_arn
   memory_size      = 128
   timeout          = 20
   runtime          = "go1.x"

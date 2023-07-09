@@ -8,9 +8,10 @@ variable "availability_zones" {
   description = "AZ in which all the resources will be deployed"
 }
 
-variable "subnets" {
+variable "subnet_ids" {
   type        = list(string)
-  description = "List of subnets ids"
+  description = "List of subnet ids"
+  default = []
 }
 
 variable "prefix" {
@@ -190,13 +191,6 @@ variable "set_obs_integration" {
   description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
 }
 
-variable "blob_obs_access_key" {
-  type        = string
-  description = "The access key of the existing Blob object store container."
-  sensitive   = true
-  default     = ""
-}
-
 variable "tiering_ssd_percent" {
   type        = number
   default     = 20
@@ -204,11 +198,6 @@ variable "tiering_ssd_percent" {
 }
 
 variable "ssh_public_key_path" {
-  type    = string
-  default = null
-}
-
-variable "aws_profile" {
   type    = string
   default = null
 }
@@ -234,7 +223,6 @@ variable "install_weka_url" {
   default = ""
   description = "The URL of the Weka release. Supports path to weka tar file or installation script."
 }
-
 
 variable "tags_map" {
   type        = map(string)
@@ -284,4 +272,28 @@ variable "hotspare" {
   type = number
   default = 1
   description = "Hot-spare value."
+}
+
+variable "instance_profile_name" {
+    type = string
+    description = "Instance profile name"
+    default = ""
+}
+
+variable "lambda_iam_role_arn" {
+    type = string
+    description = "Lambda IAM role ARN"
+    default = ""
+}
+
+variable "vpc_id" {
+  type = string
+  description = "VPC ID, required only for security group creation"
+  default = ""
+}
+
+variable "allow_ssh_ranges" {
+  type        = list(string)
+  description = "Allow ssh from ips list to weka vms"
+  default     = []
 }

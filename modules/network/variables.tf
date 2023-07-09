@@ -1,12 +1,12 @@
 variable "vpc_cidr" {
   description = "CIDR block of the vpc"
-  default     = ""
+  default     = "10.0.0.0/16"
 }
 
 variable "subnets_cidr" {
   type        = list(string)
   description = "CIDR block for Subnet"
-  default     = []
+  default     = ["10.0.1.0/24"]
 }
 
 variable "region" {
@@ -29,20 +29,4 @@ variable "private_network" {
   type        = bool
   default     = false
   description = "Determines whether to enable a private or public network. The default is public network."
-}
-
-variable "create_sg" {
-  type        = bool
-  default     = true
-  description = "Create sg for subnet"
-}
-
-variable "allow_ssh_from_ips" {
-  type        = list(string)
-  description = "Allow ssh from ips list to weka vms"
-  default     = []
-}
-
-variable "aws_profile" {
-  type    = string
 }
