@@ -1,4 +1,4 @@
-module github.com/weka/aws-tf/modules/deploy_weka/cloud-functions
+module github.com/weka/aws-tf/modules/deploy_weka/lambdas
 
 go 1.20
 

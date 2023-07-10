@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/common"
-	AwsFunctionDef "github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/aws_functions_def"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
 	"github.com/weka/go-cloud-lib/protocol"
@@ -52,7 +52,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	}
 	log.Info().Msgf("Fetched weka cluster creds successfully")
 
-	funcDef := AwsFunctionDef.NewFuncDef()
+	funcDef := aws_functions_def.NewFuncDef()
 
 	ips, err := common.GetBackendsPrivateIps(p.Cluster.ClusterName)
 

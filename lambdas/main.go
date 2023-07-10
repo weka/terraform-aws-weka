@@ -9,9 +9,9 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/clusterize"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/clusterize_finalization"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/functions/deploy"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize_finalization"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/deploy"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
 	"github.com/weka/go-cloud-lib/protocol"
 )

@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/rs/zerolog/log"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/connectors"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"github.com/weka/go-cloud-lib/protocol"
 	"io"
 	"time"
