@@ -2,7 +2,7 @@ package clusterize_finalization
 
 import (
 	"github.com/rs/zerolog/log"
-	"github.com/weka/aws-tf/modules/deploy_weka/cloud-functions/common"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 )
 
 func ClusterizeFinalization(bucket string) (err error) {
