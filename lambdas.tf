@@ -77,6 +77,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       PROTECTION_LEVEL            = var.protection_level
       HOTSPARE                    = var.hotspare
       SET_OBS                     = var.set_obs_integration
+      OBS_NAME                    = var.obs_name
       OBS_TIERING_SSD_PERCENT     = var.tiering_ssd_percent
       NUM_FRONTEND_CONTAINERS     = var.container_number_map[var.instance_type].frontend
       CLUSTERIZE_FINALIZATION_URL = aws_lambda_function_url.clusterize_finalization_lambda_url.function_url

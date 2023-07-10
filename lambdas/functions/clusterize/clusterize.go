@@ -9,6 +9,7 @@ import (
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
 	"github.com/weka/go-cloud-lib/protocol"
+	"os"
 )
 
 type ClusterizationParams struct {
@@ -63,6 +64,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	clusterParams.WekaUsername = creds.Username
 	clusterParams.InstallDpdk = true
 	clusterParams.FindDrivesScript = common.FindDrivesScript
+	clusterParams.ObsScript = GetObsScript(p.Obs)
 
 	scriptGenerator := clusterize.ClusterizeScriptGenerator{
 		Params:  clusterParams,
@@ -72,4 +74,20 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 
 	log.Info().Msg("Clusterization script generated")
 	return
+}
+
+func GetObsScript(obsParams protocol.ObsParams) string {
+	template := `
+	OBS_TIERING_SSD_PERCENT=%s
+	OBS_NAME="%s"
+	REGION=%s
+
+	weka fs tier s3 add aws-bucket --hostname s3-$REGION.amazonaws.com --port 443 --bucket "$OBS_NAME" --protocol https --auth-method AWSSignature4 --region $REGION --site local
+	weka fs tier s3 attach default aws-bucket
+	tiering_percent=$(echo "$full_capacity * 100 / $OBS_TIERING_SSD_PERCENT" | bc)
+	weka fs update default --total-capacity "$tiering_percent"B
+	`
+	return fmt.Sprintf(
+		dedent.Dedent(template), obsParams.TieringSsdPercent, obsParams.Name, os.Getenv("REGION"),
+	)
 }
