@@ -29,7 +29,7 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:*Object"
+          "s3:*Object",
         ]
         Resource = ["arn:aws:s3:::${var.obs_name}/*"]
       }

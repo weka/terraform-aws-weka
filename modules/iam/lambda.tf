@@ -37,9 +37,10 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:*Object"
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
         ]
-        Resource = ["arn:aws:s3:::${var.state_bucket_name}/*"]
+        Resource = ["arn:aws:dynamodb:*:*:table/${var.state_table_name}"]
       },
       {
         Effect = "Allow"

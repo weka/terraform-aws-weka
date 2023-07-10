@@ -27,8 +27,9 @@ type Vm struct {
 }
 
 func clusterizeFinalizationHandler() (string, error) {
-	bucket := os.Getenv("BUCKET")
-	err := clusterize_finalization.ClusterizeFinalization(bucket)
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+	err := clusterize_finalization.ClusterizeFinalization(stateTable, stateTableHashKey)
 
 	if err != nil {
 		return err.Error(), err
@@ -44,7 +45,8 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
-	bucket := os.Getenv("BUCKET")
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	// data protection-related vars
 	stripeWidth, _ := strconv.Atoi(os.Getenv("STRIPE_WIDTH"))
 	protectionLevel, _ := strconv.Atoi(os.Getenv("PROTECTION_LEVEL"))
@@ -72,10 +74,11 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	}
 
 	params := clusterize.ClusterizationParams{
-		UsernameId: usernameId,
-		PasswordId: passwordId,
-		Bucket:     bucket,
-		VmName:     vm.Vm,
+		UsernameId:        usernameId,
+		PasswordId:        passwordId,
+		StateTable:        stateTable,
+		StateTableHashKey: stateTableHashKey,
+		VmName:            vm.Vm,
 		Cluster: clusterizeCommon.ClusterParams{
 			HostsNum:    hostsNum,
 			ClusterName: clusterName,
@@ -104,7 +107,8 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
-	bucket := os.Getenv("BUCKET")
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	clusterName := os.Getenv("CLUSTER_NAME")
 	computeMemory := os.Getenv("COMPUTE_MEMORY")
 	computeContainerNum, _ := strconv.Atoi(os.Getenv("NUM_COMPUTE_CONTAINERS"))
@@ -127,7 +131,8 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 		passwordId,
 		tokenId,
 		clusterName,
-		bucket,
+		stateTable,
+		stateTableHashKey,
 		vm.Vm,
 		nicsNumStr,
 		computeMemory,

@@ -1,19 +1,31 @@
 package common
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"github.com/weka/go-cloud-lib/protocol"
-	"io"
-	"time"
 )
+
+var (
+	StateKey           = getStateKey()
+	WaitForLockTimeout = time.Minute * 5
+)
+
+type StateItem struct {
+	Value  protocol.ClusterState `json:"Value"`
+	Locked bool                  `json:"Locked"`
+}
 
 const FindDrivesScript = `
 import json
@@ -31,50 +43,152 @@ type AwsObsParams struct {
 	TieringSsdPercent string
 }
 
-func GetClusterState(bucket string) (state protocol.ClusterState, err error) {
-	log.Info().Msgf("Fetching cluster state from bucket %s", bucket)
-	client := connectors.GetAWSSession().S3
-	result, err := client.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String("state"),
-	},
-	)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
+func getStateKey() string {
+	prefix := os.Getenv("PREFIX")
+	clusterName := os.Getenv("CLUSTER_NAME")
+	if prefix == "" || clusterName == "" {
+		log.Fatal().Msgf("Missing PREFIX or CLUSTER_NAME env vars")
 	}
+	return fmt.Sprintf("%s-%s-state", prefix, clusterName)
+}
 
-	log.Info().Msg("Fetched cluster state successfully")
+func LockState(table, hashKey string) (err error) {
+	client := connectors.GetAWSSession().DynamoDB
+	log.Debug().Msgf("Trying to lock state in table %s", table)
 
-	defer result.Body.Close()
-	body, err := io.ReadAll(result.Body)
-	if err != nil {
-		log.Error().Err(err).Send()
-	}
+	for start := time.Now(); time.Since(start) < WaitForLockTimeout; {
+		expr, err := expression.NewBuilder().WithCondition(
+			expression.Equal(expression.Name("Locked"), expression.Value(false)),
+		).WithUpdate(
+			expression.Set(expression.Name("Locked"), expression.Value(true)),
+		).Build()
+		if err != nil {
+			log.Error().Err(err).Send()
+			return err
+		}
 
-	err = json.Unmarshal(body, &state)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
+		input := &dynamodb.UpdateItemInput{
+			TableName:                 aws.String(table),
+			Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+			UpdateExpression:          expr.Update(),
+			ConditionExpression:       expr.Condition(),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+		}
+		_, err = client.UpdateItem(input)
+		// get aws error code
+		if err != nil && err.(awserr.Error).Code() == dynamodb.ErrCodeConditionalCheckFailedException {
+			// wait for state being unlocked
+			log.Info().Msg("State is locked, waiting for a second")
+			time.Sleep(time.Second)
+			continue
+		}
+		if err != nil {
+			err = fmt.Errorf("failed to lock state: %v", err)
+			log.Debug().Err(err).Send()
+			return err
+		} else {
+			log.Debug().Msg("Locked state")
+			break
+		}
 	}
 	return
 }
 
-func UpdateClusterState(bucket string, state protocol.ClusterState) (err error) {
-	client := connectors.GetAWSSession().S3
+func UnlockState(table, hashKey string) (err error) {
+	client := connectors.GetAWSSession().DynamoDB
 
-	_state, err := json.Marshal(state)
+	expr, err := expression.NewBuilder().WithUpdate(
+		expression.Set(expression.Name("Locked"), expression.Value(false)),
+	).Build()
 	if err != nil {
 		log.Error().Err(err).Send()
 		return err
 	}
 
-	_, err = client.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String("state"),
-		Body:   aws.ReadSeekCloser(bytes.NewReader(_state)),
-	})
+	input := &dynamodb.UpdateItemInput{
+		TableName:                 aws.String(table),
+		Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		UpdateExpression:          expr.Update(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+	}
+	_, err = client.UpdateItem(input)
 
+	if err == nil {
+		log.Debug().Msg("Unlocked state")
+	}
+	return
+}
+
+func GetClusterStateWithoutLock(table, hashKey string) (state protocol.ClusterState, err error) {
+	client := connectors.GetAWSSession().DynamoDB
+	input := dynamodb.GetItemInput{
+		TableName:      aws.String(table),
+		Key:            map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		ConsistentRead: aws.Bool(true),
+	}
+
+	result, err := client.GetItem(&input)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return state, err
+	}
+
+	var stateItem StateItem
+	err = dynamodbattribute.UnmarshalMap(result.Item, &stateItem)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+	state = stateItem.Value
+	return
+}
+
+func GetClusterState(table, hashKey string) (state protocol.ClusterState, err error) {
+	log.Info().Msgf("Fetching cluster state %s from dynamodb", StateKey)
+
+	err = LockState(table, hashKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return state, err
+	}
+
+	state, err = GetClusterStateWithoutLock(table, hashKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return state, err
+	}
+
+	err = UnlockState(table, hashKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return state, err
+	}
+
+	log.Info().Msg("Fetched cluster state successfully")
+	return
+}
+
+func UpdateClusterState(table, hashKey string, state protocol.ClusterState) (err error) {
+	client := connectors.GetAWSSession().DynamoDB
+
+	value, err := dynamodbattribute.Marshal(state)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return err
+	}
+
+	_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName: aws.String(table),
+		Key:       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
+			"Value": {
+				Action: aws.String("PUT"),
+				Value:  value,
+			},
+		},
+	})
 	return
 }
 
@@ -152,33 +266,17 @@ func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
 	return
 }
 
-func LockState(bucket string) (err error) {
-	svc := connectors.GetAWSSession().S3
-	err = fmt.Errorf("failed to lock state")
-	for start := time.Now(); time.Since(start) < time.Minute*5 && err != nil; {
-		_, err = svc.PutObject(&s3.PutObjectInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String("lock"),
-		})
+func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesNames []string, err error) {
+	err = LockState(table, hashKey)
+	if err != nil {
+		return
 	}
-	return
-}
 
-func UnlockState(bucket string) (err error) {
-	svc := connectors.GetAWSSession().S3
-	_, err = svc.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String("lock"),
-	})
-	return
-}
-
-func AddInstanceToStateInstances(bucket, newInstance string) (instancesNames []string, err error) {
-	err = LockState(bucket)
+	state, err := GetClusterStateWithoutLock(table, hashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
+		return
 	}
-	state, err := GetClusterState(bucket)
 
 	if len(state.Instances) == state.InitialSize {
 		//This might happen if someone increases the desired number before the clusterization id done
@@ -188,12 +286,12 @@ func AddInstanceToStateInstances(bucket, newInstance string) (instancesNames []s
 	}
 	state.Instances = append(state.Instances, newInstance)
 
-	err = UpdateClusterState(bucket, state)
+	err = UpdateClusterState(table, hashKey, state)
 	if err == nil {
 		instancesNames = state.Instances
 	}
 
-	err = UnlockState(bucket)
+	err = UnlockState(table, hashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 	}

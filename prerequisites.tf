@@ -20,7 +20,7 @@ module "iam" {
   source = "./modules/iam"
   prefix = var.prefix
   cluster_name = var.cluster_name
-  state_bucket_name = local.state_bucket_name
+  state_table_name = local.dynamodb_table_name
   obs_name = var.obs_name
 }
 

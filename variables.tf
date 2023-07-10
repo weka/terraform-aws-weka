@@ -305,3 +305,15 @@ variable "proxy_url" {
   description = "Weka home proxy url"
   default     = ""
 }
+
+variable "dynamodb_table_name" {
+  type        = string
+  description = "DynamoDB table name"
+  default     = ""
+}
+
+variable "dynamodb_hash_key_name" {
+  type        = string
+  description = "DynamoDB hash key name"
+  default     = "Key"
+}

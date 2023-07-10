@@ -39,7 +39,7 @@ resource "random_password" "password" {
 }
 
 resource "aws_secretsmanager_secret" "weka_password" {
-  name = "${var.prefix}-${var.cluster_name}-weka-apssword-${random_password.suffix.result}"
+  name = "${var.prefix}-${var.cluster_name}-weka-password-${random_password.suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "weka_password" {
