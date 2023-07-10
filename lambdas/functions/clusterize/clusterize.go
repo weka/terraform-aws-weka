@@ -2,6 +2,8 @@ package clusterize
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
@@ -9,20 +11,20 @@ import (
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
 	"github.com/weka/go-cloud-lib/protocol"
-	"os"
 )
 
 type ClusterizationParams struct {
-	UsernameId string
-	PasswordId string
-	Bucket     string
-	VmName     string
-	Cluster    clusterize.ClusterParams
-	Obs        protocol.ObsParams
+	UsernameId        string
+	PasswordId        string
+	StateTable        string
+	StateTableHashKey string
+	VmName            string
+	Cluster           clusterize.ClusterParams
+	Obs               protocol.ObsParams
 }
 
 func Clusterize(p ClusterizationParams) (clusterizeScript string) {
-	instancesNames, err := common.AddInstanceToStateInstances(p.Bucket, p.VmName)
+	instancesNames, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.VmName)
 	if err != nil {
 		clusterizeScript = cloudCommon.GetErrorScript(err)
 		return

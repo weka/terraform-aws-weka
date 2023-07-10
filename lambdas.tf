@@ -39,7 +39,9 @@ resource "aws_lambda_function" "deploy_lambda" {
       USERNAME_ID             = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
       TOKEN_ID                = aws_secretsmanager_secret.get_weka_io_token.id
-      BUCKET                  = local.state_bucket_name
+      STATE_TABLE             = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
+      PREFIX                  = var.prefix
       CLUSTER_NAME            = var.cluster_name
       COMPUTE_MEMORY          = var.container_number_map[var.instance_type].memory
       NUM_COMPUTE_CONTAINERS  = var.container_number_map[var.instance_type].compute
@@ -73,7 +75,8 @@ resource "aws_lambda_function" "clusterize_lambda" {
       NVMES_NUM                   = var.container_number_map[var.instance_type].nvme
       USERNAME_ID                 = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID                 = aws_secretsmanager_secret.weka_password.id
-      BUCKET                      = local.state_bucket_name
+      STATE_TABLE                 = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY        = local.dynamodb_hash_key_name
       STRIPE_WIDTH                = var.stripe_width
       PROTECTION_LEVEL            = var.protection_level
       HOTSPARE                    = var.hotspare
@@ -100,9 +103,12 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   runtime          = "go1.x"
   environment {
     variables = {
-      LAMBDA = "clusterizeFinalization"
-      REGION = var.region
-      BUCKET = local.state_bucket_name
+      LAMBDA               = "clusterizeFinalization"
+      REGION               = var.region
+      STATE_TABLE          = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
+      PREFIX               = var.prefix
+      CLUSTER_NAME         = var.cluster_name
     }
   }
   depends_on = [data.archive_file.lambda_archive_file]

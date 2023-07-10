@@ -14,7 +14,7 @@ variable "obs_name" {
   description = "Obs name"
 }
 
-variable "state_bucket_name" {
+variable "state_table_name" {
   type        = string
-  description = "State bucket name"
+  description = "State DynamoDB table name"
 }

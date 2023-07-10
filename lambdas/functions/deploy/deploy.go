@@ -2,6 +2,7 @@ package deploy
 
 import (
 	"context"
+
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
@@ -22,7 +23,8 @@ func GetDeployScript(
 	passwordId,
 	tokenId,
 	clusterName,
-	bucket,
+	stateTable,
+	stateTableHashKey,
 	instanceName,
 	nicsNum,
 	computeMemory,
@@ -34,7 +36,7 @@ func GetDeployScript(
 
 	log.Info().Msg("Getting deploy script")
 
-	state, err := common.GetClusterState(bucket)
+	state, err := common.GetClusterState(stateTable, stateTableHashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
