@@ -1,5 +1,5 @@
 locals {
-  path_ssh_keys = var.ssh_private_key_path == null ? "${local.ssh_path}-public-key.pub\n${local.ssh_path}-private-key.pem" : "${var.ssh_private_key_path} \n ${var.ssh_public_key_path}"
+  path_ssh_keys = var.ssh_public_key == null ? "${local.ssh_path}-public-key.pub\n${local.ssh_path}-private-key.pem" : ""
 }
 
 

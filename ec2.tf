@@ -3,8 +3,7 @@ locals {
   ssh_path                = "/tmp/${var.prefix}-${var.cluster_name}"
   nics                    = var.container_number_map[var.instance_type].nics
   private_nic_first_index = var.private_network ? 0 : 1
-  public_ssh_key          = var.ssh_public_key_path == null ? tls_private_key.key[0].public_key_openssh : file(var.ssh_public_key_path)
-  private_ssh_key         = var.ssh_private_key_path == null ? tls_private_key.key[0].private_key_pem : file(var.ssh_private_key_path)
+  public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   user_data               = templatefile("${path.module}/user_data.sh", {
     region        = var.region
     subnet_id     = local.subnet_ids[0]
@@ -28,26 +27,26 @@ data "aws_ami" "amzn_ami" {
 
 # =============== ssh key ===================
 resource "tls_private_key" "key" {
-  count     = var.ssh_private_key_path == null ? 1 : 0
+  count     = var.ssh_public_key == null ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "generated_key" {
-  count      = var.ssh_public_key_path == null ? 1 : 0
+  count      =  var.key_pair_name == null ? 1 : 0
   key_name   = "${var.prefix}-${var.cluster_name}-ssh-key"
-  public_key = tls_private_key.key[0].public_key_openssh
+  public_key = local.public_ssh_key
 }
 
 resource "local_file" "public_key" {
-  count           = var.ssh_public_key_path == null ? 1 : 0
+  count           = var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].public_key_openssh
   filename        = "${local.ssh_path}-public-key.pub"
   file_permission = "0600"
 }
 
 resource "local_file" "private_key" {
-  count           = var.ssh_private_key_path == null ? 1 : 0
+  count           = var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].private_key_pem
   filename        = "${local.ssh_path}-private-key.pem"
   file_permission = "0600"
@@ -67,7 +66,7 @@ resource "aws_launch_template" "launch_template" {
   image_id                             = data.aws_ami.amzn_ami.id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
-  key_name                             = var.ssh_public_key_path == null ? aws_key_pair.generated_key[0].key_name : null
+  key_name                             = var.key_pair_name != null ? var.key_pair_name: aws_key_pair.generated_key[0].key_name
 
   block_device_mappings {
     device_name = "/dev/sdp"

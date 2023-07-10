@@ -197,14 +197,16 @@ variable "tiering_ssd_percent" {
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
 }
 
-variable "ssh_public_key_path" {
-  type    = string
-  default = null
+variable "ssh_public_key" {
+  type        = string
+  description = "Ssh public key to pass to the instances."
+  default     = null
 }
 
-variable "ssh_private_key_path" {
-  type    = string
-  default = null
+variable "key_pair_name" {
+  type        = string
+  description = "Ssh key pair name to pass to the instances."
+  default     = null
 }
 
 variable "placement_group_name" {
