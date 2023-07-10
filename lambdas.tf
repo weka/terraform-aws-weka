@@ -80,6 +80,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       OBS_NAME                    = var.obs_name
       OBS_TIERING_SSD_PERCENT     = var.tiering_ssd_percent
       NUM_FRONTEND_CONTAINERS     = var.container_number_map[var.instance_type].frontend
+      PROXY_URL                   = var.proxy_url
       CLUSTERIZE_FINALIZATION_URL = aws_lambda_function_url.clusterize_finalization_lambda_url.function_url
     }
   }

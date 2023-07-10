@@ -51,6 +51,7 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	obsName := os.Getenv("OBS_NAME")
 	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("NUM_FRONTEND_CONTAINERS"))
+	proxyUrl := os.Getenv("PROXY_URL")
 
 	addFrontend := false
 	if addFrontendNum > 0 {
@@ -86,6 +87,7 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 				Hotspare:        hotspare,
 			},
 			AddFrontend: addFrontend,
+			ProxyUrl:    proxyUrl,
 		},
 		Obs: protocol.ObsParams{
 			Name:              obsName,

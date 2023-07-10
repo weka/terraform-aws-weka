@@ -297,3 +297,9 @@ variable "allow_ssh_ranges" {
   description = "Allow ssh from ips list to weka vms"
   default     = []
 }
+
+variable "proxy_url" {
+  type        = string
+  description = "Weka home proxy url"
+  default     = ""
+}
