@@ -1,9 +1,9 @@
 # Create an IAM policy
 resource "aws_iam_policy" "backend_eni_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-iam-policy"
+  name = "${var.prefix}-${var.cluster_name}-eni-policy"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -21,12 +21,29 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
   })
 }
 
+resource "aws_iam_policy" "backend_obs_iam_policy" {
+  count  = var.obs_name == "" ? 0 : 1
+  name   = "${var.prefix}-${var.cluster_name}-obs-policy"
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:*Object"
+        ]
+        Resource = ["arn:aws:s3:::${var.obs_name}/*"]
+      }
+    ]
+  })
+}
+
 # Create an IAM policy
 resource "aws_iam_policy" "backend_log_iam_policy" {
   name = "${var.prefix}-${var.cluster_name}-send-log-to-cloud-watch-policy"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -49,10 +66,10 @@ resource "aws_iam_role" "iam_role" {
   name = "${var.prefix}-${var.cluster_name}-iam-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = {
           Service = "ec2.amazonaws.com"
         }
@@ -66,6 +83,13 @@ resource "aws_iam_role" "iam_role" {
 resource "aws_iam_policy_attachment" "backend_eni_role_attachment" {
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_eni_iam_policy.arn
+  roles      = [aws_iam_role.iam_role.name]
+}
+
+resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
+  count      = var.obs_name == "" ? 0 : 1
+  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
   roles      = [aws_iam_role.iam_role.name]
 }
 
