@@ -8,7 +8,6 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "ec2:DescribeInstances",
           "ec2:DescribeNetworkInterfaces",
           "ec2:AttachNetworkInterface",
           "ec2:CreateNetworkInterface",
@@ -54,7 +53,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
           "logs:DescribeLogStreams"
         ]
         Resource = [
-          "*"
+          "arn:aws:logs:*:*:*"
         ]
       }
     ]
