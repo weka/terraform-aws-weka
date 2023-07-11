@@ -30,7 +30,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       }, {
         Effect = "Allow"
         Action = [
-          "ec2:*"
+          "ec2:DescribeInstances",
         ]
         Resource = ["*"]
       },
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "secretsmanager:*"
+          "secretsmanager:GetSecretValue"
         ]
         Resource = ["*"]
       }
