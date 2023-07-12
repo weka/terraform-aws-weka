@@ -37,6 +37,24 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
   })
 }
 
+resource "aws_iam_policy" "invoke_lambda_function" {
+  name   = "${var.prefix}-${var.cluster_name}-invoke-lambda-function"
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          "arn:aws:lambda:*:*:*"
+        ]
+      }
+    ]
+  })
+}
+
 # Create an IAM policy
 resource "aws_iam_policy" "backend_log_iam_policy" {
   name = "${var.prefix}-${var.cluster_name}-send-log-to-cloud-watch-policy"
@@ -95,6 +113,12 @@ resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
 resource "aws_iam_policy_attachment" "backend_log_role_attachment" {
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_log_iam_policy.arn
+  roles      = [aws_iam_role.iam_role.name]
+}
+
+resource "aws_iam_policy_attachment" "invoke_lambda_function_attachment" {
+  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  policy_arn = aws_iam_policy.invoke_lambda_function.arn
   roles      = [aws_iam_role.iam_role.name]
 }
 

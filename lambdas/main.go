@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -18,12 +17,12 @@ import (
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
-type PostEvent struct {
-	Body string `json:"body"`
-}
-
 type Vm struct {
 	Vm string `json:"vm"`
+}
+
+type StatusRequest struct {
+	Type string `json:"type"`
 }
 
 func clusterizeFinalizationHandler() (string, error) {
@@ -38,7 +37,7 @@ func clusterizeFinalizationHandler() (string, error) {
 	}
 }
 
-func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
+func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
@@ -65,12 +64,6 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	if stripeWidth == 0 || protectionLevel == 0 || hotspare == 0 {
 		msg := "Failed getting data protection params"
 		return msg, fmt.Errorf("%s", msg)
-	}
-
-	vm := Vm{}
-	err := json.Unmarshal([]byte(event.Body), &vm)
-	if err != nil {
-		return "Failed unmarshaling vm", err
 	}
 
 	params := clusterize.ClusterizationParams{
@@ -103,7 +96,7 @@ func clusterizeHandler(ctx context.Context, event PostEvent) (string, error) {
 	return clusterize.Clusterize(params), nil
 }
 
-func deployHandler(ctx context.Context, event PostEvent) (string, error) {
+func deployHandler(ctx context.Context, vm Vm) (string, error) {
 	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
@@ -116,12 +109,6 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 	driveContainerNum, _ := strconv.Atoi(os.Getenv("NUM_DRIVE_CONTAINERS"))
 	installUrl := os.Getenv("INSTALL_URL")
 	nicsNumStr := os.Getenv("NICS_NUM")
-
-	vm := Vm{}
-	err := json.Unmarshal([]byte(event.Body), &vm)
-	if err != nil {
-		return "Failed unmarshaling vm", err
-	}
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
 
@@ -147,19 +134,11 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 	return bashScript, nil
 }
 
-func reportHandler(ctx context.Context, event PostEvent) (string, error) {
+func reportHandler(ctx context.Context, currentReport protocol.Report) (string, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 
-	var currentReport protocol.Report
-
-	err := json.Unmarshal([]byte(event.Body), &currentReport)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return "Failed unmarshaling report", err
-	}
-
-	err = report.Report(currentReport, stateTable, stateTableHashKey)
+	err := report.Report(currentReport, stateTable, stateTableHashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return "Failed adding report to state table", err
@@ -169,28 +148,19 @@ func reportHandler(ctx context.Context, event PostEvent) (string, error) {
 	return "The report was added successfully", nil
 }
 
-func statusHandler(ctx context.Context, event PostEvent) (interface{}, error) {
+func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	//clusterName := os.Getenv("CLUSTER_NAME")
 	//usernameId := os.Getenv("USERNAME_ID")
 	//passwordId := os.Getenv("PASSWORD_ID")
 
-	var requestBody struct {
-		Type string `json:"type"`
-	}
-
-	err := json.Unmarshal([]byte(event.Body), &requestBody)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return "Failed unmarshaling status request", err
-	}
-
 	var clusterStatus interface{}
-	if requestBody.Type == "status" {
+	var err error
+	if req.Type == "status" {
 		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
 		clusterStatus = "Not implemented yet"
-	} else if requestBody.Type == "progress" {
+	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
 	} else {
 		clusterStatus = "Invalid status type"
