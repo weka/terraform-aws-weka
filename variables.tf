@@ -1,17 +1,20 @@
-variable "region" {
-  description = "Region in which the bastion host will be launched"
-  type        = string
-}
-
 variable "availability_zones" {
   type        = list(string)
   description = "AZ in which all the resources will be deployed"
+  validation {
+    condition     = length(var.availability_zones) == 1
+    error_message = "Multiple AZs are not supported. Please provide only one AZ."
+  }
 }
 
 variable "subnet_ids" {
   type        = list(string)
   description = "List of subnet ids"
-  default = []
+  default     = []
+  validation {
+    condition     = length(var.subnet_ids) <= 1
+    error_message = "Multiple subnets are not supported. Please provide only one subnet."
+  }
 }
 
 variable "prefix" {
@@ -38,16 +41,16 @@ variable "instance_type" {
   default     = "i3en.2xlarge"
 }
 
-variable "ami_image" {
+variable "ami_id" {
   type        = string
-  default     = "/aws/service/ami-amazon-linux-latest/amzn2-ami-kernel-5.10-hvm-x86_64-gp2"
-  description = "ami image"
+  description = "ami id"
+  default     = null
 }
 
 variable "sg_id" {
   type        = list(string)
   default     = []
-  description = "Security group id"
+  description = "Security group ids"
 }
 
 variable "container_number_map" {
@@ -60,7 +63,7 @@ variable "container_number_map" {
     memory   = string
   }))
   description = "Maps the number of objects and memory size per machine type."
-  default = {
+  default     = {
     "i3en.2xlarge" = {
       compute  = 1
       drive    = 1
@@ -150,7 +153,7 @@ variable "cluster_size" {
   default     = 6
 
   validation {
-    condition = var.cluster_size >= 6
+    condition     = var.cluster_size >= 6
     error_message = "Cluster size should be at least 6."
   }
 }
@@ -214,21 +217,15 @@ variable "placement_group_name" {
   default = null
 }
 
-variable "apt_repo_url" {
+variable "install_weka_url" {
   type        = string
   default     = ""
-  description = "The URL of the apt private repository."
-}
-
-variable "install_weka_url" {
-  type = string
-  default = ""
   description = "The URL of the Weka release. Supports path to weka tar file or installation script."
 }
 
 variable "tags_map" {
   type        = map(string)
-  default     = {"env": "dev", "creator": "tf"}
+  default     = { "env" : "dev", "creator" : "tf" }
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
 }
 
@@ -247,12 +244,12 @@ variable "install_cluster_dpdk" {
 variable "weka_username" {
   type        = string
   description = "Weka cluster username"
-  default = "admin"
+  default     = "admin"
 }
 
 variable "protection_level" {
-  type = number
-  default = 2
+  type        = number
+  default     = 2
   description = "Cluster data protection level."
   validation {
     condition     = var.protection_level == 2 || var.protection_level == 4
@@ -261,8 +258,8 @@ variable "protection_level" {
 }
 
 variable "stripe_width" {
-  type = number
-  default = -1
+  type        = number
+  default     = -1
   description = "Stripe width = cluster_size - protection_level - 1 (by default)."
   validation {
     condition     = var.stripe_width == -1 || var.stripe_width >= 3 && var.stripe_width <= 16
@@ -271,27 +268,27 @@ variable "stripe_width" {
 }
 
 variable "hotspare" {
-  type = number
-  default = 1
+  type        = number
+  default     = 1
   description = "Hot-spare value."
 }
 
 variable "instance_profile_name" {
-    type = string
-    description = "Instance profile name"
-    default = ""
+  type        = string
+  description = "Instance profile name"
+  default     = ""
 }
 
 variable "lambda_iam_role_arn" {
-    type = string
-    description = "Lambda IAM role ARN"
-    default = ""
+  type        = string
+  description = "Lambda IAM role ARN"
+  default     = ""
 }
 
 variable "vpc_id" {
-  type = string
+  type        = string
   description = "VPC ID, required only for security group creation"
-  default = ""
+  default     = ""
 }
 
 variable "allow_ssh_ranges" {
@@ -308,7 +305,7 @@ variable "proxy_url" {
 
 variable "dynamodb_table_name" {
   type        = string
-  description = "DynamoDB table name"
+  description = "DynamoDB table name, if not supplied a new table will be created"
   default     = ""
 }
 

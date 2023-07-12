@@ -4,13 +4,11 @@ variable "get_weka_io_token" {
 }
 
 provider "aws" {
-  region = "eu-west-1"
 }
 
 module "deploy-weka" {
   source             = "../../"
   prefix             = "weka-tf"
-  region             = "eu-west-1"
   cluster_name       = "test"
   availability_zones = ["a"]
   allow_ssh_ranges   = ["0.0.0.0/0"]

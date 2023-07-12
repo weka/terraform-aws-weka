@@ -1,5 +1,3 @@
-data "aws_region" "current" {}
-
 locals {
   binary_name = "lambdas"
   binary_path = "${path.module}/lambdas/${local.binary_name}"
@@ -35,7 +33,7 @@ resource "aws_lambda_function" "deploy_lambda" {
   environment {
     variables = {
       LAMBDA                  = "deploy"
-      REGION                  = var.region
+      REGION                  = local.region
       USERNAME_ID             = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
       TOKEN_ID                = aws_secretsmanager_secret.get_weka_io_token.id
@@ -47,7 +45,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       NUM_COMPUTE_CONTAINERS  = var.container_number_map[var.instance_type].compute
       NUM_FRONTEND_CONTAINERS = var.container_number_map[var.instance_type].frontend
       NUM_DRIVE_CONTAINERS    = var.container_number_map[var.instance_type].drive
-      INSTALL_URL             = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
+      INSTALL_URL             = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}?provider=aws&region=${local.region}"
       NICS_NUM                = var.container_number_map[var.instance_type].nics
       CLUSTERIZE_URL          = aws_lambda_function_url.clusterize_lambda_url.function_url
       REPORT_URL              = aws_lambda_function_url.report_lambda_url.function_url
@@ -68,7 +66,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
   environment {
     variables = {
       LAMBDA                      = "clusterize"
-      REGION                      = var.region
+      REGION                      = local.region
       HOSTS_NUM                   = var.cluster_size
       CLUSTER_NAME                = var.cluster_name
       PREFIX                      = var.prefix
@@ -104,7 +102,7 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   environment {
     variables = {
       LAMBDA               = "clusterizeFinalization"
-      REGION               = var.region
+      REGION               = local.region
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
       PREFIX               = var.prefix
@@ -126,7 +124,7 @@ resource "aws_lambda_function" "report_lambda" {
   environment {
     variables = {
       LAMBDA = "report"
-      REGION = var.region
+      REGION = local.region
       STATE_TABLE             = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
       PREFIX                  = var.prefix
@@ -148,7 +146,7 @@ resource "aws_lambda_function" "status_lambda" {
   environment {
     variables = {
       LAMBDA = "status"
-      REGION = var.region
+      REGION = local.region
       STATE_TABLE             = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
       PREFIX                  = var.prefix

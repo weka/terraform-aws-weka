@@ -1,3 +1,9 @@
+data aws_region current {}
+
+locals {
+  region = data.aws_region.current.name
+}
+
 # VPC
 resource "aws_vpc" "vpc" {
   cidr_block           = var.vpc_cidr
@@ -47,7 +53,7 @@ resource "aws_subnet" "subnet" {
   count                   = length(var.subnets_cidr)
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.subnets_cidr[count.index]
-  availability_zone       = "${var.region}${var.availability_zones[count.index]}"
+  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
   map_public_ip_on_launch = local.map_public_ip
 
   tags = {
