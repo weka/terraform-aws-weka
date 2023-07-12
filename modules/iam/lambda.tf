@@ -47,7 +47,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = ["*"]
+        Resource = ["arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"]
       }
     ]
   })
