@@ -127,7 +127,10 @@ resource "aws_lambda_function" "report_lambda" {
     variables = {
       LAMBDA = "report"
       REGION = var.region
-      BUCKET = local.state_bucket_name
+      STATE_TABLE             = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
+      PREFIX                  = var.prefix
+      CLUSTER_NAME            = var.cluster_name
     }
   }
   depends_on = [data.archive_file.lambda_archive_file]
@@ -146,8 +149,10 @@ resource "aws_lambda_function" "status_lambda" {
     variables = {
       LAMBDA = "status"
       REGION = var.region
-      BUCKET = local.state_bucket_name
-      //CLUSTER_NAME = var.cluster_name
+      STATE_TABLE             = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
+      PREFIX                  = var.prefix
+      CLUSTER_NAME            = var.cluster_name
       //USERNAME_ID = aws_secretsmanager_secret.weka_username.id
       //PASSWORD_ID = aws_secretsmanager_secret.weka_password.id
     }
