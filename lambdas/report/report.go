@@ -7,9 +7,16 @@ import (
 	reportLib "github.com/weka/go-cloud-lib/report"
 )
 
-func Report(report protocol.Report, bucket string) (err error) {
+func Report(report protocol.Report, stateTable, hashKey string) (err error) {
 	log.Info().Msgf("Updating state %s with %s", report.Type, report.Message)
-	state, err := common.GetClusterState(bucket)
+
+	err = common.LockState(stateTable, hashKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	state, err := common.GetClusterStateWithoutLock(stateTable, hashKey)
 	if err != nil {
 		return
 	}
@@ -17,6 +24,15 @@ func Report(report protocol.Report, bucket string) (err error) {
 	if err != nil {
 		return
 	}
-	err = common.UpdateClusterState(bucket, state)
+	err = common.UpdateClusterState(stateTable, hashKey, state)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	err = common.UnlockState(stateTable, hashKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
 	return
 }

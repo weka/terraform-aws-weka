@@ -3,10 +3,11 @@ package status
 import (
 	"context"
 	"encoding/json"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	"github.com/weka/go-cloud-lib/logging"
 	"math/rand"
 	"time"
+
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
+	"github.com/weka/go-cloud-lib/logging"
 
 	"github.com/weka/go-cloud-lib/connectors"
 	"github.com/weka/go-cloud-lib/lib/jrpc"
@@ -14,11 +15,11 @@ import (
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
-func GetReports(ctx context.Context, bucket string) (reports protocol.Reports, err error) {
+func GetReports(ctx context.Context, stateTable, hashKey string) (reports protocol.Reports, err error) {
 	logger := logging.LoggerFromCtx(ctx)
 	logger.Info().Msg("fetching cluster status...")
 
-	state, err := common.GetClusterState(bucket)
+	state, err := common.GetClusterStateWithoutLock(stateTable, hashKey)
 	if err != nil {
 		return
 	}
@@ -29,8 +30,8 @@ func GetReports(ctx context.Context, bucket string) (reports protocol.Reports, e
 	return
 }
 
-func GetClusterStatus(ctx context.Context, bucket, clusterName, usernameId, passwordId string) (clusterStatus protocol.ClusterStatus, err error) {
-	state, err := common.GetClusterState(bucket)
+func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, clusterName, usernameId, passwordId string) (clusterStatus protocol.ClusterStatus, err error) {
+	state, err := common.GetClusterStateWithoutLock(stateTableName, tableHashKey)
 	if err != nil {
 		return
 	}

@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/report"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/status"
 	"os"
 	"strconv"
 
@@ -14,6 +12,8 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize_finalization"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/deploy"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/report"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/status"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
 	"github.com/weka/go-cloud-lib/protocol"
 )
@@ -148,7 +148,9 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 }
 
 func reportHandler(ctx context.Context, event PostEvent) (string, error) {
-	bucket := os.Getenv("BUCKET")
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+
 	var currentReport protocol.Report
 
 	err := json.Unmarshal([]byte(event.Body), &currentReport)
@@ -157,10 +159,10 @@ func reportHandler(ctx context.Context, event PostEvent) (string, error) {
 		return "Failed unmarshaling report", err
 	}
 
-	err = report.Report(currentReport, bucket)
+	err = report.Report(currentReport, stateTable, stateTableHashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
-		return "Failed adding report to bucket", err
+		return "Failed adding report to state table", err
 	}
 
 	log.Info().Msg("The report was added successfully")
@@ -168,7 +170,8 @@ func reportHandler(ctx context.Context, event PostEvent) (string, error) {
 }
 
 func statusHandler(ctx context.Context, event PostEvent) (interface{}, error) {
-	bucket := os.Getenv("BUCKET")
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	//clusterName := os.Getenv("CLUSTER_NAME")
 	//usernameId := os.Getenv("USERNAME_ID")
 	//passwordId := os.Getenv("PASSWORD_ID")
@@ -188,7 +191,7 @@ func statusHandler(ctx context.Context, event PostEvent) (interface{}, error) {
 		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
 		clusterStatus = "Not implemented yet"
 	} else if requestBody.Type == "progress" {
-		clusterStatus, err = status.GetReports(ctx, bucket)
+		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
 	} else {
 		clusterStatus = "Invalid status type"
 	}
