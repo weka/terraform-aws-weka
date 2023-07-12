@@ -5,11 +5,11 @@ locals {
   private_nic_first_index = var.private_network ? 0 : 1
   public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   user_data               = templatefile("${path.module}/user_data.sh", {
-    region        = local.region
-    subnet_id     = local.subnet_ids[0]
-    groups        = join(" ", local.sg_id)
-    nics_num      = var.container_number_map[var.instance_type].nics
-    deploy_lambda = aws_lambda_function_url.deploy_lambda_url.function_url
+    region           = local.region
+    subnet_id        = local.subnet_ids[0]
+    groups           = join(" ", local.sg_id)
+    nics_num         = var.container_number_map[var.instance_type].nics
+    deploy_func_name = aws_lambda_function.deploy_lambda.function_name
   })
 }
 

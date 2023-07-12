@@ -13,7 +13,7 @@ user: ${var.vm_username}
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[]| select( .Tags[].Value == "${var.cluster_name}").Instances[].InstanceId') | jq -r '.Reservations[].Instances[].PublicIpAddress'
 
 ##############################################   status url   #############################################################################
-curl ${aws_lambda_function_url.status_lambda_url.function_url} -H "Content-Type:application/json" -d '{"type":"progress"}'
+aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --cli-binary-format raw-in-base64-out /dev/stdout
 
 ##############################################      state     #############################################################################
 aws dynamodb get-item --table-name ${local.dynamodb_table_name} --key '{"${local.dynamodb_hash_key_name}": {"S": "${local.state_key}"}}' | jq -r '.Item.Value.M'

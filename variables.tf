@@ -311,6 +311,6 @@ variable "dynamodb_table_name" {
 
 variable "dynamodb_hash_key_name" {
   type        = string
-  description = "DynamoDB hash key name"
+  description = "DynamoDB hash key name (optional configuration, will use 'Key' by default)"
   default     = "Key"
 }
