@@ -1,7 +1,12 @@
+data aws_region current {}
+
+locals {
+  region = data.aws_region.current.name
+}
+
 module "network" {
   count              = length(var.subnet_ids) == 0 ? 1 : 0
   source             = "./modules/network"
-  region             = var.region
   prefix             = var.prefix
   availability_zones = var.availability_zones
 }

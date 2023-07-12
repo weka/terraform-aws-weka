@@ -9,11 +9,6 @@ variable "subnets_cidr" {
   default     = ["10.0.1.0/24"]
 }
 
-variable "region" {
-  description = "Region in which the bastion host will be launched"
-  type        = string
-}
-
 variable "availability_zones" {
   type        = list(string)
   description = "AZ in which all the resources will be deployed"

@@ -5,7 +5,7 @@ locals {
   private_nic_first_index = var.private_network ? 0 : 1
   public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   user_data               = templatefile("${path.module}/user_data.sh", {
-    region        = var.region
+    region        = local.region
     subnet_id     = local.subnet_ids[0]
     groups        = join(" ", local.sg_id)
     nics_num      = var.container_number_map[var.instance_type].nics
@@ -16,6 +16,7 @@ locals {
 data "aws_caller_identity" "current" {}
 
 data "aws_ami" "amzn_ami" {
+  count       = var.ami_id == null ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
 
@@ -33,7 +34,7 @@ resource "tls_private_key" "key" {
 }
 
 resource "aws_key_pair" "generated_key" {
-  count      =  var.key_pair_name == null ? 1 : 0
+  count      = var.key_pair_name == null ? 1 : 0
   key_name   = "${var.prefix}-${var.cluster_name}-ssh-key"
   public_key = local.public_ssh_key
 }
@@ -63,10 +64,10 @@ resource "aws_launch_template" "launch_template" {
   disable_api_stop                     = true
   disable_api_termination              = true
   ebs_optimized                        = true
-  image_id                             = data.aws_ami.amzn_ami.id
+  image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.amzn_ami[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
-  key_name                             = var.key_pair_name != null ? var.key_pair_name: aws_key_pair.generated_key[0].key_name
+  key_name                             = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
 
   block_device_mappings {
     device_name = "/dev/sdp"
@@ -105,7 +106,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   placement {
-    availability_zone = "${var.region}${var.availability_zones[0]}"
+    availability_zone = "${local.region}${var.availability_zones[0]}"
     group_name        = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
   }
 
@@ -125,7 +126,7 @@ resource "aws_launch_template" "launch_template" {
 
 resource "aws_autoscaling_group" "autoscaling_group" {
   name                = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-  #availability_zones  = [ for z in var.availability_zones: format("%s%s", var.region,z) ]
+  #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
   desired_capacity    = var.cluster_size
   max_size            = var.cluster_size
   min_size            = var.cluster_size
