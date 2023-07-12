@@ -48,6 +48,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       INSTALL_URL             = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
       NICS_NUM                = var.container_number_map[var.instance_type].nics
       CLUSTERIZE_URL          = aws_lambda_function_url.clusterize_lambda_url.function_url
+      REPORT_URL              = aws_lambda_function_url.report_lambda_url.function_url
     }
   }
   depends_on = [data.archive_file.lambda_archive_file]
@@ -82,6 +83,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       NUM_FRONTEND_CONTAINERS     = var.container_number_map[var.instance_type].frontend
       PROXY_URL                   = var.proxy_url
       CLUSTERIZE_FINALIZATION_URL = aws_lambda_function_url.clusterize_finalization_lambda_url.function_url
+      REPORT_URL                  = aws_lambda_function_url.report_lambda_url.function_url
     }
   }
   depends_on = [data.archive_file.lambda_archive_file]
@@ -106,6 +108,25 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   depends_on = [data.archive_file.lambda_archive_file]
 }
 
+resource "aws_lambda_function" "report_lambda" {
+  function_name    = "${var.prefix}-${var.cluster_name}-report-lambda"
+  filename         = local.lambda_zip
+  source_code_hash = data.archive_file.lambda_archive_file.output_base64sha256
+  handler          = local.binary_name
+  role             = local.lambda_iam_role_arn
+  memory_size      = 128
+  timeout          = 20
+  runtime          = "go1.x"
+  environment {
+    variables = {
+      LAMBDA = "report"
+      REGION = var.region
+      BUCKET = local.state_bucket_name
+    }
+  }
+  depends_on = [data.archive_file.lambda_archive_file]
+}
+
 resource "aws_lambda_function_url" "deploy_lambda_url" {
   authorization_type = "NONE"
   function_name      = aws_lambda_function.deploy_lambda.function_name
@@ -119,4 +140,9 @@ resource "aws_lambda_function_url" "clusterize_lambda_url" {
 resource "aws_lambda_function_url" "clusterize_finalization_lambda_url" {
   authorization_type = "NONE"
   function_name      = aws_lambda_function.clusterize_finalization_lambda.function_name
+}
+
+resource "aws_lambda_function_url" "report_lambda_url" {
+  authorization_type = "NONE"
+  function_name      = aws_lambda_function.report_lambda.function_name
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/report"
 	"os"
 	"strconv"
 
@@ -140,6 +141,26 @@ func deployHandler(ctx context.Context, event PostEvent) (string, error) {
 	return bashScript, nil
 }
 
+func reportHandler(ctx context.Context, event PostEvent) (string, error) {
+	bucket := os.Getenv("BUCKET")
+	var currentReport protocol.Report
+
+	err := json.Unmarshal([]byte(event.Body), &currentReport)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "Failed unmarshaling report", err
+	}
+
+	err = report.Report(currentReport, bucket)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "Failed adding report to bucket", err
+	}
+
+	log.Info().Msg("The report was added successfully")
+	return "The report was added successfully", nil
+}
+
 func main() {
 	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
 	case "deploy":
@@ -148,6 +169,8 @@ func main() {
 		lambda.Start(clusterizeHandler)
 	case "clusterizeFinalization":
 		lambda.Start(clusterizeFinalizationHandler)
+	case "report":
+		lambda.Start(reportHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}
