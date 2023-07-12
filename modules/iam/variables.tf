@@ -18,3 +18,8 @@ variable "state_table_name" {
   type        = string
   description = "State DynamoDB table name"
 }
+
+variable "secret_prefix" {
+    type        = string
+    description = "Secrets prefix"
+}

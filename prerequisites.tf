@@ -22,6 +22,7 @@ module "iam" {
   cluster_name = var.cluster_name
   state_table_name = local.dynamodb_table_name
   obs_name = var.obs_name
+  secret_prefix = local.secret_prefix
 }
 
 locals {

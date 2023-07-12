@@ -9,8 +9,12 @@ resource "random_password" "suffix" {
   special = false
 }
 
+locals {
+  secret_prefix = "weka/${var.prefix}-${var.cluster_name}/"
+}
+
 resource "aws_secretsmanager_secret" "get_weka_io_token" {
-  name = "${var.prefix}-${var.cluster_name}-get_weka_io_token-${random_password.suffix.result}"
+  name = "${local.secret_prefix}get_weka_io_token-${random_password.suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "get_weka_io_token" {
@@ -19,7 +23,7 @@ resource "aws_secretsmanager_secret_version" "get_weka_io_token" {
 }
 
 resource "aws_secretsmanager_secret" "weka_username" {
-  name = "${var.prefix}-${var.cluster_name}-weka-username-${random_password.suffix.result}"
+  name = "${local.secret_prefix}weka-username-${random_password.suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "weka_username" {
@@ -39,7 +43,7 @@ resource "random_password" "password" {
 }
 
 resource "aws_secretsmanager_secret" "weka_password" {
-  name = "${var.prefix}-${var.cluster_name}-weka-password-${random_password.suffix.result}"
+  name = "${local.secret_prefix}weka-password-${random_password.suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "weka_password" {
