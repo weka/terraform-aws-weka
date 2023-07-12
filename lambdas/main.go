@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/report"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/status"
 	"os"
 	"strconv"
 
@@ -161,6 +162,39 @@ func reportHandler(ctx context.Context, event PostEvent) (string, error) {
 	return "The report was added successfully", nil
 }
 
+func statusHandler(ctx context.Context, event PostEvent) (interface{}, error) {
+	bucket := os.Getenv("BUCKET")
+	//clusterName := os.Getenv("CLUSTER_NAME")
+	//usernameId := os.Getenv("USERNAME_ID")
+	//passwordId := os.Getenv("PASSWORD_ID")
+
+	var requestBody struct {
+		Type string `json:"type"`
+	}
+
+	err := json.Unmarshal([]byte(event.Body), &requestBody)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "Failed unmarshaling status request", err
+	}
+
+	var clusterStatus interface{}
+	if requestBody.Type == "status" {
+		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
+		clusterStatus = "Not implemented yet"
+	} else if requestBody.Type == "progress" {
+		clusterStatus, err = status.GetReports(ctx, bucket)
+	} else {
+		clusterStatus = "Invalid status type"
+	}
+
+	if err != nil {
+		return "Failed retrieving status: %s", err
+	}
+
+	return clusterStatus, nil
+}
+
 func main() {
 	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
 	case "deploy":
@@ -171,6 +205,8 @@ func main() {
 		lambda.Start(clusterizeFinalizationHandler)
 	case "report":
 		lambda.Start(reportHandler)
+	case "status":
+		lambda.Start(statusHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}

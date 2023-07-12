@@ -127,6 +127,28 @@ resource "aws_lambda_function" "report_lambda" {
   depends_on = [data.archive_file.lambda_archive_file]
 }
 
+resource "aws_lambda_function" "status_lambda" {
+  function_name    = "${var.prefix}-${var.cluster_name}-status-lambda"
+  filename         = local.lambda_zip
+  source_code_hash = data.archive_file.lambda_archive_file.output_base64sha256
+  handler          = local.binary_name
+  role             = local.lambda_iam_role_arn
+  memory_size      = 128
+  timeout          = 20
+  runtime          = "go1.x"
+  environment {
+    variables = {
+      LAMBDA = "status"
+      REGION = var.region
+      BUCKET = local.state_bucket_name
+      //CLUSTER_NAME = var.cluster_name
+      //USERNAME_ID = aws_secretsmanager_secret.weka_username.id
+      //PASSWORD_ID = aws_secretsmanager_secret.weka_password.id
+    }
+  }
+  depends_on = [data.archive_file.lambda_archive_file]
+}
+
 resource "aws_lambda_function_url" "deploy_lambda_url" {
   authorization_type = "NONE"
   function_name      = aws_lambda_function.deploy_lambda.function_name
@@ -145,4 +167,9 @@ resource "aws_lambda_function_url" "clusterize_finalization_lambda_url" {
 resource "aws_lambda_function_url" "report_lambda_url" {
   authorization_type = "NONE"
   function_name      = aws_lambda_function.report_lambda.function_name
+}
+
+resource "aws_lambda_function_url" "status_lambda_url" {
+  authorization_type = "NONE"
+  function_name      = aws_lambda_function.status_lambda.function_name
 }
