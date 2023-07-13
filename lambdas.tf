@@ -4,6 +4,14 @@ locals {
   source_dir  = "${path.module}/lambdas"
   s3_bucket   = "tf-lambdas-${local.region}"
   s3_key      = "${var.lambdas_dist}/${var.lambdas_version}.zip"
+  functions     = toset(["deploy","clusterize","report","clusterize-finalization","status"])
+  function_name = [for func in local.functions: "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+}
+
+resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
+  count             = length(local.function_name)
+  name              = "/aws/lambda/${local.function_name[count.index]}"
+  retention_in_days = 30
 }
 
 resource "aws_lambda_function" "deploy_lambda" {
@@ -36,6 +44,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       REPORT_LAMBDA_NAME      = aws_lambda_function.report_lambda.function_name
     }
   }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "clusterize_lambda" {
@@ -72,6 +81,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name
     }
   }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "clusterize_finalization_lambda" {
@@ -93,6 +103,7 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
       CLUSTER_NAME         = var.cluster_name
     }
   }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "report_lambda" {
@@ -114,6 +125,7 @@ resource "aws_lambda_function" "report_lambda" {
       CLUSTER_NAME         = var.cluster_name
     }
   }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "status_lambda" {
@@ -137,4 +149,5 @@ resource "aws_lambda_function" "status_lambda" {
       //PASSWORD_ID = aws_secretsmanager_secret.weka_password.id
     }
   }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
