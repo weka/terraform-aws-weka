@@ -4,6 +4,7 @@ locals {
   nics                    = var.container_number_map[var.instance_type].nics
   private_nic_first_index = var.private_network ? 0 : 1
   public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
+  tags_dest               = ["instance","network-interface","volume"]
   user_data               = templatefile("${path.module}/user_data.sh", {
     region           = local.region
     subnet_id        = local.subnet_ids[0]
@@ -110,14 +111,16 @@ resource "aws_launch_template" "launch_template" {
     group_name        = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
   }
 
-  tag_specifications {
-    resource_type = "instance"
-
-    tags = {
-      Name                = "${var.prefix}-${var.cluster_name}-backend"
-      weka_cluster_name   = var.cluster_name
-      weka_hostgroup_type = "backend"
-      user                = data.aws_caller_identity.current.user_id
+  dynamic "tag_specifications" {
+    for_each = local.tags_dest
+    content {
+      resource_type = tag_specifications.value
+      tags = {
+        Name                = "${var.prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
+        weka_cluster_name   = var.cluster_name
+        weka_hostgroup_type = "backend"
+        user                = data.aws_caller_identity.current.user_id
+      }
     }
   }
   user_data  = base64encode(local.user_data)

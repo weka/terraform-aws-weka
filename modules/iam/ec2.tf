@@ -71,7 +71,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
           "logs:DescribeLogStreams"
         ]
         Resource = [
-          "arn:aws:logs:*:*:*"
+          "arn:aws:logs:*:*:log-group:/wekaio/${var.prefix}-${var.cluster_name}*"
         ]
       }
     ]
