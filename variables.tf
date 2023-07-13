@@ -314,3 +314,20 @@ variable "dynamodb_hash_key_name" {
   description = "DynamoDB hash key name (optional configuration, will use 'Key' by default)"
   default     = "Key"
 }
+
+variable "lambdas_version" {
+  type = string
+  description = "Lambdas code version (hash)"
+  default = "0e443ba2223cbe54dabfad362b298d5e"
+}
+
+variable "lambdas_dist" {
+  type = string
+  description = "Lambdas code dist"
+  default = "dev"
+
+  validation {
+    condition = contains(["dev", "release"], var.lambdas_dist)
+    error_message = "Valid value is one of the following: dev, release."
+  }
+}

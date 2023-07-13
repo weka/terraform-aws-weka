@@ -14,3 +14,4 @@ weka-deployment
 .tf-function-app/
 lambdas/lambdas
 lambdas/lambdas.zip
+.tf-zip-dist
