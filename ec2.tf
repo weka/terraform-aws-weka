@@ -83,7 +83,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   iam_instance_profile {
-    name = local.instance_profile_name
+    arn = local.instance_iam_profile_arn
   }
 
   metadata_options {
