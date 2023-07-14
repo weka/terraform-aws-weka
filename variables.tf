@@ -267,9 +267,9 @@ variable "hotspare" {
   description = "Hot-spare value."
 }
 
-variable "instance_profile_name" {
+variable "instance_iam_profile_arn" {
   type        = string
-  description = "Instance profile name"
+  description = "Instance IAM profile ARN"
   default     = ""
 }
 

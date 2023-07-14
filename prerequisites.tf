@@ -21,7 +21,7 @@ module "security_group" {
 }
 
 module "iam" {
-  count  = var.instance_profile_name == "" ? 1 : 0
+  count  = var.instance_iam_profile_arn == "" ? 1 : 0
   source = "./modules/iam"
   prefix = var.prefix
   cluster_name = var.cluster_name
@@ -34,6 +34,6 @@ locals {
   subnet_ids = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
   vpc_id = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
   sg_id = length(var.sg_id) == 0 ? [module.security_group[0].sg_id] : var.sg_id
-  instance_profile_name = var.instance_profile_name == "" ? module.iam[0].instance_profile_name : var.instance_profile_name
+  instance_iam_profile_arn = var.instance_iam_profile_arn == "" ? module.iam[0].instance_iam_profile_arn : var.instance_iam_profile_arn
   lambda_iam_role_arn = var.lambda_iam_role_arn == "" ? module.iam[0].lambda_iam_role_arn : var.lambda_iam_role_arn
 }
