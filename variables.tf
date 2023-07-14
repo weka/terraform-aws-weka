@@ -182,12 +182,6 @@ variable "obs_name" {
   description = "Name of existing obs storage account"
 }
 
-variable "obs_container_name" {
-  type        = string
-  default     = ""
-  description = "Name of existing obs conatiner name"
-}
-
 variable "set_obs_integration" {
   type        = bool
   default     = false
