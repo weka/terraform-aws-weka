@@ -6,10 +6,12 @@ locals {
   tags_dest               = ["instance", "network-interface", "volume"]
   user_data               = templatefile("${path.module}/user_data.sh", {
     region           = local.region
+    proxy            = var.proxy_url
     subnet_id        = local.subnet_ids[0]
     groups           = join(" ", local.sg_ids)
     nics_num         = var.container_number_map[var.instance_type].nics
     deploy_func_name = aws_lambda_function.deploy_lambda.function_name
+    weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
   })
 }
 
