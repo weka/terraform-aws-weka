@@ -26,7 +26,13 @@ variable "prefix" {
 variable "private_network" {
   type        = bool
   default     = false
-  description = "Determines whether to enable a private or public network. The default is public network."
+  description = "Determines whether to enable a private or public network. The default is public network. Relevant only when subnet_ids is empty."
+}
+
+variable "assign_public_ip" {
+  type        = bool
+  default     = true
+  description = "Determines whether to assign public ip."
 }
 
 variable "vm_username" {

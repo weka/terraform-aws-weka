@@ -25,3 +25,9 @@ variable "private_network" {
   default     = false
   description = "Determines whether to enable a private or public network. The default is public network."
 }
+
+variable "assign_public_ip" {
+  type        = bool
+  default     = true
+  description = "Determines whether to assign public ip."
+}
