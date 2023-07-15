@@ -19,9 +19,9 @@ resource "aws_vpc" "vpc" {
 # Subnets
 # Internet Gateway for Public Subnet
 resource "aws_internet_gateway" "ig" {
-  count  = var.private_network == false ? 1 : 0
+  count  = var.private_network ? 0 : 1
   vpc_id = aws_vpc.vpc.id
-  tags = {
+  tags   = {
     Name        = "${var.prefix}-igw"
     Environment = var.prefix
   }
@@ -29,13 +29,15 @@ resource "aws_internet_gateway" "ig" {
 
 # Elastic-IP (eip) for NAT
 resource "aws_eip" "nat_eip" {
+  count      = var.private_network ? 1 : 0
   domain     = "vpc"
   depends_on = [aws_internet_gateway.ig]
 }
 
 # NAT
 resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat_eip.id
+  count         = var.private_network ? 1 : 0
+  allocation_id = aws_eip.nat_eip[0].id
   subnet_id     = element(aws_subnet.subnet.*.id, 0)
 
   tags = {
@@ -44,17 +46,13 @@ resource "aws_nat_gateway" "nat" {
   }
 }
 
-locals {
-  map_public_ip = var.private_network == false ? true : false
-}
-
 # Public subnet
 resource "aws_subnet" "subnet" {
   count                   = length(var.subnets_cidr)
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.subnets_cidr[count.index]
   availability_zone       = "${local.region}${var.availability_zones[count.index]}"
-  map_public_ip_on_launch = local.map_public_ip
+  map_public_ip_on_launch = var.assign_public_ip
 
   tags = {
     Name        = "${var.prefix}-subnet-${count.index}"
@@ -75,7 +73,7 @@ resource "aws_route_table" "rt" {
 
 # Route for Internet Gateway
 resource "aws_route" "public_internet_gateway" {
-  count                  = var.private_network == false ? 1: 0
+  count                  = var.private_network ? 0 : 1
   route_table_id         = aws_route_table.rt.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.ig[0].id
@@ -83,10 +81,10 @@ resource "aws_route" "public_internet_gateway" {
 
 # Route for NAT
 resource "aws_route" "private_nat_gateway" {
-  count                  = var.private_network == true ? 1: 0
+  count                  = var.private_network ? 1 : 0
   route_table_id         = aws_route_table.rt.id
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat.id
+  nat_gateway_id         = aws_nat_gateway.nat[0].id
 }
 
 # Route table associations for both Public & Private Subnets

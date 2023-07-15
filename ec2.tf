@@ -1,8 +1,7 @@
 locals {
-  public_ip               = var.private_network == false ? 0 : 1
   ssh_path                = "/tmp/${var.prefix}-${var.cluster_name}"
   nics                    = var.container_number_map[var.instance_type].nics
-  private_nic_first_index = var.private_network ? 0 : 1
+  private_nic_first_index = var.assign_public_ip ? 1 : 0
   public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   tags_dest               = ["instance","network-interface","volume"]
   user_data               = templatefile("${path.module}/user_data.sh", {
@@ -99,7 +98,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   network_interfaces {
-    associate_public_ip_address = var.private_network ? false : true
+    associate_public_ip_address = var.assign_public_ip
     delete_on_termination       = true
     device_index                = 0
     security_groups             = local.sg_id

@@ -10,6 +10,7 @@ module "network" {
   prefix             = var.prefix
   availability_zones = var.availability_zones
   private_network    = var.private_network
+  assign_public_ip   = var.assign_public_ip
 }
 
 module "security_group" {
