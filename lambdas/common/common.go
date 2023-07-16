@@ -266,6 +266,31 @@ func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
 	return
 }
 
+func GetBackendWekaVolumeId(InstanceId string) (volumeId string, err error) {
+	svc := connectors.GetAWSSession().EC2
+	log.Debug().Msgf("Fetching backend %s volume ids...", InstanceId)
+	describeResponse, err := svc.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{aws.String(InstanceId)},
+	})
+	if err != nil {
+		return
+	}
+
+	for _, reservation := range describeResponse.Reservations {
+		for _, instance := range reservation.Instances {
+			for _, blockDevice := range instance.BlockDeviceMappings {
+				log.Debug().Msgf("found block device %s", *blockDevice.DeviceName)
+				if *blockDevice.DeviceName == "/dev/sdp" {
+					volumeId = *blockDevice.Ebs.VolumeId
+					break
+				}
+			}
+		}
+	}
+	log.Debug().Msgf("found volume id %s", volumeId)
+	return
+}
+
 func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesNames []string, err error) {
 	err = LockState(table, hashKey)
 	if err != nil {

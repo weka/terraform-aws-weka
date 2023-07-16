@@ -2,22 +2,6 @@
 set -ex
 
 yum install -y jq
-yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
-
-function create_wekaio_partition() {
-  echo "--------------------------------------------"
-  echo " Creating local filesystem on WekaIO volume "
-  echo "--------------------------------------------"
-
-  wekaiosw_device="/dev/sdp"
-  sleep 4
-  mkfs.ext4 -L wekaiosw "$wekaiosw_device" || return 1
-  mkdir -p /opt/weka || return 1
-  mount "$wekaiosw_device" /opt/weka || return 1
-  echo "LABEL=wekaiosw /opt/weka ext4 defaults 0 2" >>/etc/fstab
-}
-
-create_wekaio_partition
 
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 instance_id=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-id)
