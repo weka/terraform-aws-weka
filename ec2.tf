@@ -134,6 +134,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   min_size            = var.cluster_size
   vpc_zone_identifier = [local.subnet_ids[0]]
   placement_group     = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
+  suspended_processes = ["ReplaceUnhealthy"]
 
   launch_template {
     id      = aws_launch_template.launch_template.id
