@@ -106,6 +106,7 @@ func GetDeployScript(
 		findDrivesScript := common.FindDrivesScript
 		joinScriptGenerator := join.JoinScriptGenerator{
 			FailureDomainCmd:   getHashedIpCommand,
+			DeviceNameCmd:      GetDeviceName(ebsVolumeId),
 			GetInstanceNameCmd: getAWSInstanceNameCmd(),
 			FindDrivesScript:   dedent.Dedent(findDrivesScript),
 			ScriptBase:         dedent.Dedent(scriptBase),
