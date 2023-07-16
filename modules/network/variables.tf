@@ -3,10 +3,16 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "subnets_cidr" {
+variable "public_subnets_cidr" {
   type        = list(string)
-  description = "CIDR block for Subnet"
+  description = "CIDR block for public subnet"
   default     = ["10.0.1.0/24"]
+}
+
+variable "private_subnets_cidr" {
+  type        = list(string)
+  description = "CIDR block for private subnet"
+  default     = ["10.0.2.0/24"]
 }
 
 variable "availability_zones" {
