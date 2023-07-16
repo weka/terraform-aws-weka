@@ -33,62 +33,88 @@ resource "aws_eip" "nat_eip" {
   depends_on = [aws_internet_gateway.ig]
 }
 
-# NAT
-resource "aws_nat_gateway" "nat" {
-  count         = var.private_network ? 1 : 0
-  allocation_id = aws_eip.nat_eip[0].id
-  subnet_id     = element(aws_subnet.subnet.*.id, 0)
+resource "aws_route_table" "ig_route_table" {
+  vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.ig.id
+  }
 
   tags = {
-    Name        = "${var.prefix}-nat"
+    Name        = "${var.prefix}-igw-rt"
+    Environment = var.prefix
+  }
+  depends_on = [aws_vpc.vpc, aws_internet_gateway.ig]
+}
+
+# NAT
+resource "aws_nat_gateway" "nat" {
+  count             = var.private_network ? 1 : 0
+  subnet_id         = element(aws_subnet.public_subnet.*.id, 0)
+  allocation_id     = aws_eip.nat_eip[0].id
+  tags = {
+    Name        = "${var.prefix}-private-nat"
     Environment = var.prefix
   }
 }
 
-# Public subnet
-resource "aws_subnet" "subnet" {
-  count                   = length(var.subnets_cidr)
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.subnets_cidr[count.index]
-  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
-  map_public_ip_on_launch = var.assign_public_ip
+resource "aws_route_table" "nat_route_table" {
+  count  = var.private_network ? 1 : 0
+  vpc_id = aws_vpc.vpc.id
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_nat_gateway.nat[0].id
+  }
 
   tags = {
-    Name        = "${var.prefix}-subnet-${count.index}"
+    Name        = "${var.prefix}-nat-rt"
+    Environment = var.prefix
+  }
+  depends_on = [aws_vpc.vpc, aws_nat_gateway.nat]
+}
+
+# Public subnet
+resource "aws_subnet" "public_subnet" {
+  count                   = length(var.public_subnets_cidr)
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.public_subnets_cidr[count.index]
+  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name        = "${var.prefix}-public-subnet-${count.index}"
     Environment = var.prefix
     Zone        = var.availability_zones[count.index]
   }
 }
 
-# Routing tables to route traffic for Public Subnet
-resource "aws_route_table" "rt" {
-  vpc_id = aws_vpc.vpc.id
+# associate route table to public subnet
+resource "aws_route_table_association" "public_rt_associate" {
+  count          = length(var.public_subnets_cidr)
+  subnet_id      = aws_subnet.public_subnet[count.index].id
+  route_table_id = aws_route_table.ig_route_table.id
+  depends_on     = [aws_subnet.public_subnet, aws_route_table.ig_route_table]
+}
+
+# Private subnet
+resource "aws_subnet" "private_subnet" {
+  count                   = var.private_network ? length(var.private_subnets_cidr) : 0
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = var.private_subnets_cidr[count.index]
+  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
+  map_public_ip_on_launch = false
 
   tags = {
-    Name        = "${var.prefix}-route-table"
+    Name        = "${var.prefix}-private-subnet-${count.index}"
     Environment = var.prefix
+    Zone        = var.availability_zones[count.index]
   }
 }
 
-# Route for Internet Gateway
-resource "aws_route" "public_internet_gateway" {
-  count                  = var.private_network ? 0 : 1
-  route_table_id         = aws_route_table.rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.ig.id
-}
-
-# Route for NAT
-resource "aws_route" "private_nat_gateway" {
-  count                  = var.private_network ? 1 : 0
-  route_table_id         = aws_route_table.rt.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat[0].id
-}
-
-# Route table associations for both Public & Private Subnets
-resource "aws_route_table_association" "rt_association" {
-  count          = length(var.subnets_cidr)
-  subnet_id      = aws_subnet.subnet[count.index].id
-  route_table_id = aws_route_table.rt.id
+# associate route table to private subnet
+resource "aws_route_table_association" "private_rt_associate" {
+  count          = var.private_network ? length(var.private_subnets_cidr) : 0
+  subnet_id      = aws_subnet.private_subnet[count.index].id
+  route_table_id = aws_route_table.nat_route_table[0].id
+  depends_on     = [aws_subnet.private_subnet, aws_route_table.nat_route_table]
 }

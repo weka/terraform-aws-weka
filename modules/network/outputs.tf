@@ -1,5 +1,5 @@
 output "subnet_ids" {
-  value = aws_subnet.subnet.*.id
+  value = var.private_network ? aws_subnet.private_subnet.*.id : aws_subnet.public_subnet.*.id
 }
 
 output "vpc_id" {
