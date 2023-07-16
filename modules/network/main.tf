@@ -17,9 +17,8 @@ resource "aws_vpc" "vpc" {
 }
 
 # Subnets
-# Internet Gateway for Public Subnet
+# Internet Gateway (required for Public Subnet and NAT)
 resource "aws_internet_gateway" "ig" {
-  count  = var.private_network ? 0 : 1
   vpc_id = aws_vpc.vpc.id
   tags   = {
     Name        = "${var.prefix}-igw"
@@ -76,7 +75,7 @@ resource "aws_route" "public_internet_gateway" {
   count                  = var.private_network ? 0 : 1
   route_table_id         = aws_route_table.rt.id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.ig[0].id
+  gateway_id             = aws_internet_gateway.ig.id
 }
 
 # Route for NAT
