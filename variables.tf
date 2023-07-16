@@ -74,7 +74,7 @@ variable "container_number_map" {
       compute  = 1
       drive    = 1
       frontend = 1
-      nvme     = 1
+      nvme     = 2
       nics     = 4
       memory   = "31796436575B"
     },
@@ -87,30 +87,30 @@ variable "container_number_map" {
       memory   = "31796436575B"
     },
     "i3en.3xlarge" = {
-      compute  = 2
+      compute  = 1
       drive    = 1
       frontend = 1
-      nvme     = 2
+      nvme     = 1
       nics     = 4
       memory   = "55955545954B"
     },
-    "i3.3xlarge" = {
-      compute  = 2
+    "i3.4xlarge" = {
+      compute  = 5
       drive    = 1
       frontend = 1
       nvme     = 2
-      nics     = 4
+      nics     = 8
       memory   = "55955545954B"
     },
     "i3en.6xlarge" = {
-      compute  = 4
-      drive    = 2
+      compute  = 5
+      drive    = 1
       frontend = 1
-      nvme     = 4
+      nvme     = 2
       nics     = 8
       memory   = "130433516148B"
     },
-    "i3.6xlarge" = {
+    "i3.8xlarge" = {
       compute  = 4
       drive    = 2
       frontend = 1
@@ -122,27 +122,19 @@ variable "container_number_map" {
       compute  = 4
       drive    = 2
       frontend = 1
-      nvme     = 6
+      nvme     = 4
       nics     = 8
       memory   = "312901542392B"
     },
-    "i3.12xlarge" = {
-      compute  = 4
-      drive    = 2
-      frontend = 1
-      nvme     = 6
-      nics     = 8
-      memory   = "312901542392B"
-    },
-    "i3en.24xlarge" = {
+    "i3.16xlarge" = {
       compute  = 9
       drive    = 4
       frontend = 1
-      nvme     = 8
+      nvme     = 4
       nics     = 15
-      memory   = "602459825769B"
+      memory   = "312901542392B"
     },
-    "i3.24xlarge" = {
+    "i3en.24xlarge" = {
       compute  = 9
       drive    = 4
       frontend = 1
