@@ -2,6 +2,8 @@ package deploy
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
@@ -46,6 +48,12 @@ func GetDeployScript(
 	getHashedIpCommand := bash_functions.GetHashedPrivateIpBashCmd()
 	instanceParams := protocol.BackendCoreCount{Compute: computeContainerNum, Frontend: frontendContainerNum, Drive: driveContainerNum, ComputeMemory: computeMemory}
 
+	ebsVolumeId, err := common.GetBackendWekaVolumeId(instanceName)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "", err
+	}
+
 	if !state.Clusterized {
 		var token string
 		token, err = common.GetWekaIoToken(tokenId)
@@ -65,6 +73,7 @@ func GetDeployScript(
 			FuncDef:          funcDef,
 			Params:           deploymentParams,
 			FailureDomainCmd: getHashedIpCommand,
+			DeviceNameCmd:    GetDeviceName(ebsVolumeId),
 		}
 		bashScript = deployScriptGenerator.GetDeployScript()
 	} else {
@@ -107,4 +116,9 @@ func GetDeployScript(
 	}
 	bashScript = dedent.Dedent(bashScript)
 	return
+}
+
+func GetDeviceName(ebsVolumeId string) string {
+	template := "$(ls /dev/xvdw || lsblk --output NAME,SERIAL --path --list --noheadings | grep %s | cut --delimiter ' ' --field 1)"
+	return fmt.Sprintf(dedent.Dedent(template), strings.Replace(ebsVolumeId, "-", "", -1))
 }
