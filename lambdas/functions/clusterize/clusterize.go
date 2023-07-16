@@ -84,7 +84,7 @@ func GetObsScript(obsParams protocol.ObsParams) string {
 	OBS_NAME="%s"
 	REGION=%s
 
-	weka fs tier s3 add aws-bucket --hostname s3-$REGION.amazonaws.com --port 443 --bucket "$OBS_NAME" --protocol https --auth-method AWSSignature4 --region $REGION --site local
+	weka fs tier s3 add aws-bucket --hostname s3.$REGION.amazonaws.com --port 443 --bucket "$OBS_NAME" --protocol https --auth-method AWSSignature4 --region $REGION --site local
 	weka fs tier s3 attach default aws-bucket
 	tiering_percent=$(echo "$full_capacity * 100 / $OBS_TIERING_SSD_PERCENT" | bc)
 	weka fs update default --total-capacity "$tiering_percent"B
