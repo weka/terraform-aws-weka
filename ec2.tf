@@ -130,7 +130,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   name                = "${var.prefix}-${var.cluster_name}-autoscaling-group"
   #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
   desired_capacity    = var.cluster_size
-  max_size            = var.cluster_size
+  max_size            = var.cluster_size * 7
   min_size            = var.cluster_size
   vpc_zone_identifier = [local.subnet_ids[0]]
   placement_group     = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
