@@ -11,8 +11,8 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/clusterize_finalization"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/deploy"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/report"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/status"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/status"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
 	"github.com/weka/go-cloud-lib/protocol"
 )
