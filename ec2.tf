@@ -145,5 +145,8 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     propagate_at_launch = true
     value               = var.cluster_name
   }
+  lifecycle {
+    ignore_changes = [desired_capacity, min_size, max_size]
+  }
   depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group]
 }
