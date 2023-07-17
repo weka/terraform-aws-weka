@@ -53,7 +53,7 @@ variable "ami_id" {
   default     = null
 }
 
-variable "sg_id" {
+variable "sg_ids" {
   type        = list(string)
   default     = []
   description = "Security group ids"
