@@ -48,6 +48,26 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = ["arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:AttachNetworkInterface",
+          "ec2:CreateNetworkInterface",
+          "ec2:ModifyNetworkInterfaceAttribute",
+          "ec2:DeleteNetworkInterface",
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          "arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}*"
+        ]
       }
     ]
   })

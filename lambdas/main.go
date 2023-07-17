@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	lambda2 "github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"os"
 	"strconv"
 
@@ -157,9 +160,16 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 
 	var clusterStatus interface{}
 	var err error
+	log.Info().Msg("running status handler")
 	if req.Type == "status" {
-		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
-		clusterStatus = "Not implemented yet"
+		log.Info().Msg("Getting weka status from lambda")
+		svc := connectors.GetAWSSession().Lambda
+		res, err2 := svc.Invoke(&lambda2.InvokeInput{
+			FunctionName: aws.String("weka-tf-test-weka-status-lambda"),
+		},
+		)
+		err = err2
+		clusterStatus = res.Payload
 	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
 	} else {
@@ -171,6 +181,18 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	}
 
 	return clusterStatus, nil
+}
+
+func wekaStatusHandler(ctx context.Context) (clusterStatus protocol.ClusterStatus, err error) {
+	stateTable := os.Getenv("STATE_TABLE")
+	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+	clusterName := os.Getenv("CLUSTER_NAME")
+	usernameId := os.Getenv("USERNAME_ID")
+	passwordId := os.Getenv("PASSWORD_ID")
+
+	clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, clusterName, usernameId, passwordId)
+
+	return
 }
 
 func main() {
@@ -185,6 +207,8 @@ func main() {
 		lambda.Start(reportHandler)
 	case "status":
 		lambda.Start(statusHandler)
+	case "wekaStatus":
+		lambda.Start(wekaStatusHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}

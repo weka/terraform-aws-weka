@@ -151,3 +151,31 @@ resource "aws_lambda_function" "status_lambda" {
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
+
+resource "aws_lambda_function" "weka_status_lambda" {
+  function_name = "${var.prefix}-${var.cluster_name}-weka-status-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.binary_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "go1.x"
+  vpc_config {
+    security_group_ids = local.sg_ids
+    subnet_ids         = local.subnet_ids
+  }
+  environment {
+    variables = {
+      LAMBDA               = "wekaStatus"
+      REGION               = local.region
+      STATE_TABLE          = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
+      PREFIX               = var.prefix
+      CLUSTER_NAME         = var.cluster_name
+      USERNAME_ID = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID = aws_secretsmanager_secret.weka_password.id
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
