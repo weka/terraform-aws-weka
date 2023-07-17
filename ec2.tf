@@ -7,7 +7,7 @@ locals {
   user_data               = templatefile("${path.module}/user_data.sh", {
     region           = local.region
     subnet_id        = local.subnet_ids[0]
-    groups           = join(" ", local.sg_id)
+    groups           = join(" ", local.sg_ids)
     nics_num         = var.container_number_map[var.instance_type].nics
     deploy_func_name = aws_lambda_function.deploy_lambda.function_name
   })
@@ -101,7 +101,7 @@ resource "aws_launch_template" "launch_template" {
     associate_public_ip_address = var.assign_public_ip
     delete_on_termination       = true
     device_index                = 0
-    security_groups             = local.sg_id
+    security_groups             = local.sg_ids
     subnet_id                   = local.subnet_ids[0]
   }
 
