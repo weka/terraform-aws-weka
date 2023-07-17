@@ -1,8 +1,14 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/weka/go-cloud-lib/lib/strings"
+	"github.com/weka/go-cloud-lib/lib/types"
+	"golang.org/x/sync/semaphore"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -21,6 +27,8 @@ var (
 	StateKey           = getStateKey()
 	WaitForLockTimeout = time.Minute * 5
 )
+
+type InstancePrivateIpsSet map[string]types.Nilt
 
 type StateItem struct {
 	Value  protocol.ClusterState `json:"Value"`
@@ -321,4 +329,123 @@ func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 		log.Error().Err(err).Send()
 	}
 	return
+}
+
+func UnpackASGInstanceIds(instances []*autoscaling.Instance) []*string {
+	instanceIds := []*string{}
+	if len(instances) == 0 {
+		return instanceIds
+	}
+	for _, instance := range instances {
+		instanceIds = append(instanceIds, instance.InstanceId)
+	}
+	return instanceIds
+}
+
+func getEc2InstancesFromDescribeOutput(describeResponse *ec2.DescribeInstancesOutput) (instances []*ec2.Instance) {
+	for _, reservation := range describeResponse.Reservations {
+		for _, instance := range reservation.Instances {
+			instances = append(instances, instance)
+		}
+	}
+	return
+}
+
+func GetInstances(instanceIds []*string) (instances []*ec2.Instance, err error) {
+	if len(instanceIds) == 0 {
+		err = fmt.Errorf("instanceIds list must not be empty")
+		return
+	}
+	svc := connectors.GetAWSSession().EC2
+	describeResponse, err := svc.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: instanceIds,
+	})
+	if err != nil {
+		return
+	}
+
+	instances = getEc2InstancesFromDescribeOutput(describeResponse)
+	return
+}
+
+func Min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func DetachInstancesFromASG(instancesIds []string, autoScalingGroupsName string) error {
+	svc := connectors.GetAWSSession().ASG
+	limit := 20
+	for i := 0; i < len(instancesIds); i += limit {
+		batch := strings.ListToRefList(instancesIds[i:Min(i+limit, len(instancesIds))])
+		_, err := svc.DetachInstances(&autoscaling.DetachInstancesInput{
+			AutoScalingGroupName:           &autoScalingGroupsName,
+			InstanceIds:                    batch,
+			ShouldDecrementDesiredCapacity: aws.Bool(false),
+		})
+		if err != nil {
+			return err
+		}
+		log.Info().Msgf("Detached %d instances from %s successfully!", len(batch), autoScalingGroupsName)
+	}
+	return nil
+}
+
+func setDisableInstanceApiTermination(instanceId string, value bool) (*ec2.ModifyInstanceAttributeOutput, error) {
+	svc := connectors.GetAWSSession().EC2
+	input := &ec2.ModifyInstanceAttributeInput{
+		DisableApiTermination: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(value),
+		},
+		InstanceId: aws.String(instanceId),
+	}
+	return svc.ModifyInstanceAttribute(input)
+}
+
+var terminationSemaphore *semaphore.Weighted
+
+func init() {
+	terminationSemaphore = semaphore.NewWeighted(20)
+}
+
+func SetDisableInstancesApiTermination(instanceIds []string, value bool) (updated []string, errs []error) {
+	var wg sync.WaitGroup
+	var responseLock sync.Mutex
+
+	log.Debug().Msgf("Setting instances DisableApiTermination to: %t ...", value)
+	wg.Add(len(instanceIds))
+	for i := range instanceIds {
+		go func(i int) {
+			_ = terminationSemaphore.Acquire(context.Background(), 1)
+			defer terminationSemaphore.Release(1)
+			defer wg.Done()
+
+			responseLock.Lock()
+			defer responseLock.Unlock()
+			_, err := setDisableInstanceApiTermination(instanceIds[i], value)
+			if err != nil {
+				errs = append(errs, err)
+				log.Error().Err(err)
+				log.Error().Msgf("failed to set DisableApiTermination on %s", instanceIds[i])
+			}
+			updated = append(updated, instanceIds[i])
+		}(i)
+	}
+	wg.Wait()
+	return
+}
+
+func GetASGInstances(asgName string) ([]*autoscaling.Instance, error) {
+	svc := connectors.GetAWSSession().ASG
+	asgOutput, err := svc.DescribeAutoScalingGroups(
+		&autoscaling.DescribeAutoScalingGroupsInput{
+			AutoScalingGroupNames: []*string{&asgName},
+		},
+	)
+	if err != nil {
+		return []*autoscaling.Instance{}, err
+	}
+	return asgOutput.AutoScalingGroups[0].Instances, nil
 }
