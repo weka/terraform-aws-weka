@@ -2,7 +2,7 @@ locals {
   binary_name = "lambdas"
   binary_path = "${path.module}/lambdas/${local.binary_name}"
   source_dir  = "${path.module}/lambdas"
-  s3_bucket   = "tf-lambdas-${local.region}"
+  s3_bucket   = "weka-tf-aws-releases-${local.region}"
   s3_key      = "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions     = toset(["deploy","clusterize","report","clusterize-finalization","status"])
   function_name = [for func in local.functions: "${var.prefix}-${var.cluster_name}-${func}-lambda"]
