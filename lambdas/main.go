@@ -3,8 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
+	"github.com/weka/go-cloud-lib/scale_down"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
@@ -173,6 +177,28 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	return clusterStatus, nil
 }
 
+func fetchHandler() (protocol.HostGroupInfoResponse, error) {
+	result, err := lambdas.GetFetchDataParams(
+		os.Getenv("CLUSTER_NAME"),
+		os.Getenv("ASG_NAME"),
+		os.Getenv("USERNAME_ID"),
+		os.Getenv("PASSWORD_ID"),
+		os.Getenv("ROLE"),
+	)
+	if err != nil {
+		return protocol.HostGroupInfoResponse{}, err
+	}
+	return result, nil
+}
+
+func transientHandler(terminateResponse protocol.TerminatedInstancesResponse) error {
+	errs := terminateResponse.TransientErrors
+	if len(errs) > 0 {
+		return fmt.Errorf("the following errors were found:\n%s", strings.Join(errs, "\n"))
+	}
+	return nil
+}
+
 func main() {
 	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
 	case "deploy":
@@ -185,6 +211,14 @@ func main() {
 		lambda.Start(reportHandler)
 	case "status":
 		lambda.Start(statusHandler)
+	case "fetch":
+		lambda.Start(fetchHandler)
+	case "scaleDown":
+		lambda.Start(scale_down.ScaleDown)
+	case "terminate":
+		lambda.Start(terminate.Handler)
+	case "transient":
+		lambda.Start(transientHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}
