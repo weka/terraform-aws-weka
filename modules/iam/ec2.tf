@@ -29,7 +29,10 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:*Object"
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject"
         ]
         Resource = ["arn:aws:s3:::${var.obs_name}/*"]
       }
@@ -48,7 +51,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
           "lambda:InvokeFunction"
         ]
         Resource = [
-          "arn:aws:lambda:*:*:*"
+          "arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}*"
         ]
       }
     ]
