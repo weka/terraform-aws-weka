@@ -19,7 +19,7 @@ tasks:
   upload_zip:
     env:
       REGIONS_FILE_DIR: '{{.TASKFILE_DIR}}/supported_regions' # File containing list of supported Azure regions
-      AWS_PROFILE: devops
+      AWS_PROFILE: cloud-infra
     deps: [create_lambdas_zip]
     cmds:
       - ./lambdas_distribution/upload_to_regions.sh ${REGIONS_FILE_DIR} ${DIST} {{OS}} ${FUNCTION_CODE_PATH} ${FUNCTION_ZIP_DIR}
