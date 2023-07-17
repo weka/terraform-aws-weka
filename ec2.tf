@@ -3,7 +3,7 @@ locals {
   nics                    = var.container_number_map[var.instance_type].nics
   private_nic_first_index = var.assign_public_ip ? 1 : 0
   public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
-  tags_dest               = ["instance","network-interface","volume"]
+  tags_dest               = ["instance", "network-interface", "volume"]
   user_data               = templatefile("${path.module}/user_data.sh", {
     region           = local.region
     subnet_id        = local.subnet_ids[0]
@@ -114,7 +114,7 @@ resource "aws_launch_template" "launch_template" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = {
+      tags          = {
         Name                = "${var.prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
@@ -127,14 +127,15 @@ resource "aws_launch_template" "launch_template" {
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+  name                  = "${var.prefix}-${var.cluster_name}-autoscaling-group"
   #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
-  desired_capacity    = var.cluster_size
-  max_size            = var.cluster_size * 7
-  min_size            = var.cluster_size
-  vpc_zone_identifier = [local.subnet_ids[0]]
-  placement_group     = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
-  suspended_processes = ["ReplaceUnhealthy"]
+  desired_capacity      = var.cluster_size
+  max_size              = var.cluster_size * 7
+  min_size              = var.cluster_size
+  vpc_zone_identifier   = [local.subnet_ids[0]]
+  placement_group       = var.placement_group_name == null ? aws_placement_group.placement_group[0].id : var.placement_group_name
+  suspended_processes   = ["ReplaceUnhealthy"]
+  protect_from_scale_in = true
 
   launch_template {
     id      = aws_launch_template.launch_template.id
