@@ -35,7 +35,9 @@ module "iam" {
 locals {
   subnet_ids               = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
   vpc_id                   = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
-  sg_ids                    = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
+  sg_ids                   = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
   instance_iam_profile_arn = var.instance_iam_profile_arn == "" ? module.iam[0].instance_iam_profile_arn : var.instance_iam_profile_arn
   lambda_iam_role_arn      = var.lambda_iam_role_arn == "" ? module.iam[0].lambda_iam_role_arn : var.lambda_iam_role_arn
+  sfn_iam_role_arn         = var.sfn_iam_role == "" ? module.iam[0].sfn_iam_role_arn :  var.sfn_iam_role
+  event_iam_role_arn       = var.event_iam_role == "" ? module.iam[0].event_iam_role_arn : var.event_iam_role
 }

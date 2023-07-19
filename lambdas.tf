@@ -1,10 +1,10 @@
 locals {
-  binary_name = "lambdas"
-  binary_path = "${path.module}/lambdas/${local.binary_name}"
-  source_dir  = "${path.module}/lambdas"
-  s3_bucket   = "weka-tf-aws-releases-${local.region}"
-  s3_key      = "${var.lambdas_dist}/${var.lambdas_version}.zip"
-  functions     = toset(["deploy","clusterize","report","clusterize-finalization","status"])
+  binary_name   = "lambdas"
+  binary_path   = "${path.module}/lambdas/${local.binary_name}"
+  source_dir    = "${path.module}/lambdas"
+  s3_bucket     = "weka-tf-aws-releases-${local.region}"
+  s3_key        = "${var.lambdas_dist}/${var.lambdas_version}.zip"
+  functions     = toset(["deploy","clusterize","report","clusterize-finalization","status","scale-down","fetch","terminate","transient"])
   function_name = [for func in local.functions: "${var.prefix}-${var.cluster_name}-${func}-lambda"]
 }
 
@@ -147,6 +147,97 @@ resource "aws_lambda_function" "status_lambda" {
       CLUSTER_NAME         = var.cluster_name
       //USERNAME_ID = aws_secretsmanager_secret.weka_username.id
       //PASSWORD_ID = aws_secretsmanager_secret.weka_password.id
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+resource "aws_lambda_function" "fetch_lambda" {
+  function_name = "${var.prefix}-${var.cluster_name}-fetch-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.binary_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "go1.x"
+  environment {
+    variables = {
+      LAMBDA        = "fetch"
+      REGION        = local.region
+      STATE_TABLE   = local.dynamodb_table_name
+      ROLE          = "backend"
+      PREFIX        = var.prefix
+      CLUSTER_NAME  = var.cluster_name
+      ASG_NAME      = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+      USERNAME_ID   = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID   = aws_secretsmanager_secret.weka_password.id
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+resource "aws_lambda_function" "scale_down_lambda" {
+  function_name = "${var.prefix}-${var.cluster_name}-scale-down-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.binary_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "go1.x"
+  vpc_config {
+     security_group_ids = local.sg_ids
+     subnet_ids         = local.subnet_ids
+  }
+  environment {
+    variables = {
+      LAMBDA        = "scaleDown"
+      REGION        = local.region
+      PREFIX        = var.prefix
+      CLUSTER_NAME  = var.cluster_name
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+resource "aws_lambda_function" "transient_lambda" {
+  function_name = "${var.prefix}-${var.cluster_name}-transient-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.binary_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "go1.x"
+  environment {
+    variables = {
+      LAMBDA        = "transient"
+      REGION        = local.region
+      PREFIX        = var.prefix
+      CLUSTER_NAME  = var.cluster_name
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+resource "aws_lambda_function" "terminate_lambda" {
+  function_name = "${var.prefix}-${var.cluster_name}-terminate-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.binary_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "go1.x"
+  environment {
+    variables = {
+      LAMBDA        = "terminate"
+      REGION        = local.region
+      PREFIX        = var.prefix
+      CLUSTER_NAME  = var.cluster_name
+      ASG_NAME      = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
