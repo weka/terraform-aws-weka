@@ -4,12 +4,13 @@ variable "get_weka_io_token" {
 }
 
 provider "aws" {
+  profile = "cloud-dev"
 }
 
 module "deploy-weka" {
   source             = "../../"
-  prefix             = "weka-tf"
-  cluster_name       = "test"
+  prefix             = "denise-tf"
+  cluster_name       = "status"
   availability_zones = ["a"]
   allow_ssh_ranges   = ["0.0.0.0/0"]
   get_weka_io_token  = var.get_weka_io_token

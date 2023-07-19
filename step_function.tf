@@ -92,3 +92,38 @@ EOF
   depends_on = [aws_lambda_function.scale_down_lambda, aws_lambda_function.fetch_lambda, aws_lambda_function.terminate_lambda, aws_lambda_function.transient_lambda,aws_cloudwatch_log_group.sfn_log_group]
 }
 
+
+resource "aws_sfn_state_machine" "get_status_state_machine" {
+  name       = "${var.prefix}-${var.cluster_name}-get-status-state-machine"
+  role_arn   = local.sfn_iam_role_arn
+  definition = <<EOF
+  {
+  "Comment": "Get Weka Status",
+  "StartAt": "Status",
+  "States": {
+    "Fetch": {
+      "Type": "Task",
+      "Resource": "${aws_lambda_function.status_lambda.arn}",
+      "Next": "internalStatus"
+    },
+    "internalStatus" : {
+        "Type": "Task",
+        "Resource": "${aws_lambda_function.internal_status_lambda.arn}",
+        "End": true
+    },
+   }
+}
+EOF
+
+  logging_configuration {
+    log_destination        = "${aws_cloudwatch_log_group.sfn_log_group.arn}:*"
+    include_execution_data = true
+    level                  = "ALL"
+  }
+
+  tags = {
+    Name = "${var.prefix}-${var.cluster_name}-get-status-state-machine"
+  }
+  depends_on = [aws_lambda_function.status_lambda, aws_lambda_function.internal_status_lambda, aws_cloudwatch_log_group.sfn_log_group]
+}
+

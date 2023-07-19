@@ -155,14 +155,14 @@ func reportHandler(ctx context.Context, currentReport protocol.Report) (string, 
 func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
-	//clusterName := os.Getenv("CLUSTER_NAME")
-	//usernameId := os.Getenv("USERNAME_ID")
-	//passwordId := os.Getenv("PASSWORD_ID")
+	clusterName := os.Getenv("CLUSTER_NAME")
+	usernameId := os.Getenv("USERNAME_ID")
+	passwordId := os.Getenv("PASSWORD_ID")
 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
-		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
+		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, clusterName, usernameId, passwordId)
 		clusterStatus = "Not implemented yet"
 	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
@@ -178,12 +178,17 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 }
 
 func fetchHandler() (protocol.HostGroupInfoResponse, error) {
+	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
+	if err != nil {
+		return protocol.HostGroupInfoResponse{}, err
+	}
 	result, err := lambdas.GetFetchDataParams(
 		os.Getenv("CLUSTER_NAME"),
 		os.Getenv("ASG_NAME"),
 		os.Getenv("USERNAME_ID"),
 		os.Getenv("PASSWORD_ID"),
 		os.Getenv("ROLE"),
+		useSecretManagerEndpoint,
 	)
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err

@@ -3,7 +3,7 @@
 # Usage:
 # upload_to_bucket.sh <local_zip_file> <bucket_name> <object_name>
 
-set -e
+set -ex
 
 local_zip_file="$1"
 bucket_name="$2"

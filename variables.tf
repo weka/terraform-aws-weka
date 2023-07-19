@@ -310,7 +310,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type = string
   description = "Lambdas code version (hash)"
-  default = "dc6c2a3712060005fe9033190d472518"
+  default = "6162c3ad6b27ba10c8d172616458d0ba"
 }
 
 variable "lambdas_dist" {
@@ -334,4 +334,16 @@ variable "event_iam_role" {
   type        = string
   default     = ""
   description = "Event iam role arn"
+}
+
+variable "use_secretmanager_endpoint" {
+  type        = bool
+  default     = true
+  description = "Use secret manager endpoint"
+}
+
+variable "create_secretmanager_endpoint" {
+  type        = bool
+  default     = true
+  description = "Enable secret manager endpoint on vpc"
 }
