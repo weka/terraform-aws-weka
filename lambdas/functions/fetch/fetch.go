@@ -4,7 +4,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
+	"github.com/weka/go-cloud-lib/aws/aws_common"
+	"github.com/weka/go-cloud-lib/aws/connectors"
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
@@ -16,7 +17,7 @@ func getAutoScalingGroupDesiredCapacity(asgOutput *autoscaling.DescribeAutoScali
 	return int(*asgOutput.AutoScalingGroups[0].DesiredCapacity)
 }
 
-func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role string) (fd protocol.HostGroupInfoResponse, err error) {
+func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role string, useSecretManagerEndpoint bool) (fd protocol.HostGroupInfoResponse, err error) {
 	svc := connectors.GetAWSSession().ASG
 	input := &autoscaling.DescribeAutoScalingGroupsInput{AutoScalingGroupNames: []*string{&asgName}}
 	asgOutput, err := svc.DescribeAutoScalingGroups(input)
@@ -35,9 +36,12 @@ func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role strin
 		return
 	}
 
-	creds, err := common.GetUsernameAndPassword(usernameId, passwordId)
-	if err != nil {
-		return
+	var creds protocol.ClusterCreds
+	if !useSecretManagerEndpoint {
+		creds, err = aws_common.GetUsernameAndPassword(usernameId, passwordId)
+		if err != nil {
+			return
+		}
 	}
 
 	return protocol.HostGroupInfoResponse{

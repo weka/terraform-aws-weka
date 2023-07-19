@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/lib/types"
 	"golang.org/x/sync/semaphore"
@@ -17,9 +18,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/rs/zerolog/log"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
+	"github.com/weka/go-cloud-lib/aws/connectors"
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
@@ -200,35 +200,9 @@ func UpdateClusterState(table, hashKey string, state protocol.ClusterState) (err
 	return
 }
 
-func getSecret(secretId string) (secret string, err error) {
-	svc := connectors.GetAWSSession().SecretsManager
-	input := &secretsmanager.GetSecretValueInput{
-		SecretId: aws.String(secretId),
-	}
-
-	result, err := svc.GetSecretValue(input)
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to get secret value")
-		return
-	}
-	secret = *result.SecretString
-	return
-}
-
 func GetWekaIoToken(tokenId string) (token string, err error) {
 	log.Info().Msgf("Fetching token %s", tokenId)
-	return getSecret(tokenId)
-}
-
-func GetUsernameAndPassword(usernameId, passwordId string) (clusterCreds protocol.ClusterCreds, err error) {
-	log.Info().Msgf("Fetching username %s and password %s", usernameId, passwordId)
-	clusterCreds.Username, err = getSecret(usernameId)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
-	}
-	clusterCreds.Password, err = getSecret(passwordId)
-	return
+	return aws_common.GetSecret(tokenId)
 }
 
 func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
