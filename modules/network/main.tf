@@ -118,3 +118,19 @@ resource "aws_route_table_association" "private_rt_associate" {
   route_table_id = aws_route_table.nat_route_table[0].id
   depends_on     = [aws_subnet.private_subnet, aws_route_table.nat_route_table]
 }
+
+# endpoint to secret manager
+resource "aws_vpc_endpoint" "secretmanager_endpoint" {
+  count               = var.enable_secretmanager_endpoint ? 1 : 0
+  vpc_id              = aws_vpc.vpc.id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = [aws_vpc.vpc.default_security_group_id]
+  subnet_ids          = var.private_network ? aws_subnet.private_subnet.*.id : aws_subnet.public_subnet.*.id
+  private_dns_enabled = true
+  tags                = {
+    Name        = "${var.prefix}-secretmanager-endpoint"
+    Environment = var.prefix
+  }
+  depends_on = [aws_vpc.vpc]
+}
