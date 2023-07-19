@@ -37,9 +37,9 @@ resource "aws_lambda_function" "deploy_lambda" {
       STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
       PREFIX                  = var.prefix
       CLUSTER_NAME            = var.cluster_name
-      COMPUTE_MEMORY          = var.container_number_map[var.instance_type].memory
-      NUM_COMPUTE_CONTAINERS  = var.container_number_map[var.instance_type].compute
-      NUM_FRONTEND_CONTAINERS = var.container_number_map[var.instance_type].frontend
+      COMPUTE_MEMORY          = var.add_frontend_container ? var.container_number_map[var.instance_type].memory[1] : var.container_number_map[var.instance_type].memory[0]
+      NUM_COMPUTE_CONTAINERS  = var.add_frontend_container ? var.container_number_map[var.instance_type].compute : var.container_number_map[var.instance_type].compute + 1
+      NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
       NUM_DRIVE_CONTAINERS    = var.container_number_map[var.instance_type].drive
       INSTALL_URL             = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}?provider=aws&region=${local.region}"
       NICS_NUM                = var.container_number_map[var.instance_type].nics
@@ -77,7 +77,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       SET_OBS                             = var.set_obs_integration
       OBS_NAME                            = var.obs_name
       OBS_TIERING_SSD_PERCENT             = var.tiering_ssd_percent
-      NUM_FRONTEND_CONTAINERS             = var.container_number_map[var.instance_type].frontend
+      NUM_FRONTEND_CONTAINERS             = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
       PROXY_URL                           = var.proxy_url
       // pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name

@@ -66,7 +66,7 @@ variable "container_number_map" {
     frontend = number
     nvme     = number
     nics     = number
-    memory   = string
+    memory   = list(string)
   }))
   description = "Maps the number of objects and memory size per machine type."
   default     = {
@@ -76,7 +76,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 2
       nics     = 4
-      memory   = "31796436575B"
+      memory   = ["32.9GB","32.64GB"]
     },
     "i3.2xlarge" = {
       compute  = 1
@@ -84,7 +84,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 1
       nics     = 4
-      memory   = "31796436575B"
+      memory   = ["30.9GB","30.7GB"]
     },
     "i3en.3xlarge" = {
       compute  = 1
@@ -92,7 +92,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 1
       nics     = 4
-      memory   = "55955545954B"
+      memory   = ["62.GB","61.7GB"]
     },
     "i3.4xlarge" = {
       compute  = 5
@@ -100,7 +100,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 2
       nics     = 8
-      memory   = "55955545954B"
+      memory   = ["74.3GB","74.1GB"]
     },
     "i3en.6xlarge" = {
       compute  = 5
@@ -108,7 +108,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 2
       nics     = 8
-      memory   = "130433516148B"
+      memory   = ["136.5GB","136.2GB"]
     },
     "i3.8xlarge" = {
       compute  = 4
@@ -116,7 +116,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 4
       nics     = 8
-      memory   = "130433516148B"
+      memory   = ["186GB","185.8GB"]
     },
     "i3en.12xlarge" = {
       compute  = 4
@@ -124,7 +124,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 4
       nics     = 8
-      memory   = "312901542392B"
+      memory   = ["310.7GB","310.4GB"]
     },
     "i3.16xlarge" = {
       compute  = 9
@@ -132,7 +132,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 4
       nics     = 15
-      memory   = "312901542392B"
+      memory   = ["387.9GB","349.3GB"]
     },
     "i3en.24xlarge" = {
       compute  = 9
@@ -140,7 +140,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 8
       nics     = 15
-      memory   = "602459825769B"
+      memory   = ["637.1GB","573.6GB"]
     }
   }
 }
@@ -310,7 +310,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "4f8f34e14946d11415f0f083512e4dad"
+  default     = "cc45cda0ea6cd87b19cc80254b7e8d9c"
 }
 
 variable "lambdas_dist" {
