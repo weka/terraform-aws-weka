@@ -323,3 +323,15 @@ variable "lambdas_dist" {
     error_message = "Valid value is one of the following: dev, release."
   }
 }
+
+variable "sfn_iam_role" {
+  type        = string
+  default     = ""
+  description = "Step function iam role arn"
+}
+
+variable "event_iam_role" {
+  type        = string
+  default     = ""
+  description = "Event iam role arn"
+}

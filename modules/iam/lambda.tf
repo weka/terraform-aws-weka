@@ -30,6 +30,11 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       }, {
         Effect = "Allow"
         Action = [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface",
+          "ec2:ModifyInstanceAttribute",
+          "ec2:TerminateInstances",
           "ec2:DescribeInstances",
         ]
         Resource = ["*"]
@@ -48,6 +53,15 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "secretsmanager:GetSecretValue"
         ]
         Resource = ["arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"]
+      },
+      {
+        "Action" : [
+          "autoscaling:DetachInstances",
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:SetInstanceProtection"
+        ],
+        "Effect" : "Allow",
+        "Resource" : ["*"]
       }
     ]
   })
