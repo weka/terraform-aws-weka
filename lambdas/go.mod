@@ -4,10 +4,10 @@ go 1.20
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go v1.44.295
+	github.com/aws/aws-sdk-go v1.44.302
 	github.com/lithammer/dedent v1.1.0
 	github.com/rs/zerolog v1.29.1
-	github.com/weka/go-cloud-lib v0.0.0-20230717182757-aff38a022f50
+	github.com/weka/go-cloud-lib v0.0.0-20230719172911-6a3e349ea97d
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
 )
 

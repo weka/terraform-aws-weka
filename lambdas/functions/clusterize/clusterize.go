@@ -2,6 +2,7 @@ package clusterize
 
 import (
 	"fmt"
+	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"os"
 
 	"github.com/lithammer/dedent"
@@ -46,7 +47,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 		return
 	}
 
-	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
+	creds, err := aws_common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
 	if err != nil {
 		log.Error().Msgf("%s", err)
 		clusterizeScript = cloudCommon.GetErrorScript(err)

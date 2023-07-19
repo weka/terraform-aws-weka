@@ -178,12 +178,17 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 }
 
 func fetchHandler() (protocol.HostGroupInfoResponse, error) {
+	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
+	if err != nil {
+		return protocol.HostGroupInfoResponse{}, err
+	}
 	result, err := lambdas.GetFetchDataParams(
 		os.Getenv("CLUSTER_NAME"),
 		os.Getenv("ASG_NAME"),
 		os.Getenv("USERNAME_ID"),
 		os.Getenv("PASSWORD_ID"),
 		os.Getenv("ROLE"),
+		useSecretManagerEndpoint,
 	)
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err

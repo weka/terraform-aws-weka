@@ -37,9 +37,3 @@ variable "assign_public_ip" {
   default     = true
   description = "Determines whether to assign public ip."
 }
-
-variable "enable_secretmanager_endpoint" {
-  type        = bool
-  default     = true
-  description = "Enable secret manager endpoint on vpc"
-}
