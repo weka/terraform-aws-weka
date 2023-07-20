@@ -308,18 +308,18 @@ variable "dynamodb_hash_key_name" {
 }
 
 variable "lambdas_version" {
-  type = string
+  type        = string
   description = "Lambdas code version (hash)"
-  default = "ace08e3490f4d3ef7fdb2acc7db86c90"
+  default     = "ace08e3490f4d3ef7fdb2acc7db86c90"
 }
 
 variable "lambdas_dist" {
-  type = string
+  type        = string
   description = "Lambdas code dist"
-  default = "dev"
+  default     = "dev"
 
   validation {
-    condition = contains(["dev", "release"], var.lambdas_dist)
+    condition     = contains(["dev", "release"], var.lambdas_dist)
     error_message = "Valid value is one of the following: dev, release."
   }
 }
@@ -346,4 +346,10 @@ variable "create_secretmanager_endpoint" {
   type        = bool
   default     = true
   description = "Enable secret manager endpoint on vpc"
+}
+
+variable "secretmanager_endpoint_sg_ids" {
+  type        = list(string)
+  default     = []
+  description = "Secret manager endpoint security groups ids"
 }
