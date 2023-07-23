@@ -121,6 +121,6 @@ func GetDeployScript(
 }
 
 func GetDeviceName(ebsVolumeId string) string {
-	template := "$(ls /dev/xvdw || lsblk --output NAME,SERIAL --path --list --noheadings | grep %s | cut --delimiter ' ' --field 1)"
+	template := "$(ls /dev/xvdp || lsblk --output NAME,SERIAL --path --list --noheadings | grep %s | cut --delimiter ' ' --field 1)"
 	return fmt.Sprintf(dedent.Dedent(template), strings.Replace(ebsVolumeId, "-", "", -1))
 }
