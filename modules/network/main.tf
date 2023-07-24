@@ -1,7 +1,15 @@
 data aws_region current {}
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 locals {
-  region = data.aws_region.current.name
+  region                  = data.aws_region.current.name
+  public_subnets          = var.additional_subnet && ! var.private_network ? concat(var.public_subnets_cidr,[var.additional_subnet_cidr]) : var.public_subnets_cidr
+  private_subnets         = var.additional_subnet && var.private_network ? concat(var.private_subnets_cidr,[var.additional_subnet_cidr]) : var.private_subnets_cidr
+  availability_zones      = [ for z in var.availability_zones: "${local.region}${z}" ]
+  availability_zones_list = var.additional_subnet ? distinct(flatten([local.availability_zones,data.aws_availability_zones.available[*].names])) : local.availability_zones
 }
 
 # VPC
@@ -75,16 +83,16 @@ resource "aws_route_table" "nat_route_table" {
 
 # Public subnet
 resource "aws_subnet" "public_subnet" {
-  count                   = length(var.public_subnets_cidr)
+  count                   = length(local.public_subnets)
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.public_subnets_cidr[count.index]
-  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
+  cidr_block              = local.public_subnets[count.index]
+  availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = true
 
   tags = {
     Name        = "${var.prefix}-public-subnet-${count.index}"
     Environment = var.prefix
-    Zone        = var.availability_zones[count.index]
+    Zone        = local.availability_zones_list[count.index]
   }
 }
 
@@ -98,16 +106,16 @@ resource "aws_route_table_association" "public_rt_associate" {
 
 # Private subnet
 resource "aws_subnet" "private_subnet" {
-  count                   = var.private_network ? length(var.private_subnets_cidr) : 0
+  count                   = var.private_network ? length(local.private_subnets) : 0
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.private_subnets_cidr[count.index]
-  availability_zone       = "${local.region}${var.availability_zones[count.index]}"
+  cidr_block              = local.private_subnets[count.index]
+  availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = false
 
   tags = {
     Name        = "${var.prefix}-private-subnet-${count.index}"
     Environment = var.prefix
-    Zone        = var.availability_zones[count.index]
+    Zone        = local.availability_zones_list[count.index]
   }
 }
 
