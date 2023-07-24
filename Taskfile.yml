@@ -4,6 +4,8 @@ env:
   DIST: '{{.DIST | default "dev"}}'
   FUNCTION_CODE_PATH: '{{.TASKFILE_DIR}}/lambdas'
   FUNCTION_ZIP_DIR: '{{.TASKFILE_DIR}}/.tf-zip-dist'
+  # uncomment the following line if you want to use default or different AWS profile
+  # AWS_PROFILE: '{{.AWS_PROFILE | default "cloud-infra"}}'
 
 tasks:
   get_lambdas_hash:
@@ -19,7 +21,6 @@ tasks:
   upload_zip:
     env:
       REGIONS_FILE_DIR: '{{.TASKFILE_DIR}}/supported_regions' # File containing list of supported Azure regions
-      AWS_PROFILE: cloud-infra
     deps: [create_lambdas_zip]
     cmds:
       - ./lambdas_distribution/upload_to_regions.sh ${REGIONS_FILE_DIR} ${DIST} {{OS}} ${FUNCTION_CODE_PATH} ${FUNCTION_ZIP_DIR}
