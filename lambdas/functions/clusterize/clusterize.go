@@ -3,6 +3,7 @@ package clusterize
 import (
 	"fmt"
 	"github.com/weka/go-cloud-lib/aws/aws_common"
+	"github.com/weka/go-cloud-lib/lib/strings"
 	"os"
 
 	"github.com/lithammer/dedent"
@@ -57,7 +58,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 
 	funcDef := aws_functions_def.NewFuncDef()
 
-	ips, err := common.GetBackendsPrivateIps(p.Cluster.ClusterName)
+	ips, err := common.GetBackendsPrivateIPsFromInstanceIds(strings.ListToRefList(instancesNames))
 
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames

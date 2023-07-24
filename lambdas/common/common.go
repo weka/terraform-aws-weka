@@ -342,6 +342,19 @@ func GetInstances(instanceIds []*string) (instances []*ec2.Instance, err error) 
 	return
 }
 
+func GetBackendsPrivateIPsFromInstanceIds(instanceIds []*string) (privateIps []string, err error) {
+	instances, err := GetInstances(instanceIds)
+	if err != nil {
+		return
+	}
+	for _, i := range instances {
+		if i.InstanceId != nil && i.PrivateIpAddress != nil {
+			privateIps = append(privateIps, *i.PrivateIpAddress)
+		}
+	}
+	return
+}
+
 func Min(a, b int) int {
 	if a < b {
 		return a
