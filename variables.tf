@@ -84,7 +84,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 1
       nics     = 4
-      memory   = "31796436575B"
+      memory   = ["30.9GB","30.7GB"]
     },
     "i3en.3xlarge" = {
       compute  = 1
@@ -354,16 +354,26 @@ variable "secretmanager_endpoint_sg_ids" {
   description = "Secret manager endpoint security groups ids"
 }
 
-
 variable "create_alb" {
   type        = bool
   default     = true
   description = "Create ALB"
 }
 
-
 variable "additional_alb_subnet" {
   type        = string
   default     = ""
   description = "Additional subnet for ALB"
+}
+
+variable "alb_alias_name" {
+  type        = string
+  default     = ""
+  description = "Set ALB alias name"
+}
+
+variable "route53_zone_id" {
+  type        = string
+  default     = ""
+  description = "Route53 zone id"
 }

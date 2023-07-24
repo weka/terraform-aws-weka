@@ -55,3 +55,16 @@ resource "aws_autoscaling_attachment" "alb_autoscaling_attachment" {
   lb_target_group_arn    = aws_lb_target_group.alb_target_group[0].arn
   depends_on             = [aws_autoscaling_group.autoscaling_group]
 }
+
+resource "aws_route53_record" "lb_record" {
+  count      = var.alb_alias_name != "" ? 1 : 0
+  name       = var.alb_alias_name
+  type       = "A"
+  alias {
+    evaluate_target_health = false
+    name                   = aws_lb.alb[0].dns_name
+    zone_id                = aws_lb.alb[0].zone_id
+  }
+  zone_id    = var.route53_zone_id
+  depends_on = [aws_lb.alb]
+}

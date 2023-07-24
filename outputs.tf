@@ -30,6 +30,10 @@ output "alb_dns_name" {
   value = var.create_alb ? aws_lb.alb[0].dns_name : null
 }
 
+output "alb_alias_record" {
+  value = var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : null
+}
+
 output "helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[]| select( .Tags[].Value == "${var.cluster_name}").Instances[].InstanceId') | jq -r '.Reservations[].Instances[].${local.ips_type}'
