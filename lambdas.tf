@@ -9,6 +9,7 @@ locals {
     "transient"
   ])
   function_name = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+  lambdas_hash  = md5(join("", [for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")]))
 }
 
 resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
@@ -48,6 +49,13 @@ resource "aws_lambda_function" "deploy_lambda" {
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+
+  lifecycle {
+    precondition {
+      condition     = var.lambdas_version == local.lambdas_hash
+      error_message = "Please update lambdas version."
+    }
+  }
 }
 
 resource "aws_lambda_function" "clusterize_lambda" {
