@@ -26,6 +26,10 @@ output "weka_cluster_password_secret_id" {
   value = aws_secretsmanager_secret.weka_password.id
 }
 
+output "alb_dns_name" {
+  value = var.create_alb ? aws_lb.alb[0].dns_name : null
+}
+
 output "helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[]| select( .Tags[].Value == "${var.cluster_name}").Instances[].InstanceId') | jq -r '.Reservations[].Instances[].${local.ips_type}'

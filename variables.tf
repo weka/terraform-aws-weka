@@ -353,3 +353,17 @@ variable "secretmanager_endpoint_sg_ids" {
   default     = []
   description = "Secret manager endpoint security groups ids"
 }
+
+
+variable "create_alb" {
+  type        = bool
+  default     = true
+  description = "Create ALB"
+}
+
+
+variable "additional_alb_subnet" {
+  type        = string
+  default     = ""
+  description = "Additional subnet for ALB"
+}

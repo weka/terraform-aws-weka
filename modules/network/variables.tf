@@ -9,6 +9,12 @@ variable "public_subnets_cidr" {
   default     = ["10.0.1.0/24"]
 }
 
+variable "additional_subnet_cidr" {
+  type        = string
+  description = "Additional CIDR block for public subnet"
+  default     = "10.0.3.0/24"
+}
+
 variable "private_subnets_cidr" {
   type        = list(string)
   description = "CIDR block for private subnet"
@@ -36,4 +42,10 @@ variable "assign_public_ip" {
   type        = bool
   default     = true
   description = "Determines whether to assign public ip."
+}
+
+variable "additional_subnet" {
+  type        = bool
+  default     = true
+  description = "Add additional subnet"
 }
