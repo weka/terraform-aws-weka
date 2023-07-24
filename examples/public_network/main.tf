@@ -15,6 +15,6 @@ module "deploy-weka" {
   get_weka_io_token  = var.get_weka_io_token
 }
 
-output "helpers_commands" {
-  value = module.deploy-weka.cluster_helpers_commands
+output "outputs" {
+  value = module.deploy-weka
 }
