@@ -84,7 +84,7 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 1
       nics     = 4
-      memory   = ["30.9GB","30.7GB"]
+      memory   = "31796436575B"
     },
     "i3en.3xlarge" = {
       compute  = 1
