@@ -3,14 +3,15 @@ package common
 import (
 	"context"
 	"fmt"
+	"os"
+	"sync"
+	"time"
+
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/lib/types"
 	"golang.org/x/sync/semaphore"
-	"os"
-	"sync"
-	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -163,12 +164,13 @@ func GetClusterState(table, hashKey string) (state protocol.ClusterState, err er
 	}
 
 	state, err = GetClusterStateWithoutLock(table, hashKey)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return state, err
+
+	unlockErr := UnlockState(table, hashKey)
+	if unlockErr != nil {
+		// expand existing error
+		err = fmt.Errorf("%v; %v", err, unlockErr)
 	}
 
-	err = UnlockState(table, hashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return state, err
@@ -279,6 +281,22 @@ func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 		return
 	}
 
+	instancesNames, err = addInstanceToStateInstances(table, hashKey, newInstance)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	unlockErr := UnlockState(table, hashKey)
+	if unlockErr != nil {
+		// expand existing error
+		err = fmt.Errorf("%v; %v", err, unlockErr)
+	}
+	return
+}
+
+// NOTE: Modifies state in dynamodb
+// This function should be called only using Lock and Unlock state functions surrounding it
+func addInstanceToStateInstances(table, hashKey, newInstance string) (instancesNames []string, err error) {
 	state, err := GetClusterStateWithoutLock(table, hashKey)
 	if err != nil {
 		log.Error().Err(err).Send()
@@ -296,11 +314,6 @@ func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 	err = UpdateClusterState(table, hashKey, state)
 	if err == nil {
 		instancesNames = state.Instances
-	}
-
-	err = UnlockState(table, hashKey)
-	if err != nil {
-		log.Error().Err(err).Send()
 	}
 	return
 }
