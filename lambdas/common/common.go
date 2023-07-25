@@ -303,6 +303,12 @@ func addInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 		return
 	}
 
+	if state.Clusterized {
+		err = fmt.Errorf("cluster is ready, not adding instance %s to state instances list (this extra instance was created before the end of clusterization)", newInstance)
+		log.Error().Err(err).Send()
+		return
+	}
+
 	if len(state.Instances) == state.InitialSize {
 		//This might happen if someone increases the desired number before the clusterization id done
 		err = fmt.Errorf("number of instances is already the initial size, not adding instance %s to state instances list", newInstance)
