@@ -256,3 +256,36 @@ resource "aws_lambda_function" "terminate_lambda" {
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
+
+resource "null_resource" "remove_vpc_config_from_scale_down_lambda" {
+  triggers = {
+    scale_down_lambda = aws_lambda_function.scale_down_lambda.function_name
+    region            = local.region
+    vpc_id            = local.vpc_id
+    sg_id             = join(",", local.sg_ids)
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      detached_lambda_eni () {
+        aws lambda update-function-configuration --region ${self.triggers.region} --function-name ${self.triggers.scale_down_lambda} --vpc-config SubnetIds=[],SecurityGroupIds=[]
+
+        SG=$(aws ec2 describe-security-groups --filters Name=description,Values='default VPC security group' Name=vpc-id,Values=${self.triggers.vpc_id} --query 'SecurityGroups[0].GroupId')
+        ENIS=$(aws ec2 describe-network-interfaces --filters "Name=group-id,Values=${self.triggers.sg_id}" "Name=status,Values=available" --query 'NetworkInterfaces[*].NetworkInterfaceId')
+
+        enis=$(echo $ENIS | jq -c -r '.[]' | tr '\n' ' ')
+        SG=$(echo $SG | jq -r)
+
+        # change security group to default
+        for item in $enis; do
+          aws ec2 modify-network-interface-attribute --network-interface-id $item --groups $SG
+        done
+
+        echo detached $enis from $SG
+      }
+       detached_lambda_eni || true
+EOT
+    when    = destroy
+  }
+  depends_on = [aws_lambda_function.scale_down_lambda]
+}
