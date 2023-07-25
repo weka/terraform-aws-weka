@@ -2,9 +2,11 @@ package clusterize
 
 import (
 	"fmt"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
-	"github.com/weka/go-cloud-lib/lib/strings"
 	"os"
+
+	"github.com/weka/go-cloud-lib/aws/aws_common"
+	"github.com/weka/go-cloud-lib/functions_def"
+	"github.com/weka/go-cloud-lib/lib/strings"
 
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
@@ -26,14 +28,20 @@ type ClusterizationParams struct {
 }
 
 func Clusterize(p ClusterizationParams) (clusterizeScript string) {
+	funcDef := aws_functions_def.NewFuncDef()
+	reportFunction := funcDef.GetFunctionCmdDefinition(functions_def.Report)
+
+	clusterizeScript, err := doClusterize(p, funcDef)
+	if err != nil {
+		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction)
+	}
+	return
+}
+
+func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
 	instancesNames, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.VmName)
 	if err != nil {
-		clusterizeScript = cloudCommon.GetErrorScript(err)
-		return
-	}
-
-	if err != nil {
-		clusterizeScript = cloudCommon.GetErrorScript(err)
+		log.Error().Err(err).Send()
 		return
 	}
 
@@ -41,24 +49,22 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	msg := fmt.Sprintf("This (%s) is instance %d/%d that is ready for clusterization", p.VmName, len(instancesNames), initialSize)
 	log.Info().Msgf(msg)
 	if len(instancesNames) != initialSize {
-		clusterizeScript = dedent.Dedent(fmt.Sprintf(`
-		#!/bin/bash
-		echo "%s"
-		`, msg))
+		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report))
 		return
 	}
 
 	creds, err := aws_common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
 	if err != nil {
-		log.Error().Msgf("%s", err)
-		clusterizeScript = cloudCommon.GetErrorScript(err)
+		log.Error().Err(err).Send()
 		return
 	}
 	log.Info().Msgf("Fetched weka cluster creds successfully")
 
-	funcDef := aws_functions_def.NewFuncDef()
-
 	ips, err := common.GetBackendsPrivateIPsFromInstanceIds(strings.ListToRefList(instancesNames))
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
 
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames

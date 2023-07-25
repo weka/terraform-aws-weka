@@ -1,6 +1,8 @@
 package report
 
 import (
+	"fmt"
+
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	"github.com/weka/go-cloud-lib/protocol"
@@ -25,14 +27,16 @@ func Report(report protocol.Report, stateTable, hashKey string) (err error) {
 		return
 	}
 	err = common.UpdateClusterState(stateTable, hashKey, state)
+
+	unlockErr := common.UnlockState(stateTable, hashKey)
+	if unlockErr != nil {
+		// expand existing error
+		err = fmt.Errorf("%v; %v", err, unlockErr)
+	}
+
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
-	}
-
-	err = common.UnlockState(stateTable, hashKey)
-	if err != nil {
-		log.Error().Err(err).Send()
 	}
 	return
 }
