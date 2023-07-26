@@ -304,7 +304,7 @@ func addInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 	}
 
 	if state.Clusterized {
-		err = fmt.Errorf("cluster is ready, not adding instance %s to state instances list (this extra instance was created before the end of clusterization)", newInstance)
+		err = fmt.Errorf("not adding instance %s to state instances list (this extra instance was created before the end of clusterization)", newInstance)
 		log.Error().Err(err).Send()
 		return
 	}

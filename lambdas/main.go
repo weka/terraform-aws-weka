@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
-	"github.com/weka/go-cloud-lib/scale_down"
 	"os"
 	"strconv"
 	"strings"
+
+	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
+	"github.com/weka/go-cloud-lib/scale_down"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
