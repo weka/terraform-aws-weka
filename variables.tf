@@ -165,7 +165,7 @@ variable "cluster_name" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.0.142"
+  default     = "4.2.1"
 }
 
 variable "get_weka_io_token" {
@@ -376,4 +376,52 @@ variable "route53_zone_id" {
   type        = string
   default     = ""
   description = "Route53 zone id"
+}
+
+variable "clients_number" {
+  type        = number
+  description = "The number of client instances to deploy"
+  default     = 0
+}
+
+variable "client_instance_type" {
+  type        = string
+  description = "The client instance type (sku) to deploy"
+  default     = "i3en.large"
+}
+
+variable "client_instance_iam_profile_arn" {
+  type        = string
+  description = "The client instance IAM profile ARN"
+  default     = ""
+}
+
+variable "client_instance_ami_id" {
+  type        = string
+  description = "The client instance AMI ID"
+  default     = null
+}
+
+variable "client_nics_num" {
+  type        = string
+  description = "The client NICs number"
+  default     = 2
+}
+
+variable "mount_clients_dpdk" {
+  type        = bool
+  default     = true
+  description = "Mount weka clients in DPDK mode"
+}
+
+variable "client_placement_group_name" {
+  type        = string
+  description = "The client instances placement group name"
+  default     = ""
+}
+
+variable "client_root_volume_size" {
+  type        = number
+  description = "The client root volume size in GB"
+  default     = 50
 }

@@ -41,3 +41,9 @@ aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_n
 aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka_password.id} --query SecretString --output text
 EOT
 }
+
+output "client-ips" {
+  value = var.clients_number == 0 ? null : <<EOT
+aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${module.clients[0].clients_name}'].Value, '${module.clients[0].clients_name}')].Instances[].InstanceId" --output text) | jq -r '.Reservations[].Instances[].${local.ips_type}'
+EOT
+}

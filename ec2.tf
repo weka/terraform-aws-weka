@@ -115,12 +115,12 @@ resource "aws_launch_template" "launch_template" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags          = {
+      tags          = merge(var.tags_map, {
         Name                = "${var.prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
         user                = data.aws_caller_identity.current.user_id
-      }
+      })
     }
   }
   user_data  = base64encode(local.user_data)
