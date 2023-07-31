@@ -5,13 +5,13 @@ locals {
 }
 
 module "network" {
-  count                 = length(var.subnet_ids) == 0 ? 1 : 0
-  source                = "./modules/network"
-  prefix                = var.prefix
-  availability_zones    = var.availability_zones
-  private_network       = var.private_network
-  assign_public_ip      = var.assign_public_ip
-  additional_subnet     = var.create_alb
+  count              = length(var.subnet_ids) == 0 ? 1 : 0
+  source             = "./modules/network"
+  prefix             = var.prefix
+  availability_zones = var.availability_zones
+  private_network    = var.private_network
+  assign_public_ip   = var.assign_public_ip
+  additional_subnet  = var.create_alb
 }
 
 module "security_group" {
@@ -24,13 +24,14 @@ module "security_group" {
 }
 
 module "iam" {
-  count            = var.instance_iam_profile_arn == "" ? 1 : 0
-  source           = "./modules/iam"
-  prefix           = var.prefix
-  cluster_name     = var.cluster_name
-  state_table_name = local.dynamodb_table_name
-  obs_name         = var.obs_name
-  secret_prefix    = local.secret_prefix
+  count               = var.instance_iam_profile_arn == "" ? 1 : 0
+  source              = "./modules/iam"
+  prefix              = var.prefix
+  cluster_name        = var.cluster_name
+  state_table_name    = local.dynamodb_table_name
+  obs_name            = var.obs_name
+  secret_prefix       = local.secret_prefix
+  set_obs_integration = var.set_obs_integration
 }
 
 locals {

@@ -2,18 +2,19 @@ package clusterize
 
 import (
 	"fmt"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
 	"os"
-
-	"github.com/weka/go-cloud-lib/aws/aws_common"
-	"github.com/weka/go-cloud-lib/functions_def"
-	"github.com/weka/go-cloud-lib/lib/strings"
+	"strings"
 
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
+	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
+	"github.com/weka/go-cloud-lib/functions_def"
+	cloudStrings "github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
@@ -53,6 +54,27 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		return
 	}
 
+	if p.Cluster.SetObs {
+		if p.Obs.Name == "" {
+			p.Obs.Name = strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-")
+			err = common.CreateBucket(p.Obs.Name)
+			if err != nil {
+				log.Error().Err(err).Send()
+				err = report.Report(
+					protocol.Report{
+						Type:     "error",
+						Hostname: p.VmName,
+						Message:  fmt.Sprintf("Failed creating obs bucket %s: %s", p.Obs.Name, err),
+					}, p.StateTable, p.StateTableHashKey)
+				if err != nil {
+					log.Error().Err(err).Send()
+				}
+			}
+		} else {
+			log.Info().Msgf("Using existing obs bucket %s", p.Obs.Name)
+		}
+	}
+
 	creds, err := aws_common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
 	if err != nil {
 		log.Error().Err(err).Send()
@@ -60,7 +82,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	}
 	log.Info().Msgf("Fetched weka cluster creds successfully")
 
-	ips, err := common.GetBackendsPrivateIPsFromInstanceIds(strings.ListToRefList(instancesNames))
+	ips, err := common.GetBackendsPrivateIPsFromInstanceIds(cloudStrings.ListToRefList(instancesNames))
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
