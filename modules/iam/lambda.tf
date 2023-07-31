@@ -71,3 +71,27 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   policy_arn = aws_iam_policy.lambda_iam_policy.arn
   role       = aws_iam_role.lambda_iam_role.name
 }
+
+resource "aws_iam_policy" "lambda_obs_iam_policy" {
+  count  = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  name   = "${var.prefix}-${var.cluster_name}-lambda-obs-policy"
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:CreateBucket",
+        ]
+        Resource = ["arn:aws:s3:::${var.prefix}-${var.cluster_name}-obs"]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {
+  count  = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  policy_arn = aws_iam_policy.lambda_obs_iam_policy[0].arn
+  roles      = [aws_iam_role.lambda_iam_role.name]
+}

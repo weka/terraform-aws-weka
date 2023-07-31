@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
 	"sync"
 	"time"
@@ -454,4 +455,12 @@ func GetASGInstances(asgName string) ([]*autoscaling.Instance, error) {
 		return []*autoscaling.Instance{}, err
 	}
 	return asgOutput.AutoScalingGroups[0].Instances, nil
+}
+
+func CreateBucket(bucketName string) (err error) {
+	svc := connectors.GetAWSSession().S3
+	_, err = svc.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(bucketName),
+	})
+	return
 }
