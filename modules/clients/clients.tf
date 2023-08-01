@@ -119,29 +119,12 @@ resource "aws_launch_template" "this" {
   depends_on = [aws_placement_group.this]
 }
 
-resource "aws_autoscaling_group" "this" {
-  name                = "${var.clients_name}-autoscaling-group"
-  desired_capacity    = var.clients_number
-  max_size            = var.clients_number
-  min_size            = var.clients_number
-  vpc_zone_identifier = [var.subnet_id]
-  placement_group     = var.placement_group_name == null ? aws_placement_group.this[0].id : var.placement_group_name
-  suspended_processes = ["ReplaceUnhealthy"]
-
+resource "aws_instance" "this" {
+  count                         = var.clients_number
   launch_template {
     id      = aws_launch_template.this.id
     version = aws_launch_template.this.latest_version
   }
 
-  tag {
-    key                 = "${var.clients_name}-asg"
-    propagate_at_launch = true
-    value               = var.clients_name
-  }
-
-  lifecycle {
-    ignore_changes = [desired_capacity, min_size, max_size]
-  }
-
-  depends_on = [aws_launch_template.this, aws_placement_group.this]
+  depends_on = [aws_placement_group.this]
 }
