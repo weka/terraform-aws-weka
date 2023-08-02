@@ -54,13 +54,14 @@ resource "aws_placement_group" "this" {
 }
 
 resource "aws_launch_template" "this" {
-  name_prefix                          = var.clients_name
+  name                                 = "${var.clients_name}-launch-template"
   disable_api_termination              = false
   ebs_optimized                        = true
   image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.selected[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.key_pair_name
+  update_default_version               = true
 
   block_device_mappings {
     device_name = "/dev/xvda" # root device
@@ -122,8 +123,11 @@ resource "aws_launch_template" "this" {
 resource "aws_instance" "this" {
   count = var.clients_number
   launch_template {
-    id      = aws_launch_template.this.id
-    version = aws_launch_template.this.latest_version
+    id = aws_launch_template.this.id
+  }
+
+  lifecycle {
+    ignore_changes = [tags]
   }
 
   depends_on = [aws_placement_group.this]
