@@ -3,7 +3,6 @@ package deploy
 import (
 	"context"
 	"fmt"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"strings"
 
 	"github.com/lithammer/dedent"
@@ -78,7 +77,7 @@ func GetDeployScript(
 		}
 		bashScript = deployScriptGenerator.GetDeployScript()
 	} else {
-		creds, err2 := aws_common.GetUsernameAndPassword(usernameId, passwordId)
+		creds, err2 := common.GetUsernameAndPassword(usernameId, passwordId)
 		if err2 != nil {
 			log.Error().Msgf("Error while getting weka creds: %v", err2)
 			return "", err2

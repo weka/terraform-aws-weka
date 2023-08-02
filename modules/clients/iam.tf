@@ -40,7 +40,7 @@ resource "aws_iam_policy" "logging" {
           "logs:PutRetentionPolicy"
         ]
         Resource = [
-          "arn:aws:logs:*:*:log-group:/wekaio/${var.clients_name}*"
+          "arn:aws:logs:*:*:log-group:/wekaio/clients/${var.clients_name}*"
         ]
       }
     ]

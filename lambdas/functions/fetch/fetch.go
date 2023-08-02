@@ -4,8 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
-	"github.com/weka/go-cloud-lib/aws/connectors"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
@@ -38,7 +37,7 @@ func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role strin
 
 	var creds protocol.ClusterCreds
 	if !useSecretManagerEndpoint {
-		creds, err = aws_common.GetUsernameAndPassword(usernameId, passwordId)
+		creds, err = common.GetUsernameAndPassword(usernameId, passwordId)
 		if err != nil {
 			return
 		}

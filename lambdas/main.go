@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
 	"github.com/weka/go-cloud-lib/scale_down"
@@ -205,6 +206,20 @@ func transientHandler(terminateResponse protocol.TerminatedInstancesResponse) er
 	return nil
 }
 
+func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) (protocol.ScaleResponse, error) {
+	if info.Password == "" {
+		usernameId := os.Getenv("USERNAME_ID")
+		passwordId := os.Getenv("PASSWORD_ID")
+		creds, err := common.GetUsernameAndPassword(usernameId, passwordId)
+		if err != nil {
+			return protocol.ScaleResponse{}, err
+		}
+		info.Username = creds.Username
+		info.Password = creds.Password
+	}
+	return scale_down.ScaleDown(ctx, info)
+}
+
 func main() {
 	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
 	case "deploy":
@@ -220,7 +235,7 @@ func main() {
 	case "fetch":
 		lambda.Start(fetchHandler)
 	case "scaleDown":
-		lambda.Start(scale_down.ScaleDown)
+		lambda.Start(scaleDownHandler)
 	case "terminate":
 		lambda.Start(terminate.Handler)
 	case "transient":
