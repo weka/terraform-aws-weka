@@ -2,17 +2,18 @@ package terminate
 
 import (
 	"errors"
+	"os"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	"github.com/weka/go-cloud-lib/aws/connectors"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/lib/types"
 	"github.com/weka/go-cloud-lib/protocol"
-	"os"
-	"time"
 )
 
 type instancesMap map[string]*ec2.Instance
