@@ -8,7 +8,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
   name = "${var.prefix}-${var.cluster_name}-eni-policy"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -26,10 +26,10 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
 }
 
 resource "aws_iam_policy" "backend_obs_iam_policy" {
-  count  = var.set_obs_integration ? 1 : 0
-  name   = "${var.prefix}-${var.cluster_name}-obs-policy"
+  count = var.set_obs_integration ? 1 : 0
+  name  = "${var.prefix}-${var.cluster_name}-obs-policy"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -46,9 +46,9 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
 }
 
 resource "aws_iam_policy" "invoke_lambda_function" {
-  name   = "${var.prefix}-${var.cluster_name}-invoke-lambda-function"
+  name = "${var.prefix}-${var.cluster_name}-invoke-lambda-function"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -68,7 +68,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
   name = "${var.prefix}-${var.cluster_name}-send-log-to-cloud-watch-policy"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -92,10 +92,10 @@ resource "aws_iam_role" "iam_role" {
   name = "${var.prefix}-${var.cluster_name}-iam-role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
+        Effect = "Allow"
         Principal = {
           Service = "ec2.amazonaws.com"
         }

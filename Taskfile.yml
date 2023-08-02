@@ -12,7 +12,7 @@ tasks:
     cmds:
       - ./lambdas_distribution/get_lambdas_hash.sh {{OS}} ${FUNCTION_CODE_PATH}
     silent: true
-  
+
   create_lambdas_zip:
     cmds:
       - ./lambdas_distribution/create_lambdas_zip.sh {{OS}} ${FUNCTION_CODE_PATH} ${FUNCTION_ZIP_DIR}

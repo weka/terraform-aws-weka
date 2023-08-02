@@ -26,6 +26,6 @@ variable "state_table_name" {
 }
 
 variable "secret_prefix" {
-    type        = string
-    description = "Secrets prefix"
+  type        = string
+  description = "Secrets prefix"
 }

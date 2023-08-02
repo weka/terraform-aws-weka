@@ -1,4 +1,4 @@
-data aws_region current {}
+data "aws_region" "current" {}
 
 data "aws_availability_zones" "available" {
   state = "available"
@@ -6,10 +6,10 @@ data "aws_availability_zones" "available" {
 
 locals {
   region                  = data.aws_region.current.name
-  public_subnets          = var.additional_subnet && ! var.private_network ? concat(var.public_subnets_cidr,[var.additional_subnet_cidr]) : var.public_subnets_cidr
-  private_subnets         = var.additional_subnet && var.private_network ? concat(var.private_subnets_cidr,[var.additional_subnet_cidr]) : var.private_subnets_cidr
-  availability_zones      = [ for z in var.availability_zones: "${local.region}${z}" ]
-  availability_zones_list = var.additional_subnet ? distinct(flatten([local.availability_zones,data.aws_availability_zones.available[*].names])) : local.availability_zones
+  public_subnets          = var.additional_subnet && !var.private_network ? concat(var.public_subnets_cidr, [var.additional_subnet_cidr]) : var.public_subnets_cidr
+  private_subnets         = var.additional_subnet && var.private_network ? concat(var.private_subnets_cidr, [var.additional_subnet_cidr]) : var.private_subnets_cidr
+  availability_zones      = [for z in var.availability_zones : "${local.region}${z}"]
+  availability_zones_list = var.additional_subnet ? distinct(flatten([local.availability_zones, data.aws_availability_zones.available[*].names])) : local.availability_zones
 }
 
 # VPC
@@ -28,7 +28,7 @@ resource "aws_vpc" "vpc" {
 # Internet Gateway (required for Public Subnet and NAT)
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.vpc.id
-  tags   = {
+  tags = {
     Name        = "${var.prefix}-igw"
     Environment = var.prefix
   }
@@ -57,9 +57,9 @@ resource "aws_route_table" "ig_route_table" {
 
 # NAT
 resource "aws_nat_gateway" "nat" {
-  count             = var.private_network ? 1 : 0
-  subnet_id         = element(aws_subnet.public_subnet.*.id, 0)
-  allocation_id     = aws_eip.nat_eip[0].id
+  count         = var.private_network ? 1 : 0
+  subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
+  allocation_id = aws_eip.nat_eip[0].id
   tags = {
     Name        = "${var.prefix}-private-nat"
     Environment = var.prefix

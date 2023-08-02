@@ -16,7 +16,7 @@ function_app_code_hash="$($current_script_dir/get_lambdas_hash.sh ${os_name} ${f
 local_zip_file="$function_zip_dir/${function_app_code_hash}.zip"
 object_name="${DIST}/${function_app_code_hash}.zip"
 
-while read region; do 
+while read region; do
     echo "Uploading to region: $region"
     bucket_name="weka-tf-aws-releases-${region}"
     ./lambdas_distribution/upload_to_bucket.sh "$local_zip_file" "$bucket_name" "$object_name"

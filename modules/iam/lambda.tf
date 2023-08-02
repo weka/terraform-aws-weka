@@ -1,11 +1,11 @@
 resource "aws_iam_role" "lambda_iam_role" {
-  name               = "${var.prefix}-${var.cluster_name}-lambda-role"
+  name = "${var.prefix}-${var.cluster_name}-lambda-role"
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         Principal = {
           Service = "lambda.amazonaws.com"
         }
@@ -15,9 +15,9 @@ resource "aws_iam_role" "lambda_iam_role" {
 }
 
 resource "aws_iam_policy" "lambda_iam_policy" {
-  name   = "${var.prefix}-${var.cluster_name}-lambda-policy"
+  name = "${var.prefix}-${var.cluster_name}-lambda-policy"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -27,7 +27,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "logs:PutLogEvents"
         ]
         Resource = ["arn:aws:logs:*:*:log-group:/aws/lambda/${var.prefix}-${var.cluster_name}*:*"]
-      }, {
+        }, {
         Effect = "Allow"
         Action = [
           "ec2:CreateNetworkInterface",
@@ -73,10 +73,10 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 }
 
 resource "aws_iam_policy" "lambda_obs_iam_policy" {
-  count  = var.set_obs_integration && var.obs_name == "" ? 1 : 0
-  name   = "${var.prefix}-${var.cluster_name}-lambda-obs-policy"
+  count = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  name  = "${var.prefix}-${var.cluster_name}-lambda-obs-policy"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -90,7 +90,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
 }
 
 resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {
-  count  = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  count      = var.set_obs_integration && var.obs_name == "" ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.lambda_obs_iam_policy[0].arn
   roles      = [aws_iam_role.lambda_iam_role.name]

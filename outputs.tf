@@ -36,14 +36,14 @@ output "alb_alias_record" {
 
 output "helper_commands" {
   value = <<EOT
-aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups | jq -r '.AutoScalingGroups[]| select( .Tags[].Value == "${var.cluster_name}").Instances[].InstanceId') | jq -r '.Reservations[].Instances[].${local.ips_type}'
+aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${var.cluster_name}'].Value, '${var.cluster_name}')].Instances[].InstanceId" --output text) --query 'Reservations[].Instances[].${local.ips_type}' --output json
 aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --cli-binary-format raw-in-base64-out /dev/stdout
 aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka_password.id} --query SecretString --output text
 EOT
 }
 
-output "client-ips" {
+output "client_ips" {
   value = var.clients_number == 0 ? null : <<EOT
-aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${module.clients[0].clients_name}'].Value, '${module.clients[0].clients_name}')].Instances[].InstanceId" --output text) | jq -r '.Reservations[].Instances[].${local.ips_type}'
+echo $(aws ec2 describe-instances --filters "Name=tag-value,Values='${module.clients[0].clients_name}'" --query "Reservations[*].Instances[*].${local.ips_type}" --output text)
 EOT
 }

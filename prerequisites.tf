@@ -1,4 +1,4 @@
-data aws_region current {}
+data "aws_region" "current" {}
 
 locals {
   region = data.aws_region.current.name
@@ -10,7 +10,6 @@ module "network" {
   prefix             = var.prefix
   availability_zones = var.availability_zones
   private_network    = var.private_network
-  assign_public_ip   = var.assign_public_ip
   additional_subnet  = var.create_alb
 }
 
@@ -43,7 +42,7 @@ locals {
   lambda_iam_role_arn           = var.lambda_iam_role_arn == "" ? module.iam[0].lambda_iam_role_arn : var.lambda_iam_role_arn
   sfn_iam_role_arn              = var.sfn_iam_role == "" ? module.iam[0].sfn_iam_role_arn : var.sfn_iam_role
   event_iam_role_arn            = var.event_iam_role == "" ? module.iam[0].event_iam_role_arn : var.event_iam_role
-  secretmanager_endpoint_sg_ids = length(var.secretmanager_endpoint_sg_ids) >1 ? var.secretmanager_endpoint_sg_ids : local.sg_ids
+  secretmanager_endpoint_sg_ids = length(var.secretmanager_endpoint_sg_ids) > 1 ? var.secretmanager_endpoint_sg_ids : local.sg_ids
 }
 
 # endpoint to secret manager
@@ -55,7 +54,7 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   security_group_ids  = local.secretmanager_endpoint_sg_ids
   subnet_ids          = local.subnet_ids
   private_dns_enabled = true
-  tags                = {
+  tags = {
     Name        = "${var.prefix}-secretmanager-endpoint"
     Environment = var.prefix
   }

@@ -1,16 +1,15 @@
 locals {
-  ssh_path                = "/tmp/${var.prefix}-${var.cluster_name}"
-  nics                    = var.container_number_map[var.instance_type].nics
-  private_nic_first_index = var.assign_public_ip ? 1 : 0
-  public_ssh_key          = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
-  tags_dest               = ["instance", "network-interface", "volume"]
-  user_data               = templatefile("${path.module}/user_data.sh", {
-    region           = local.region
-    proxy            = var.proxy_url
-    subnet_id        = local.subnet_ids[0]
-    groups           = join(" ", local.sg_ids)
-    nics_num         = var.container_number_map[var.instance_type].nics
-    deploy_func_name = aws_lambda_function.deploy_lambda.function_name
+  ssh_path       = "/tmp/${var.prefix}-${var.cluster_name}"
+  nics           = var.container_number_map[var.instance_type].nics
+  public_ssh_key = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
+  tags_dest      = ["instance", "network-interface", "volume"]
+  user_data = templatefile("${path.module}/user_data.sh", {
+    region              = local.region
+    proxy               = var.proxy_url
+    subnet_id           = local.subnet_ids[0]
+    groups              = join(" ", local.sg_ids)
+    nics_num            = local.nics
+    deploy_func_name    = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
   })
 }
@@ -73,7 +72,7 @@ resource "aws_launch_template" "launch_template" {
   block_device_mappings {
     device_name = "/dev/sdp"
     ebs {
-      volume_size           = 48 + 10 * (var.container_number_map[var.instance_type].nics - 1)
+      volume_size           = 48 + 10 * (local.nics - 1)
       volume_type           = "gp3"
       delete_on_termination = true
     }
@@ -115,7 +114,7 @@ resource "aws_launch_template" "launch_template" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags          = merge(var.tags_map, {
+      tags = merge(var.tags_map, {
         Name                = "${var.prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
@@ -128,7 +127,7 @@ resource "aws_launch_template" "launch_template" {
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name                  = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+  name = "${var.prefix}-${var.cluster_name}-autoscaling-group"
   #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
   desired_capacity      = var.cluster_size
   max_size              = var.cluster_size * 7
