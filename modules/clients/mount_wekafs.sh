@@ -88,7 +88,7 @@ function getNetStrForDpdk() {
 		fi
 		bits=$(ip -o -f inet addr show $eth | awk '{print $4}')
 		IFS='/' read -ra netmask <<< "$bits"
-		
+
 		gateway=$${gateways[$i]}
     net="$net$enp/$subnet_inet/$${netmask[1]}/$gateway"
 	done

@@ -14,7 +14,7 @@ resource "aws_lb" "alb" {
 }
 
 resource "aws_lb_target_group" "alb_target_group" {
-  count    = var.create_alb  ? 1 : 0
+  count    = var.create_alb ? 1 : 0
   name     = "${var.prefix}-${var.cluster_name}-lb-target-group"
   vpc_id   = local.vpc_id
   port     = 14000
@@ -57,9 +57,9 @@ resource "aws_autoscaling_attachment" "alb_autoscaling_attachment" {
 }
 
 resource "aws_route53_record" "lb_record" {
-  count      = var.alb_alias_name != "" ? 1 : 0
-  name       = var.alb_alias_name
-  type       = "A"
+  count = var.alb_alias_name != "" ? 1 : 0
+  name  = var.alb_alias_name
+  type  = "A"
   alias {
     evaluate_target_health = false
     name                   = aws_lb.alb[0].dns_name

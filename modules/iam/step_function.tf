@@ -1,11 +1,11 @@
 resource "aws_iam_role" "sfn_iam_role" {
-  name               = "${var.prefix}-${var.cluster_name}-sfn-role"
+  name = "${var.prefix}-${var.cluster_name}-sfn-role"
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         Principal = {
           Service = ["states.amazonaws.com"]
         }
@@ -15,13 +15,13 @@ resource "aws_iam_role" "sfn_iam_role" {
 }
 
 resource "aws_iam_policy" "sfn_iam_policy" {
-  name   = "${var.prefix}-${var.cluster_name}-sfn-policy"
+  name = "${var.prefix}-${var.cluster_name}-sfn-policy"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["lambda:InvokeFunction"]
+        Effect   = "Allow"
+        Action   = ["lambda:InvokeFunction"]
         Resource = ["arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}-*-lambda"]
       },
       {

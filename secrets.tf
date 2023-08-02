@@ -1,12 +1,12 @@
 resource "random_password" "suffix" {
-  length  = 4
-  lower   = true
-  min_lower = 1
-  upper   = true
-  min_upper = 1
-  numeric = true
+  length      = 4
+  lower       = true
+  min_lower   = 1
+  upper       = true
+  min_upper   = 1
+  numeric     = true
   min_numeric = 1
-  special = false
+  special     = false
 }
 
 locals {
@@ -32,14 +32,14 @@ resource "aws_secretsmanager_secret_version" "weka_username" {
 }
 
 resource "random_password" "password" {
-  length  = 16
-  lower   = true
-  min_lower = 1
-  upper   = true
-  min_upper = 1
-  numeric = true
+  length      = 16
+  lower       = true
+  min_lower   = 1
+  upper       = true
+  min_upper   = 1
+  numeric     = true
   min_numeric = 1
-  special = false
+  special     = false
 }
 
 resource "aws_secretsmanager_secret" "weka_password" {

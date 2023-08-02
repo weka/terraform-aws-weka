@@ -1,5 +1,5 @@
 locals {
-  subnet_ids       = var.private_network ? aws_subnet.private_subnet.*.id : aws_subnet.public_subnet.*.id
+  subnet_ids       = var.private_network ? aws_subnet.private_subnet[*].id : aws_subnet.public_subnet[*].id
   subnet_ids_count = length(local.subnet_ids)
 }
 

@@ -18,9 +18,8 @@ data "aws_ami" "selected" {
 }
 
 locals {
-  region                  = data.aws_region.current.name
-  private_nic_first_index = var.assign_public_ip ? 1 : 0
-  tags_dest               = ["instance", "network-interface", "volume"]
+  region    = data.aws_region.current.name
+  tags_dest = ["instance", "network-interface", "volume"]
 
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
 
@@ -35,7 +34,7 @@ locals {
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
     # all_subnets        = split("/", data.aws_subnet.selected.cidr_block)[0]
-    all_gateways       = join(" ", [ for i in range(var.nics): cidrhost(data.aws_subnet.selected.cidr_block, 1) ])
+    all_gateways       = join(" ", [for i in range(var.nics) : cidrhost(data.aws_subnet.selected.cidr_block, 1)])
     nics_num           = var.nics
     weka_cluster_size  = var.weka_cluster_size
     weka_cluster_name  = var.weka_cluster_name
@@ -64,7 +63,7 @@ resource "aws_launch_template" "this" {
   key_name                             = var.key_pair_name
 
   block_device_mappings {
-    device_name = "/dev/xvda"  // root device
+    device_name = "/dev/xvda" # root device
     ebs {
       volume_size           = var.root_volume_size
       volume_type           = "gp2"
@@ -111,6 +110,7 @@ resource "aws_launch_template" "this" {
       tags = merge(var.tags_map, {
         Name                = "${var.clients_name}-${tag_specifications.value}-client"
         weka_hostgroup_type = "client"
+        weka_clients_name   = var.clients_name
         user                = data.aws_caller_identity.current.user_id
       })
     }
@@ -120,7 +120,7 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_instance" "this" {
-  count                         = var.clients_number
+  count = var.clients_number
   launch_template {
     id      = aws_launch_template.this.id
     version = aws_launch_template.this.latest_version

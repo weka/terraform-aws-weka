@@ -40,11 +40,11 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-        
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          # the identity provider for GH actions was created on AWS side to 
+          # the identity provider for GH actions was created on AWS side to
           # support assuming role while running the workflow
           # https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
           role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
@@ -53,7 +53,7 @@ jobs:
       - name: Run create_and_upload_bin
         if: github.event_name != 'workflow_dispatch'
         run: task create_and_upload_zip DIST=$DIST
-     
+
       - name: Run create_and_upload_bin (workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
         run: task create_and_upload_zip DIST=${{ inputs.dist }}

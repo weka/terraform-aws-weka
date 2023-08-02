@@ -1,5 +1,5 @@
 locals {
-  sfn_function_name = [aws_lambda_function.fetch_lambda.function_name,aws_lambda_function.scale_down_lambda.function_name,aws_lambda_function.terminate_lambda.function_name,aws_lambda_function.transient_lambda.function_name]
+  sfn_function_name = [aws_lambda_function.fetch_lambda.function_name, aws_lambda_function.scale_down_lambda.function_name, aws_lambda_function.terminate_lambda.function_name, aws_lambda_function.transient_lambda.function_name]
 }
 resource "aws_cloudwatch_log_group" "sfn_log_group" {
   name              = "/aws/vendedlogs/states/${var.prefix}-${var.cluster_name}-scale-down-sfn"
@@ -33,9 +33,9 @@ resource "aws_lambda_permission" "invoke_lambda_permission" {
 }
 
 resource "aws_sfn_state_machine" "scale_down_state_machine" {
-    name       = "${var.prefix}-${var.cluster_name}-scale-down-state-machine"
-    role_arn   = local.sfn_iam_role_arn
-    definition = <<EOF
+  name       = "${var.prefix}-${var.cluster_name}-scale-down-state-machine"
+  role_arn   = local.sfn_iam_role_arn
+  definition = <<EOF
   {
   "Comment": "Run Fetch function for scale down",
   "StartAt": "Fetch",
@@ -89,6 +89,5 @@ EOF
   tags = {
     Name = "${var.prefix}-${var.cluster_name}-scale-up-sfn"
   }
-  depends_on = [aws_lambda_function.scale_down_lambda, aws_lambda_function.fetch_lambda, aws_lambda_function.terminate_lambda, aws_lambda_function.transient_lambda,aws_cloudwatch_log_group.sfn_log_group]
+  depends_on = [aws_lambda_function.scale_down_lambda, aws_lambda_function.fetch_lambda, aws_lambda_function.terminate_lambda, aws_lambda_function.transient_lambda, aws_cloudwatch_log_group.sfn_log_group]
 }
-
