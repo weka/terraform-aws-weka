@@ -3,7 +3,6 @@ package status
 import (
 	"context"
 	"encoding/json"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"math/rand"
 	"time"
 
@@ -44,7 +43,7 @@ func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, cluster
 		return
 	}
 
-	creds, err := aws_common.GetUsernameAndPassword(usernameId, passwordId)
+	creds, err := common.GetUsernameAndPassword(usernameId, passwordId)
 	if err != nil {
 		return
 	}

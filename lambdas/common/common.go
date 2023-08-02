@@ -3,26 +3,26 @@ package common
 import (
 	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"os"
 	"sync"
 	"time"
 
-	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/lib/types"
-	"golang.org/x/sync/semaphore"
+	"github.com/weka/go-cloud-lib/protocol"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/rs/zerolog/log"
-	"github.com/weka/go-cloud-lib/aws/connectors"
-	"github.com/weka/go-cloud-lib/protocol"
+	"golang.org/x/sync/semaphore"
 )
 
 var (
@@ -205,7 +205,7 @@ func UpdateClusterState(table, hashKey string, state protocol.ClusterState) (err
 
 func GetWekaIoToken(tokenId string) (token string, err error) {
 	log.Info().Msgf("Fetching token %s", tokenId)
-	return aws_common.GetSecret(tokenId)
+	return GetSecret(tokenId)
 }
 
 func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
@@ -462,5 +462,31 @@ func CreateBucket(bucketName string) (err error) {
 	_, err = svc.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
 	})
+	return
+}
+
+func GetSecret(secretId string) (secret string, err error) {
+	svc := connectors.GetAWSSession().SecretsManager
+	input := &secretsmanager.GetSecretValueInput{
+		SecretId: aws.String(secretId),
+	}
+
+	result, err := svc.GetSecretValue(input)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to get secret value")
+		return
+	}
+	secret = *result.SecretString
+	return
+}
+
+func GetUsernameAndPassword(usernameId, passwordId string) (clusterCreds protocol.ClusterCreds, err error) {
+	log.Info().Msgf("Fetching username %s and password %s", usernameId, passwordId)
+	clusterCreds.Username, err = GetSecret(usernameId)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+	clusterCreds.Password, err = GetSecret(passwordId)
 	return
 }

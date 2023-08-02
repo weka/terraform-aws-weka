@@ -2,15 +2,15 @@ package clusterize
 
 import (
 	"fmt"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
 	"os"
 	"strings"
+
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
 
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	"github.com/weka/go-cloud-lib/aws/aws_common"
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
 	"github.com/weka/go-cloud-lib/functions_def"
@@ -75,7 +75,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		}
 	}
 
-	creds, err := aws_common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
+	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
