@@ -47,7 +47,7 @@ locals {
 
 # endpoint to secret manager
 resource "aws_vpc_endpoint" "secretmanager_endpoint" {
-  count               = var.create_secretmanager_endpoint ? 1 : 0
+  count               = var.use_secretmanager_endpoint && var.create_secretmanager_endpoint ? 1 : 0
   vpc_id              = local.vpc_id
   service_name        = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
   vpc_endpoint_type   = "Interface"
