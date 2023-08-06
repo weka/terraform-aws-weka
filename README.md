@@ -255,8 +255,8 @@ output "deploy_weka_output" {
 ```
 
 ## Helper modules
-We provide iam, network and security_group modules modules to help you create the prerequisites for the weka deployment.
-<br>Check our [examples](examples/public_network/main.tf) that use these modules.
+We provide iam, network and security_group modules to help you create the prerequisites for the weka deployment.
+<br>Check our [example](examples/public_network/main.tf) that uses these modules.
 - When sg_ids isn't provided we automatically create a security group using our module.
 - When subnet_ids isn't provided we automatically create a subnet using our module.
 - When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
