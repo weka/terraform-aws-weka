@@ -1,5 +1,376 @@
 # terraform-aws-weka
-Deploy weka on aws cloud with TF script
+AWS terraform weka deployment module.
+<br>Applying this terraform module will create the following resources:
+- **DynamoDB** table (stores the the weka cluster state default KMS key)
+- **Lambda**:
+    - *deploy* - responsible for providing new machines installation script
+    - *clusterize* - responsible for providing clusterize script
+    - *clusterize-finalization* - responsible for updating the cluster state about clusterization completion
+    - *report* - responsible for updating the state about clusterization and new machines installation progress
+    - *status* - responsible for providing the cluster progress status
+
+    - for State Machine:
+        - *fetch* - fetches cluster/autoscaling group information and passes to the next stage
+        - *scale-down* - relied on *fetch* information to work on the Weka cluster, i.e., deactivate drives/hosts. Will fail if the required target is not supported (like scaling down to 2 backend instances)
+        - *terminate* - terminates deactivated hosts
+        - *transient* - lambda responsible for reporting transient errors, e.g., could not deactivate specific hosts, but some have been deactivated, and the whole flow proceeded
+
+- **Launch Template**: used for new auto-scaling group instances; will run the deploy script on launch.
+- **Ec2 instances**
+- **Placement Group**
+- **Auto Scaling Group**
+- **ALB** (optional for UI and Backends)
+- **State Machine**: invokes the *fetch*, *scale-down*, *terminate*, *transient*
+    - Uses the previous lambda output as input for the following lambda.
+    - **CloudWatch**: invokes the state machine every minute
+- **SecretManager** (stores the weka user name, password and get.weka.io token)
+- **IAM Roles (and policies)**:
+
+## Weke deployment prerequisites:
+- vpc (with secret manager endpoint)
+- subnet (optional: additional_alb_subnet for ALB)
+- security group (with self reference rule)
+- iam roles
+<details>
+<summary>Ec2 iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+    "Statement": [
+    {
+        "Action": [
+            "ec2:DescribeNetworkInterfaces",
+            "ec2:AttachNetworkInterface",
+            "ec2:CreateNetworkInterface",
+            "ec2:ModifyNetworkInterfaceAttribute",
+            "ec2:DeleteNetworkInterface"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+    },
+    {
+        "Action": [
+            "lambda:InvokeFunction"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+            "arn:aws:lambda:*:*:function:prefix-cluster_name*"
+        ]
+    },
+    {
+        "Action": [
+            "s3:DeleteObject",
+            "s3:GetObject",
+            "s3:ListBucket",
+            "s3:PutObject"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+            "arn:aws:s3:::prefix-cluster_name-obs/*"
+        ]
+    },
+    {
+        "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:DescribeLogStreams",
+            "logs:PutRetentionPolicy"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+            "arn:aws:logs:*:*:log-group:/wekaio/prefix-cluster_name*"
+        ]
+    },
+    ],
+    "Version": "2012-10-17"
+}
+```
+</details>
+<details>
+<summary>Lambda iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+    "Statement": [
+    {
+        "Action": [
+          "s3:CreateBucket"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:s3:::prefix-cluster_name-obs"
+        ]
+    },
+    {
+        "Action": [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:logs:*:*:log-group:/aws/lambda/prefix-cluster_name*:*"
+        ]
+    },
+    {
+        "Action": [
+            "ec2:CreateNetworkInterface",
+            "ec2:DescribeNetworkInterfaces",
+            "ec2:DeleteNetworkInterface",
+            "ec2:ModifyInstanceAttribute",
+            "ec2:TerminateInstances",
+            "ec2:DescribeInstances"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "*"
+        ]
+    },
+    {
+        "Action": [
+            "dynamodb:GetItem",
+            "dynamodb:UpdateItem"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:dynamodb:*:*:table/prefix-cluster_name-weka-deployment"
+        ]
+    },
+    {
+        "Action": [
+          "secretsmanager:GetSecretValue"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
+        ]
+    },
+    {
+        "Action": [
+            "autoscaling:DetachInstances",
+            "autoscaling:DescribeAutoScalingGroups",
+            "autoscaling:SetInstanceProtection"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "*"
+        ]
+    }
+    ],
+    "Version": "2012-10-17"
+    }
+```
+</details>
+
+<details>
+<summary>State Machine iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+  "Statement": [
+    {
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:lambda:*:*:function:prefix-cluster_name-*-lambda"
+      ]
+    },
+    {
+      "Action": [
+        "logs:CreateLogDelivery",
+        "logs:GetLogDelivery",
+        "logs:UpdateLogDelivery",
+        "logs:DeleteLogDelivery",
+        "logs:ListLogDeliveries",
+        "logs:PutLogEvents",
+        "logs:PutResourcePolicy",
+        "logs:DescribeResourcePolicies",
+        "logs:DescribeLogGroups"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
+```
+</details>
+<details>
+<summary>Cloud Watch iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+  "Statement": [
+    {
+      "Action": [
+        "states:StartExecution"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:states:*:*:stateMachine:prefix-cluster_name-scale-down-state-machine"
+      ]
+    }
+  ],
+  "Version": "2012-10-17"
+}
+```
+</details>
+
+## Usage example
+```hcl
+provider "aws" {
+}
+
+module "deploy_weka" {
+  source             = "../../"
+  prefix             = "weka-tf"
+  cluster_name       = "test"
+  availability_zones = ["a"]
+  allow_ssh_ranges   = ["0.0.0.0/0"]
+  get_weka_io_token  = "..."
+  sg_ids             = [
+    "..."
+  ]
+  subnet_ids = [
+    "...",
+  ]
+  instance_iam_profile_arn = "..."
+  lambda_iam_role_arn = "..."
+  sfn_iam_role_arn = "..."
+  event_iam_role_arn = "..."
+  additional_alb_subnet         = "..."
+  vpc_id                        = "..."
+  create_secretmanager_endpoint = false
+  set_obs_integration = true
+}
+
+output "deploy_weka_output" {
+  value = module.deploy_weka
+}
+```
+
+## Helper modules
+We provide iam, network and security_group modules modules to help you create the prerequisites for the weka deployment.
+<br>Check our [examples](examples/public_network/main.tf) that use these modules.
+- When sg_ids isn't provided we automatically create a security group using our module.
+- When subnet_ids isn't provided we automatically create a subnet using our module.
+- When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
+
+
+### Private network deployment:
+#### To avoid public ip assignment:
+```hcl
+assign_public_ip   = false
+```
+
+## Ssh keys
+The username for ssh into vms is `ec2-user`.
+We allow passing existing key pair name:
+```hcl
+key_pair_name = "..."
+```
+We allow passing existing public key string instead:
+```hcl
+ssh_public_key = "..."
+```
+If key pair name anb public key aren't passed we will create it for you and store the private key locally under `/tmp`
+Names will be:
+```
+/tmp/${prefix}-${cluster_name}-public-key.pub
+/tmp/${prefix}-${cluster_name}-private-key.pem
+```
+## OBS
+We support tiering to s3.
+In order to setup tiering, you must supply the following variables:
+```hcl
+set_obs_integration = true
+obs_name = "..."
+```
+In addition, you can supply (and override our default):
+```hcl
+tiering_ssd_percent = VALUE
+```
+## Clients
+### prerequisites:
+- client_instance_iam_profile_arn
+<details>
+<summary>Clients iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+    "Statement": [
+        {
+            "Action": [
+                "autoscaling:DescribeAutoScalingGroups"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "*"
+            ]
+        },
+      {
+        "Action": [
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:AttachNetworkInterface",
+          "ec2:CreateNetworkInterface",
+          "ec2:ModifyNetworkInterfaceAttribute",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeInstances"
+        ],
+        "Effect": "Allow",
+        "Resource": "*"
+      },
+      {
+        "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams",
+          "logs:PutRetentionPolicy"
+        ],
+        "Effect": "Allow",
+        "Resource": [
+          "arn:aws:logs:*:*:log-group:/wekaio/clients/prefix-cluster_name-client*"
+        ]
+      }
+    ],
+    "Version": "2012-10-17"
+}
+```
+</details>
+
+We support creating clients that will be mounted automatically to the cluster.
+<br>In order to create clients you need to provide the number of clients you want (by default the number is 0),
+for example:
+```hcl
+clients_number = 2
+```
+This will automatically create 2 clients.
+<br>In addition you can provide these optional variables:
+```hcl
+client_instance_type = "i3en.large"
+client_nics_num = DESIRED_NUM
+```
+
+## Secret manager
+We use the secret manager to store the weka username, password (and get.weka.io token).
+We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
+In case providing secret manager endpoint isn't possible, you can set `use_secretmanager_endpoint=false`
+On your weka deployment module and we not use it. In this case the weka username password will be sent to
+`scale_down` lambda via `fetch` lambda and the will be shown as plain text on the state machine.
+
+<br>In case you want to use secret manager, and would like to create the endpoint automatically,
+you can set: `create_secretmanager_endpoint=true`
+
+## Terraform output
+The module output contains useful information about the created resources.
+For example: ssh username, weka password secret id etc.
+The `helper_commands` part in the output provides lambda call that can be used to learn about the clusterization process.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

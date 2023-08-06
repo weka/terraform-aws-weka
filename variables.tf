@@ -318,13 +318,13 @@ variable "lambdas_dist" {
   }
 }
 
-variable "sfn_iam_role" {
+variable "sfn_iam_role_arn" {
   type        = string
   default     = ""
   description = "Step function iam role arn"
 }
 
-variable "event_iam_role" {
+variable "event_iam_role_arn" {
   type        = string
   default     = ""
   description = "Event iam role arn"
