@@ -399,7 +399,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="module_clients"></a> [clients](#module\_clients) | ./modules/clients | n/a |
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
-| <a name="module_security_group"></a> [security\_group](#module\_security\_group) | ./modules/security-group | n/a |
+| <a name="module_security_group"></a> [security\_group](#module\_security\_group) | ./modules/security_group | n/a |
 
 ## Resources
 
@@ -472,7 +472,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_create_secretmanager_endpoint"></a> [create\_secretmanager\_endpoint](#input\_create\_secretmanager\_endpoint) | Enable secret manager endpoint on vpc | `bool` | `true` | no |
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default) | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
-| <a name="input_event_iam_role"></a> [event\_iam\_role](#input\_event\_iam\_role) | Event iam role arn | `string` | `""` | no |
+| <a name="input_event_iam_role_arn"></a> [event\_iam\_role\_arn](#input\_event\_iam\_role\_arn) | Event iam role arn | `string` | `""` | no |
 | <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
 | <a name="input_hotspare"></a> [hotspare](#input\_hotspare) | Hot-spare value. | `number` | `1` | no |
 | <a name="input_install_weka_url"></a> [install\_weka\_url](#input\_install\_weka\_url) | The URL of the Weka release. Supports path to weka tar file or installation script. | `string` | `""` | no |
@@ -492,7 +492,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_route53_zone_id"></a> [route53\_zone\_id](#input\_route53\_zone\_id) | Route53 zone id | `string` | `""` | no |
 | <a name="input_secretmanager_endpoint_sg_ids"></a> [secretmanager\_endpoint\_sg\_ids](#input\_secretmanager\_endpoint\_sg\_ids) | Secret manager endpoint security groups ids | `list(string)` | `[]` | no |
 | <a name="input_set_obs_integration"></a> [set\_obs\_integration](#input\_set\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
-| <a name="input_sfn_iam_role"></a> [sfn\_iam\_role](#input\_sfn\_iam\_role) | Step function iam role arn | `string` | `""` | no |
+| <a name="input_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#input\_sfn\_iam\_role\_arn) | Step function iam role arn | `string` | `""` | no |
 | <a name="input_sg_ids"></a> [sg\_ids](#input\_sg\_ids) | Security group ids | `list(string)` | `[]` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | Ssh public key to pass to the instances. | `string` | `null` | no |
 | <a name="input_stripe_width"></a> [stripe\_width](#input\_stripe\_width) | Stripe width = cluster\_size - protection\_level - 1 (by default). | `number` | `-1` | no |
