@@ -109,9 +109,8 @@ resource "aws_launch_template" "this" {
     content {
       resource_type = tag_specifications.value
       tags = merge(var.tags_map, {
-        Name                = "${var.clients_name}-${tag_specifications.value}-client"
+        Name                = var.clients_name
         weka_hostgroup_type = "client"
-        weka_clients_name   = var.clients_name
         user                = data.aws_caller_identity.current.user_id
       })
     }
