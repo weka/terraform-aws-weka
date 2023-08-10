@@ -148,5 +148,5 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   lifecycle {
     ignore_changes = [desired_capacity, min_size, max_size]
   }
-  depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group]
+  depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group, aws_vpc_endpoint.s3]
 }

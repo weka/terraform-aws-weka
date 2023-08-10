@@ -348,6 +348,18 @@ variable "secretmanager_endpoint_sg_ids" {
   description = "Secret manager endpoint security groups ids"
 }
 
+variable "create_s3_endpoint" {
+  type        = bool
+  default     = true
+  description = "Created S3 endpoint on vpc"
+}
+
+variable "s3_endpoint_sg_ids" {
+  type        = list(string)
+  default     = []
+  description = "S3 endpoint security groups ids"
+}
+
 variable "create_alb" {
   type        = bool
   default     = true

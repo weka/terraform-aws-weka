@@ -43,6 +43,7 @@ locals {
   sfn_iam_role_arn              = var.sfn_iam_role_arn == "" ? module.iam[0].sfn_iam_role_arn : var.sfn_iam_role_arn
   event_iam_role_arn            = var.event_iam_role_arn == "" ? module.iam[0].event_iam_role_arn : var.event_iam_role_arn
   secretmanager_endpoint_sg_ids = length(var.secretmanager_endpoint_sg_ids) > 1 ? var.secretmanager_endpoint_sg_ids : local.sg_ids
+  s3_endpoint_sg_ids            = length(var.s3_endpoint_sg_ids) > 1 ? var.s3_endpoint_sg_ids : local.sg_ids
 }
 
 # endpoint to secret manager
@@ -56,6 +57,27 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-secretmanager-endpoint"
+    Environment = var.prefix
+  }
+  depends_on = [module.network]
+}
+
+resource "aws_vpc_endpoint" "s3" {
+  count               = var.create_s3_endpoint ? 1 : 0
+  vpc_id              = local.vpc_id
+  service_name        = "com.amazonaws.${data.aws_region.current.name}.s3"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = local.s3_endpoint_sg_ids
+  subnet_ids          = local.subnet_ids
+  private_dns_enabled = true
+
+  dns_options {
+    dns_record_ip_type                             = "ipv4"
+    private_dns_only_for_inbound_resolver_endpoint = false
+  }
+
+  tags = {
+    Name        = "${var.prefix}-s3-endpoint"
     Environment = var.prefix
   }
   depends_on = [module.network]
