@@ -126,7 +126,7 @@ resource "aws_instance" "this" {
   }
 
   lifecycle {
-    ignore_changes = [tags]
+    ignore_changes = [tags, launch_template, user_data]
   }
 
   depends_on = [aws_placement_group.this]
