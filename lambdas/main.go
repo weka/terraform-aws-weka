@@ -115,6 +115,7 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 	driveContainerNum, _ := strconv.Atoi(os.Getenv("NUM_DRIVE_CONTAINERS"))
 	installUrl := os.Getenv("INSTALL_URL")
 	nicsNumStr := os.Getenv("NICS_NUM")
+	proxyUrl := os.Getenv("PROXY_URL")
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
 
@@ -129,6 +130,7 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 		vm.Vm,
 		nicsNumStr,
 		computeMemory,
+		proxyUrl,
 		installUrl,
 		computeContainerNum,
 		frontendContainerNum,
