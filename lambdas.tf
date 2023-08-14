@@ -7,8 +7,10 @@ locals {
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
     "transient"
   ])
-  function_name = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
-  lambdas_hash  = md5(join("", [for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")]))
+  function_name           = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+  lambdas_hash            = md5(join("", [for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")]))
+  stripe_width_calculated = var.cluster_size - var.protection_level - 1
+  stripe_width            = local.stripe_width_calculated < 16 ? local.stripe_width_calculated : 16
 }
 
 resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
@@ -78,7 +80,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
       STATE_TABLE             = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
-      STRIPE_WIDTH            = var.stripe_width
+      STRIPE_WIDTH            = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
       PROTECTION_LEVEL        = var.protection_level
       HOTSPARE                = var.hotspare
       SET_OBS                 = var.set_obs_integration
