@@ -270,15 +270,17 @@ assign_public_ip   = false
 
 ## Ssh keys
 The username for ssh into vms is `ec2-user`.
+<br />
+
 We allow passing existing key pair name:
 ```hcl
 key_pair_name = "..."
 ```
-We allow passing existing public key string instead:
+We allow passing an existing public key string to create new key pair:
 ```hcl
 ssh_public_key = "..."
 ```
-If key pair name anb public key aren't passed we will create it for you and store the private key locally under `/tmp`
+If key pair name and public key aren't passed we will create it for you and store the private key locally under `/tmp`
 Names will be:
 ```
 /tmp/${prefix}-${cluster_name}-public-key.pub
