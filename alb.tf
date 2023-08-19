@@ -3,7 +3,7 @@ resource "aws_lb" "alb" {
   name                             = "${var.prefix}-${var.cluster_name}-lb"
   internal                         = true
   load_balancer_type               = "application"
-  security_groups                  = local.sg_ids
+  security_groups                  = local.alb_sg_ids
   subnets                          = concat(local.subnet_ids, [local.additional_subnet_id])
   enable_cross_zone_load_balancing = false
   enable_deletion_protection       = false
@@ -35,7 +35,7 @@ resource "aws_lb_target_group" "alb_target_group" {
   }
 }
 
-resource "aws_lb_listener" "lb_listener" {
+resource "aws_lb_listener" "lb_http_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
   port              = 14000
@@ -46,6 +46,23 @@ resource "aws_lb_listener" "lb_listener" {
   }
   tags = {
     Name = "${var.prefix}-${var.cluster_name}-lb-listener"
+  }
+}
+
+resource "aws_lb_listener" "lb_https_listener" {
+  count             = var.create_alb && var.alb_cert_arn != null ? 1 : 0
+  load_balancer_arn = aws_lb.alb[0].id
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = var.alb_cert_arn
+
+  default_action {
+    target_group_arn = aws_lb_target_group.alb_target_group[0].id
+    type             = "forward"
+  }
+  tags = {
+    Name = "${var.prefix}-${var.cluster_name}-lb-https-listener"
   }
 }
 

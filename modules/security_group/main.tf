@@ -16,6 +16,18 @@ resource "aws_security_group" "sg" {
     protocol    = "tcp"
     cidr_blocks = var.allow_ssh_ranges
   }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = var.allow_https_ranges
+  }
+  ingress {
+    from_port   = 14000
+    to_port     = 14000
+    protocol    = "tcp"
+    cidr_blocks = var.allow_weka_api_ranges
+  }
   egress {
     from_port = "0"
     to_port   = "0"
