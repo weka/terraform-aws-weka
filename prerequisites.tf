@@ -14,12 +14,14 @@ module "network" {
 }
 
 module "security_group" {
-  count            = length(var.sg_ids) == 0 ? 1 : 0
-  source           = "./modules/security_group"
-  prefix           = var.prefix
-  vpc_id           = local.vpc_id
-  allow_ssh_ranges = var.allow_ssh_ranges
-  depends_on       = [module.network]
+  count                 = length(var.sg_ids) == 0 ? 1 : 0
+  source                = "./modules/security_group"
+  prefix                = var.prefix
+  vpc_id                = local.vpc_id
+  allow_ssh_ranges      = var.allow_ssh_ranges
+  allow_https_ranges    = var.allow_https_ranges
+  allow_weka_api_ranges = var.allow_weka_api_ranges
+  depends_on            = [module.network]
 }
 
 module "iam" {
@@ -38,6 +40,7 @@ locals {
   additional_subnet_id          = var.create_alb ? var.additional_alb_subnet == "" ? module.network[0].additional_subnet_id : var.additional_alb_subnet : ""
   vpc_id                        = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
   sg_ids                        = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
+  alb_sg_ids                    = var.create_alb ? length(var.alb_sg_ids) > 0 ? var.alb_sg_ids : local.sg_ids : []
   instance_iam_profile_arn      = var.instance_iam_profile_arn == "" ? module.iam[0].instance_iam_profile_arn : var.instance_iam_profile_arn
   lambda_iam_role_arn           = var.lambda_iam_role_arn == "" ? module.iam[0].lambda_iam_role_arn : var.lambda_iam_role_arn
   sfn_iam_role_arn              = var.sfn_iam_role_arn == "" ? module.iam[0].sfn_iam_role_arn : var.sfn_iam_role_arn

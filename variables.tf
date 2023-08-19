@@ -59,6 +59,12 @@ variable "sg_ids" {
   description = "Security group ids"
 }
 
+variable "alb_sg_ids" {
+  type        = list(string)
+  default     = []
+  description = "Security group ids for ALB"
+}
+
 variable "container_number_map" {
   type = map(object({
     compute  = number
@@ -279,7 +285,19 @@ variable "vpc_id" {
 
 variable "allow_ssh_ranges" {
   type        = list(string)
-  description = "Allow ssh from ips list to weka vms"
+  description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
+}
+
+variable "allow_https_ranges" {
+  type        = list(string)
+  description = "Allow port 443, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  default     = []
+}
+
+variable "allow_weka_api_ranges" {
+  type        = list(string)
+  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
   default     = []
 }
 
@@ -358,6 +376,12 @@ variable "additional_alb_subnet" {
   type        = string
   default     = ""
   description = "Additional subnet for ALB"
+}
+
+variable "alb_cert_arn" {
+  type        = string
+  default     = null
+  description = "HTTPS certificate ARN for ALB"
 }
 
 variable "alb_alias_name" {
