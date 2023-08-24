@@ -11,7 +11,7 @@ terraform {
 provider "aws" {
 }
 
-module "deploy_weka" {
+module "weka_deployment" {
   source             = "../../"
   prefix             = "weka-tf"
   cluster_name       = "test"

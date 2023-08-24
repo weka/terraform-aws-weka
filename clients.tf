@@ -7,7 +7,7 @@ module "clients" {
   clients_number           = var.clients_number
   mount_clients_dpdk       = var.mount_clients_dpdk
   proxy_url                = var.proxy_url
-  nics                     = var.mount_clients_dpdk ? var.client_nics_num : 1
+  nics_numbers             = var.mount_clients_dpdk ? var.client_nics_num : 1
   instance_type            = var.client_instance_type
   weka_cluster_name        = var.cluster_name
   weka_cluster_size        = var.cluster_size

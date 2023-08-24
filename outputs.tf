@@ -34,7 +34,7 @@ output "alb_alias_record" {
   value = var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : null
 }
 
-output "helper_commands" {
+output "cluster_helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${var.cluster_name}'].Value, '${var.cluster_name}')].Instances[].InstanceId" --output text) --query 'Reservations[].Instances[].${local.ips_type}' --output json
 aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --cli-binary-format raw-in-base64-out /dev/stdout
