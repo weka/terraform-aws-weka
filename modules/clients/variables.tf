@@ -18,7 +18,7 @@ variable "weka_cluster_name" {
   description = "Name of the weka cluster"
 }
 
-variable "nics" {
+variable "nics_numbers" {
   type        = number
   default     = 2
   description = "Number of nics to set on each client vm"

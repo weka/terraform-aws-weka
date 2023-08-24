@@ -180,24 +180,6 @@ variable "get_weka_io_token" {
   sensitive   = true
 }
 
-variable "obs_name" {
-  type        = string
-  default     = ""
-  description = "Name of existing obs storage account"
-}
-
-variable "set_obs_integration" {
-  type        = bool
-  default     = false
-  description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
-}
-
-variable "tiering_ssd_percent" {
-  type        = number
-  default     = 20
-  description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
-}
-
 variable "ssh_public_key" {
   type        = string
   description = "Ssh public key to pass to the instances."
@@ -396,6 +378,26 @@ variable "route53_zone_id" {
   description = "Route53 zone id"
 }
 
+################################################## obs variables ###################################################
+variable "obs_name" {
+  type        = string
+  default     = ""
+  description = "Name of existing obs storage account"
+}
+
+variable "set_obs_integration" {
+  type        = bool
+  default     = false
+  description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
+}
+
+variable "tiering_ssd_percent" {
+  type        = number
+  default     = 20
+  description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
+}
+
+################################################## clients variables ###################################################
 variable "clients_number" {
   type        = number
   description = "The number of client instances to deploy"
