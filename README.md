@@ -353,7 +353,7 @@ clients_number = 2
 This will automatically create 2 clients.
 <br>In addition you can provide these optional variables:
 ```hcl
-client_instance_type = "i3en.large"
+client_instance_type = "c5.2xlarge"
 client_nics_num = DESIRED_NUM
 ```
 

@@ -405,7 +405,7 @@ variable "clients_number" {
 variable "client_instance_type" {
   type        = string
   description = "The client instance type (sku) to deploy"
-  default     = "i3en.large"
+  default     = "c5.2xlarge"
 }
 
 variable "client_instance_iam_profile_arn" {
