@@ -14,7 +14,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_deploy_weka"></a> [deploy\_weka](#module\_deploy\_weka) | ../../ | n/a |
+| <a name="module_weka_deployment"></a> [weka\_deployment](#module\_weka\_deployment) | ../../ | n/a |
 
 ## Resources
 
@@ -30,5 +30,5 @@ No resources.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_deploy_weka"></a> [deploy\_weka](#output\_deploy\_weka) | n/a |
+| <a name="output_weka_deployment_output"></a> [weka\_deployment\_output](#output\_weka\_deployment\_output) | n/a |
 <!-- END_TF_DOCS -->

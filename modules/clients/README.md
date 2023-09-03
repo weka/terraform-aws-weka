@@ -51,7 +51,7 @@ No modules.
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy | `string` | n/a | yes |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | n/a | yes |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
-| <a name="input_nics"></a> [nics](#input\_nics) | Number of nics to set on each client vm | `number` | `2` | no |
+| <a name="input_nics_numbers"></a> [nics\_numbers](#input\_nics\_numbers) | Number of nics to set on each client vm | `number` | `2` | no |
 | <a name="input_placement_group_name"></a> [placement\_group\_name](#input\_placement\_group\_name) | Placement group name | `string` | `""` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | n/a | `string` | n/a | yes |
 | <a name="input_root_volume_size"></a> [root\_volume\_size](#input\_root\_volume\_size) | The root volume size in GB | `number` | n/a | yes |
