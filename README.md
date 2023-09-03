@@ -519,8 +519,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_alb_alias_record"></a> [alb\_alias\_record](#output\_alb\_alias\_record) | n/a |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | n/a |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | n/a |
+| <a name="output_cluster_helper_commands"></a> [cluster\_helper\_commands](#output\_cluster\_helper\_commands) | n/a |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | n/a |
-| <a name="output_helper_commands"></a> [helper\_commands](#output\_helper\_commands) | n/a |
 | <a name="output_ips_type"></a> [ips\_type](#output\_ips\_type) | n/a |
 | <a name="output_lambda_name"></a> [lambda\_name](#output\_lambda\_name) | n/a |
 | <a name="output_local_ssh_private_key"></a> [local\_ssh\_private\_key](#output\_local\_ssh\_private\_key) | n/a |
