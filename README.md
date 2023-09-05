@@ -359,6 +359,88 @@ client_instance_type = "c5.2xlarge"
 client_nics_num = DESIRED_NUM
 ```
 
+
+## Protocol Gateways
+We support creating protocol gateways that will be mounted automatically to the cluster.
+<br>In order to create you need to provide the number of protocol gateways instances you want (by default the number is 0),
+for example:
+```hcl
+protocol_gateways_number = 2
+```
+This will automatically create 2 instances.
+<br>In addition you can supply these optional variables:
+```hcl
+protocol                                  = VALUE
+protocol_gateway_secondary_ips_per_nic    = 3
+protocol_gateway_instance_type            = "c5.2xlarge"
+protocol_gateway_nics_num                 = 2
+protocol_gateway_disk_size                = 48
+protocol_gateway_frontend_num             = 1
+protocol_gateway_instance_iam_profile_arn = ""
+```
+### prerequisites:
+- protocol_gateway_instance_iam_profile_arn
+<details>
+<summary>Protocol gateway iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:AttachNetworkInterface",
+      "ec2:CreateNetworkInterface",
+      "ec2:ModifyNetworkInterfaceAttribute",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeInstances"
+    ]
+    "Resource":  "*",
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "secretsmanager:GetSecretValue"
+    ]
+    "Resource":
+    [
+      "arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"
+    ]
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams",
+      "logs:PutRetentionPolicy"
+    ]
+    "Resource":
+    [
+      "arn:aws:logs:*:*:log-group:/wekaio/clients/${var.gateways_name}*"
+    ]
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "autoscaling:DescribeAutoScalingGroups"
+    ],
+    "Resource":
+    [
+      "*"
+    ]
+    }
+  ]
+}
+
+```
+
 ## Secret manager
 We use the secret manager to store the weka username, password (and get.weka.io token).
 We need to be able to use them on `scale down` lambda which runs inside the provided vpc.

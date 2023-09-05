@@ -47,3 +47,9 @@ output "client_ips" {
 echo $(aws ec2 describe-instances --filters "Name=tag-value,Values='${module.clients[0].clients_name}'" --query "Reservations[*].Instances[*].${local.ips_type}" --output text)
 EOT
 }
+
+output "protocol_gateways_ips" {
+  value = var.protocol_gateways_number == 0 ? null : <<EOT
+aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}'
+EOT
+}
