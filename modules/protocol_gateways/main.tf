@@ -145,5 +145,5 @@ resource "aws_instance" "this" {
     ignore_changes = [tags, launch_template, user_data]
   }
 
-  depends_on = [aws_placement_group.this,aws_iam_instance_profile.this, aws_iam_role.this]
+  depends_on = [aws_placement_group.this, aws_iam_instance_profile.this, aws_iam_role.this]
 }

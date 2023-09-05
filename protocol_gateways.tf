@@ -1,5 +1,5 @@
 data "aws_network_interface" "lb" {
-  count = var.create_alb ? 1 : 0
+  count = var.create_alb && var.protocol_gateways_number > 0 ? 1 : 0
   filter {
     name   = "description"
     values = ["ELB ${aws_lb.alb[0].arn_suffix}"]
@@ -8,7 +8,7 @@ data "aws_network_interface" "lb" {
     name   = "subnet-id"
     values = [local.subnet_ids[0]]
   }
-  depends_on = [aws_lb.alb, aws_lb_target_group.alb_target_group,aws_lambda_function.deploy_lambda]
+  depends_on = [aws_lb.alb, aws_lb_target_group.alb_target_group, aws_lambda_function.deploy_lambda]
 }
 
 module "protocol_gateways" {

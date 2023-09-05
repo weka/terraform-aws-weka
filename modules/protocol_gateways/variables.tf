@@ -11,7 +11,7 @@ variable "cluster_name" {
 variable "nics_numbers" {
   type        = number
   description = "Number of nics per host"
-  default = -1
+  default     = -1
 
   validation {
     condition     = var.nics_numbers == -1 || var.nics_numbers > 0
@@ -112,7 +112,7 @@ variable "install_weka_url" {
 }
 
 variable "weka_token_id" {
-  type       = string
+  type        = string
   description = "Weka token id"
 }
 
@@ -155,7 +155,7 @@ variable "weka_cluster_size" {
 }
 
 variable "weka_password_id" {
-  type       = string
+  type        = string
   description = "Weka password id"
 }
 
@@ -171,6 +171,6 @@ variable "backend_lb_ip" {
 }
 
 variable "secret_prefix" {
-  type = string
+  type        = string
   description = "Prefix of secrets"
 }

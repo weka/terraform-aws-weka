@@ -448,7 +448,7 @@ variable "client_root_volume_size" {
 
 ############################################### protocol gateways variables ###################################################
 variable "protocol_gateways_number" {
-  type = number
+  type        = number
   description = "The number of protocol gateway virtual machines to deploy."
   default     = 0
 }
