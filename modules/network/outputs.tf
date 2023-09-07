@@ -4,7 +4,7 @@ locals {
 }
 
 output "subnet_ids" {
-  value = slice(local.subnet_ids, 0, local.subnet_ids_count - 1)
+  value = var.additional_subnet ? slice(local.subnet_ids, 0, local.subnet_ids_count - 1) : local.subnet_ids
 }
 
 output "additional_subnet_id" {
