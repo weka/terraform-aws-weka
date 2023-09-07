@@ -50,7 +50,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       PROXY_URL               = var.proxy_url
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network, module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 
   lifecycle {
     precondition {
@@ -94,7 +94,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network,module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "clusterize_finalization_lambda" {
@@ -116,7 +116,7 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
       CLUSTER_NAME         = var.cluster_name
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network,module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "report_lambda" {
@@ -138,7 +138,7 @@ resource "aws_lambda_function" "report_lambda" {
       CLUSTER_NAME         = var.cluster_name
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network, module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "status_lambda" {
@@ -160,7 +160,7 @@ resource "aws_lambda_function" "status_lambda" {
       CLUSTER_NAME         = var.cluster_name
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network, module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "fetch_lambda" {
@@ -186,7 +186,7 @@ resource "aws_lambda_function" "fetch_lambda" {
       USE_SECRETMANAGER_ENDPOINT = var.use_secretmanager_endpoint
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network,aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "scale_down_lambda" {
@@ -212,7 +212,10 @@ resource "aws_lambda_function" "scale_down_lambda" {
       PASSWORD_ID  = aws_secretsmanager_secret.weka_password.id
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  lifecycle {
+    ignore_changes = [vpc_config]
+  }
+  depends_on = [module.network, module.security_group, module.iam]
 }
 
 resource "aws_lambda_function" "transient_lambda" {
@@ -232,7 +235,7 @@ resource "aws_lambda_function" "transient_lambda" {
       CLUSTER_NAME = var.cluster_name
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network, module.iam, aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
 resource "aws_lambda_function" "terminate_lambda" {
@@ -254,5 +257,5 @@ resource "aws_lambda_function" "terminate_lambda" {
 
     }
   }
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [module.network,module.iam,aws_cloudwatch_log_group.cloudwatch_log_group]
 }

@@ -94,6 +94,9 @@ resource "aws_subnet" "public_subnet" {
     Environment = var.prefix
     Zone        = local.availability_zones_list[count.index]
   }
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 # associate route table to public subnet
@@ -116,6 +119,9 @@ resource "aws_subnet" "private_subnet" {
     Name        = "${var.prefix}-private-subnet-${count.index}"
     Environment = var.prefix
     Zone        = local.availability_zones_list[count.index]
+  }
+  lifecycle {
+    ignore_changes = all
   }
 }
 

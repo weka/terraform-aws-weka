@@ -11,6 +11,7 @@ resource "aws_lb" "alb" {
     Name         = "${var.prefix}-${var.cluster_name}-lb"
     cluster_name = var.cluster_name
   }
+  depends_on = [module.network]
 }
 
 resource "aws_lb_target_group" "alb_target_group" {
@@ -33,6 +34,7 @@ resource "aws_lb_target_group" "alb_target_group" {
   tags = {
     Name = "${var.prefix}-${var.cluster_name}-lb-target-group"
   }
+  depends_on = [module.network]
 }
 
 resource "aws_lb_listener" "lb_http_listener" {
@@ -47,6 +49,7 @@ resource "aws_lb_listener" "lb_http_listener" {
   tags = {
     Name = "${var.prefix}-${var.cluster_name}-lb-listener"
   }
+  depends_on = [module.network]
 }
 
 resource "aws_lb_listener" "lb_https_listener" {
@@ -64,13 +67,14 @@ resource "aws_lb_listener" "lb_https_listener" {
   tags = {
     Name = "${var.prefix}-${var.cluster_name}-lb-https-listener"
   }
+  depends_on = [module.network]
 }
 
 resource "aws_autoscaling_attachment" "alb_autoscaling_attachment" {
   count                  = var.create_alb ? 1 : 0
-  autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
+  autoscaling_group_name = aws_autoscaling_group.this.name
   lb_target_group_arn    = aws_lb_target_group.alb_target_group[0].arn
-  depends_on             = [aws_autoscaling_group.autoscaling_group]
+  depends_on             = [module.network, aws_autoscaling_group.this]
 }
 
 resource "aws_route53_record" "lb_record" {
@@ -83,5 +87,5 @@ resource "aws_route53_record" "lb_record" {
     zone_id                = aws_lb.alb[0].zone_id
   }
   zone_id    = var.route53_zone_id
-  depends_on = [aws_lb.alb]
+  depends_on = [module.network, aws_lb.alb]
 }

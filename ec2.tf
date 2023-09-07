@@ -1,3 +1,17 @@
+data "aws_subnets" "this" {
+  filter {
+    name   = "vpc-id"
+    values = var.vpc_id == "" ? [module.network[0].vpc_id] : [var.vpc_id]
+  }
+  depends_on = [module.network]
+}
+
+data "aws_security_group" "this" {
+  count      = length(var.sg_ids) == 0 ? 1 : 0
+  id         = module.security_group[0].sg_ids[count.index]
+  depends_on = [module.security_group]
+}
+
 locals {
   ssh_path       = "/tmp/${var.prefix}-${var.cluster_name}"
   nics           = var.container_number_map[var.instance_type].nics
@@ -101,7 +115,7 @@ resource "aws_launch_template" "launch_template" {
     associate_public_ip_address = var.assign_public_ip
     delete_on_termination       = true
     device_index                = 0
-    security_groups             = local.sg_ids
+    security_groups             = length(var.sg_ids) == 0 ? [data.aws_security_group.this[0].id] : var.sg_ids
     subnet_id                   = local.subnet_ids[0]
   }
 
@@ -123,16 +137,15 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   user_data  = base64encode(local.user_data)
-  depends_on = [aws_placement_group.placement_group]
+  depends_on =  [module.security_group, module.network, module.iam, aws_vpc_endpoint.secretmanager_endpoint, aws_placement_group.placement_group]
 }
 
-resource "aws_autoscaling_group" "autoscaling_group" {
-  name = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-  #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
+resource "aws_autoscaling_group" "this" {
+  name                  = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+  availability_zones    = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
   desired_capacity      = var.cluster_size
   max_size              = var.cluster_size * 7
   min_size              = var.cluster_size
-  vpc_zone_identifier   = [local.subnet_ids[0]]
   suspended_processes   = ["ReplaceUnhealthy"]
   protect_from_scale_in = true
 
@@ -146,7 +159,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     value               = var.cluster_name
   }
   lifecycle {
-    ignore_changes = [desired_capacity, min_size, max_size]
+    ignore_changes = [desired_capacity, min_size, max_size, availability_zones]
   }
-  depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group]
+  depends_on =[module.network,module.iam, module.security_group,aws_launch_template.launch_template]
 }

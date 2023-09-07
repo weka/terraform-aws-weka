@@ -4,13 +4,25 @@ locals {
   region = data.aws_region.current.name
 }
 
+module "iam" {
+  count               = var.instance_iam_profile_arn == "" ? 1 : 0
+  source              = "./modules/iam"
+  prefix              = var.prefix
+  cluster_name        = var.cluster_name
+  state_table_name    = local.dynamodb_table_name
+  obs_name            = var.obs_name
+  secret_prefix       = local.secret_prefix
+  set_obs_integration = var.set_obs_integration
+}
+
 module "network" {
-  count              = length(var.subnet_ids) == 0 ? 1 : 0
-  source             = "./modules/network"
-  prefix             = var.prefix
-  availability_zones = var.availability_zones
-  private_network    = var.private_network
-  additional_subnet  = var.create_alb
+  count                = length(var.subnet_ids) == 0 ? 1 : 0
+  source               = "./modules/network"
+  prefix               = var.prefix
+  availability_zones   = var.availability_zones
+  private_network      = var.private_network
+  additional_subnet    = var.create_alb
+  depends_on           = [module.iam]
 }
 
 module "security_group" {
@@ -24,21 +36,10 @@ module "security_group" {
   depends_on            = [module.network]
 }
 
-module "iam" {
-  count               = var.instance_iam_profile_arn == "" ? 1 : 0
-  source              = "./modules/iam"
-  prefix              = var.prefix
-  cluster_name        = var.cluster_name
-  state_table_name    = local.dynamodb_table_name
-  obs_name            = var.obs_name
-  secret_prefix       = local.secret_prefix
-  set_obs_integration = var.set_obs_integration
-}
-
 locals {
-  subnet_ids                    = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
   additional_subnet_id          = var.create_alb ? var.additional_alb_subnet == "" ? module.network[0].additional_subnet_id : var.additional_alb_subnet : ""
   vpc_id                        = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
+  subnet_ids                    = length(var.subnet_ids) == 0 ? tolist(data.aws_subnets.this.ids) : var.subnet_ids
   sg_ids                        = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
   alb_sg_ids                    = var.create_alb ? length(var.alb_sg_ids) > 0 ? var.alb_sg_ids : local.sg_ids : []
   instance_iam_profile_arn      = var.instance_iam_profile_arn == "" ? module.iam[0].instance_iam_profile_arn : var.instance_iam_profile_arn
@@ -61,5 +62,5 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
     Name        = "${var.prefix}-secretmanager-endpoint"
     Environment = var.prefix
   }
-  depends_on = [module.network]
+  depends_on = [module.network, module.security_group]
 }
