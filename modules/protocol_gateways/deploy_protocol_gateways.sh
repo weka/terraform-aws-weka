@@ -64,8 +64,62 @@ echo "$(date -u): setting up weka frontend"
 # weka@ev-test-NFS-0:~$ weka nfs interface-group add test NFS
 # error: Error: Failed connecting to http://127.0.0.1:14000/api/v1. Make sure weka is running on this host by running
 # 	 weka local status | start
-sudo weka local setup container --name frontend0 --base-port 14000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips ${backend_lb_ip}
+# if alb_dns_name if not empty string, then use alb_dns_name as ips
+if [ -z "${lb_arn_suffix}" ]; then
+  # Function to get the private IPs of instances in Auto Scaling Group
+  get_private_ips() {
+    instance_ids=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${weka_cluster_name}'].Value, '${weka_cluster_name}')].Instances[].InstanceId" --output text --region ${region})
+    private_ips=$(aws ec2 describe-instances --instance-ids $instance_ids --query "Reservations[].Instances[].PrivateIpAddress" --output text --region ${region})
+    private_ips_array=($private_ips)
+  }
 
+  # Retry until the length of the array is not 'weka_cluster_size'
+  while true; do
+    get_private_ips
+    length=$${#private_ips_array[@]}
+    # if the length == weka_cluster_size , break out of the loop
+    if [ $length -eq ${weka_cluster_size} ]; then
+      break
+    fi
+    # sleep for a while (optional) and retry
+    echo "Waiting for all backend instances to be up... $length/$${weka_cluster_size}"
+    sleep 5
+  done
+
+  ips=$private_ips_array
+else
+
+  lb_ips=$(aws ec2 describe-network-interfaces --filters Name=description,Values="ELB ${lb_arn_suffix}" --query 'NetworkInterfaces[*].PrivateIpAddresses[*].PrivateIpAddress' --region ${region} --output text)
+  ips_list=$(echo $lb_ips |tr -d '\n')
+  IFS=' ' read -r -a ips <<< "$ips_list"
+
+fi
+
+backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
+
+# install weka using random backend ip from ips list
+function retry_weka_install {
+  retry_max=60
+  retry_sleep=30
+  count=$retry_max
+
+  while [ $count -gt 0 ]; do
+      sudo weka local setup container --name frontend0 --base-port 14000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips $backend_ip && break
+
+      count=$(($count - 1))
+      backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
+      echo "Retrying install frontend0 container from $backend_ip in $retry_sleep seconds..."
+      sleep $retry_sleep
+  done
+  [ $count -eq 0 ] && {
+      echo "install frontend0 container failed after $retry_max attempts"
+      echo "$(date -u): frontend0 container installation failed"
+      return 1
+  }
+  return 0
+}
+
+retry_weka_install
 
 # check that frontend container is up
 ready_containers=0

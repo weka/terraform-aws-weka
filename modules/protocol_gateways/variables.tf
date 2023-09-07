@@ -165,9 +165,9 @@ variable "proxy_url" {
   default     = ""
 }
 
-variable "backend_lb_ip" {
+variable "lb_arn_suffix" {
   type        = string
-  description = "Backend Load balance private ip"
+  description = "Backend Load ARN suffix"
 }
 
 variable "secret_prefix" {

@@ -43,7 +43,7 @@ locals {
     weka_cluster_name     = var.cluster_name
     region                = local.region
     weka_password_id      = var.weka_password_id
-    backend_lb_ip         = var.backend_lb_ip
+    lb_arn_suffix         = var.lb_arn_suffix
   })
 
   setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
