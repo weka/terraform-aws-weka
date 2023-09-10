@@ -39,6 +39,6 @@ module "protocol_gateways" {
   vm_username              = var.weka_username
   weka_password_id         = aws_secretsmanager_secret.weka_password.id
   proxy_url                = var.proxy_url
-  secret_prefix            = "weka/${var.prefix}-${var.cluster_name}/"
+  secret_prefix            = local.secret_prefix
   depends_on               = [aws_autoscaling_group.autoscaling_group, aws_lb.alb]
 }
