@@ -13,7 +13,7 @@ module "clients" {
   weka_cluster_size        = var.cluster_size
   alb_dns_name             = var.create_alb ? aws_lb.alb[0].dns_name : null
   key_pair_name            = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
-  assign_public_ip         = var.private_network ? false : true
+  assign_public_ip         = var.assign_public_ip
   placement_group_name     = var.client_placement_group_name
   root_volume_size         = var.client_root_volume_size
   ami_id                   = var.client_instance_ami_id
