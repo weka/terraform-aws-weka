@@ -36,7 +36,7 @@ locals {
 
   deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
     subnet_prefixes       = data.aws_subnet.selected.cidr_block
-    frontend_num          = var.frontend_num
+    frontend_cores_num    = var.frontend_cores_num
     nics_num              = var.nics_numbers
     secondary_ips_per_nic = var.secondary_ips_per_nic
     weka_cluster_size     = var.weka_cluster_size
@@ -52,9 +52,25 @@ locals {
     client_group_name    = var.client_group_name
   })
 
-  setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {})
+  setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {
+    cluster_name        = var.smb_cluster_name
+    domain_name         = var.smb_domain_name
+    domain_netbios_name = var.smb_domain_netbios_name
+    smbw_enabled        = var.smbw_enabled
+    domain_username     = var.smb_domain_username
+    domain_password     = var.smb_domain_password
+    dns_ip              = var.smb_dns_ip_address
+    gateways_number     = var.gateways_number
+    gateways_name       = var.gateways_name
+    frontend_cores_num  = var.frontend_cores_num
+    share_name          = var.smb_share_name
+    region               = local.region
 
-  setup_protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
+  })
+
+  protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
+
+  setup_protocol_script = var.setup_protocol ? local.protocol_script : ""
 
   custom_data_parts = [
     local.init_script, local.deploy_script, local.setup_protocol_script
@@ -128,6 +144,7 @@ resource "aws_launch_template" "this" {
         Name                = var.gateways_name
         weka_hostgroup_type = "gateways-protocol"
         user                = data.aws_caller_identity.current.user_id
+        protocol            = var.protocol
       })
     }
   }
@@ -143,6 +160,18 @@ resource "aws_instance" "this" {
 
   lifecycle {
     ignore_changes = [tags, launch_template, user_data]
+    precondition {
+      condition     = var.protocol == "NFS" ? var.gateways_number >= 1 : var.gateways_number >= 3 && var.gateways_number <= 8
+      error_message = "The amount of protocol gateways should be at least 1 for NFS and at least 3 and at most 8 for SMB."
+    }
+    precondition {
+      condition     = var.protocol == "SMB" ? var.smb_domain_name != "" : true
+      error_message = "The SMB domain name should be set when deploying SMB protocol gateways."
+    }
+    precondition {
+      condition     = var.protocol == "SMB" ? var.secondary_ips_per_nic <= 3 : true
+      error_message = "The number of secondary IPs per single NIC per protocol gateway virtual machine must be at most 3 for SMB."
+    }
   }
 
   depends_on = [aws_placement_group.this, aws_iam_instance_profile.this, aws_iam_role.this]

@@ -11,6 +11,7 @@ locals {
   lambdas_hash            = md5(join("", [for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")]))
   stripe_width_calculated = var.cluster_size - var.protection_level - 1
   stripe_width            = local.stripe_width_calculated < 16 ? local.stripe_width_calculated : 16
+  install_weka_url        = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}"
 }
 
 resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
@@ -43,7 +44,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       NUM_COMPUTE_CONTAINERS  = var.add_frontend_container ? var.container_number_map[var.instance_type].compute : var.container_number_map[var.instance_type].compute + 1
       NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
       NUM_DRIVE_CONTAINERS    = var.container_number_map[var.instance_type].drive
-      INSTALL_URL             = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}?provider=aws&region=${local.region}"
+      INSTALL_URL             = local.install_weka_url
       NICS_NUM                = var.container_number_map[var.instance_type].nics
       CLUSTERIZE_LAMBDA_NAME  = aws_lambda_function.clusterize_lambda.function_name
       REPORT_LAMBDA_NAME      = aws_lambda_function.report_lambda.function_name
@@ -89,6 +90,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       OBS_TIERING_SSD_PERCENT = var.tiering_ssd_percent
       NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
       PROXY_URL               = var.proxy_url
+      SMBW_ENABLED            = var.smbw_enabled
       # pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name

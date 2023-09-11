@@ -48,8 +48,14 @@ echo $(aws ec2 describe-instances --filters "Name=tag-value,Values='${module.cli
 EOT
 }
 
-output "protocol_gateways_ips" {
-  value = var.protocol_gateways_number == 0 ? null : <<EOT
-aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}'
+output "smb_protocol_gateways_ips" {
+  value = var.smb_protocol_gateways_number == 0 ? null : <<EOT
+ echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.smb_protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
+EOT
+}
+
+output "nfs_protocol_gateways_ips" {
+  value = var.nfs_protocol_gateways_number == 0 ? null : <<EOT
+ echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.nfs_protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
 EOT
 }

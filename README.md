@@ -359,25 +359,29 @@ client_instance_type = "c5.2xlarge"
 client_nics_num = DESIRED_NUM
 ```
 
-
-## Protocol Gateways
+## NFS Protocol Gateways
 We support creating protocol gateways that will be mounted automatically to the cluster.
 <br>In order to create you need to provide the number of protocol gateways instances you want (by default the number is 0),
 for example:
 ```hcl
-protocol_gateways_number = 2
+nfs_protocol_gateways_number = 2
 ```
 This will automatically create 2 instances.
 <br>In addition you can supply these optional variables:
 ```hcl
-protocol                                  = VALUE
-protocol_gateway_secondary_ips_per_nic    = 3
-protocol_gateway_instance_type            = "c5.2xlarge"
-protocol_gateway_nics_num                 = 2
-protocol_gateway_disk_size                = 48
-protocol_gateway_frontend_num             = 1
-protocol_gateway_instance_iam_profile_arn = ""
+nfs_protocol_gateway_secondary_ips_per_nic    = 3
+nfs_protocol_gateway_instance_type            = "c5.2xlarge"
+nfs_protocol_gateway_nics_num                 = 2
+nfs_protocol_gateway_disk_size                = 48
+nfs_protocol_gateway_frontend_cores_num       = 1
+nfs_protocol_gateway_instance_iam_profile_arn = ""
 ```
+
+<br>In order to create stateless clients, need to set variable:
+```hcl
+nfs_setup_protocol = true
+```
+
 ### prerequisites:
 - protocol_gateway_instance_iam_profile_arn
 <details>
@@ -439,6 +443,108 @@ protocol_gateway_instance_iam_profile_arn = ""
   ]
 }
 
+```
+
+
+## SMB Protocol Gateways
+We support creating protocol gateways that will be mounted automatically to the cluster.
+<br>In order to create you need to provide the number of protocol gateways instances you want (by default the number is 0),
+
+*The amount of SMB protocol gateways should be at least 3.*
+</br>
+for example:
+```hcl
+smb_protocol_gateways_number = 3
+```
+This will automatically create 2 instances.
+<br>In addition you can supply these optional variables:
+```hcl
+smb_protocol_gateway_secondary_ips_per_nic    = 3
+smb_protocol_gateway_instance_type            = "c5.2xlarge"
+smb_protocol_gateway_nics_num                 = 2
+smb_protocol_gateway_disk_size                = 48
+smb_protocol_gateway_frontend_cores_num       = 1
+smb_protocol_gateway_instance_iam_profile_arn = ""
+smb_cluster_name                              = ""
+smb_domain_name                               = ""
+smb_domain_netbios_name                       = ""
+smb_domain_username                           = ""
+smb_domain_password                           = ""
+smb_dns_ip_address                            = ""
+smb_share_name                                = ""
+
+```
+
+<br>In order to create stateless clients, need to set variable:
+```hcl
+smb_setup_protocol = true
+```
+
+<br>In order to enable SMBW, need to set variable:
+```hcl
+smbw_enabled = true
+```
+
+### prerequisites:
+- protocol_gateway_instance_iam_profile_arn
+<details>
+<summary>Protocol gateway iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:AttachNetworkInterface",
+      "ec2:CreateNetworkInterface",
+      "ec2:ModifyNetworkInterfaceAttribute",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeInstances"
+    ]
+    "Resource":  "*",
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "secretsmanager:GetSecretValue"
+    ]
+    "Resource":
+    [
+      "arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"
+    ]
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogStreams",
+      "logs:PutRetentionPolicy"
+    ]
+    "Resource":
+    [
+      "arn:aws:logs:*:*:log-group:/wekaio/clients/${var.gateways_name}*"
+    ]
+    },
+    {
+      "Effect": "Allow",
+      "Action":
+    [
+      "autoscaling:DescribeAutoScalingGroups"
+    ],
+    "Resource":
+    [
+      "*"
+    ]
+    }
+  ]
+}
 ```
 
 ## Secret manager
