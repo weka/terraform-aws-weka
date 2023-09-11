@@ -37,6 +37,8 @@ github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=
 github.com/weka/go-cloud-lib v0.0.0-20230811031048-8602f69799df h1:kQOJ6MN56PtUvxM+2slFHrC9BGb8kzvLqxsGnPNHM1Y=
 github.com/weka/go-cloud-lib v0.0.0-20230811031048-8602f69799df/go.mod h1:lT0kVeV0d4HznnITUHbHN6JunpqyL4q9McAYr78YNm4=
+github.com/weka/go-cloud-lib v0.0.0-20230814155319-b351c2b1cee8 h1:D/h8wk3mxoXgocjHjc0lFktrB479utypoy+0x/58+eM=
+github.com/weka/go-cloud-lib v0.0.0-20230814155319-b351c2b1cee8/go.mod h1:lT0kVeV0d4HznnITUHbHN6JunpqyL4q9McAYr78YNm4=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=

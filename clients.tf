@@ -20,6 +20,5 @@ module "clients" {
   sg_ids                   = local.sg_ids
   tags_map                 = var.tags_map
   instance_iam_profile_arn = var.client_instance_iam_profile_arn
-
-  depends_on = [aws_autoscaling_group.autoscaling_group]
+  depends_on               = [aws_autoscaling_group.autoscaling_group, module.network]
 }

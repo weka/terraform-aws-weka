@@ -1,5 +1,5 @@
 FAILURE_DOMAIN=$(printf $(hostname -I) | sha256sum | tr -d '-' | cut -c1-16)
-NUM_FRONTEND_CONTAINERS=${frontend_num}
+NUM_FRONTEND_CORES=${frontend_cores_num}
 NICS_NUM=${nics_num}
 SUBNET_PREFIXES=( "${subnet_prefixes}" )
 GATEWAYS=""
@@ -55,7 +55,7 @@ getNetStrForDpdk() {
 }
 
 # weka containers setup
-get_core_ids $NUM_FRONTEND_CONTAINERS frontend_core_ids
+get_core_ids $NUM_FRONTEND_CORES frontend_core_ids
 
 getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$GATEWAYS" "$SUBNETS"
 
@@ -98,28 +98,31 @@ fi
 backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
 
 # install weka using random backend ip from ips list
-function retry_weka_install {
+function retry_command {
   retry_max=60
   retry_sleep=30
   count=$retry_max
+  command=$1
+  msg=$2
+
 
   while [ $count -gt 0 ]; do
-      sudo weka local setup container --name frontend0 --base-port 14000 --cores $NUM_FRONTEND_CONTAINERS --frontend-dedicated-cores $NUM_FRONTEND_CONTAINERS --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips $backend_ip && break
-
+      $command && break
       count=$(($count - 1))
       backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
-      echo "Retrying install frontend0 container from $backend_ip in $retry_sleep seconds..."
+      echo "Retrying $msg in $retry_sleep seconds..."
       sleep $retry_sleep
   done
   [ $count -eq 0 ] && {
-      echo "install frontend0 container failed after $retry_max attempts"
-      echo "$(date -u): frontend0 container installation failed"
+      echo "$msg failed after $retry_max attempts"
+      echo "$(date -u): $msg installation failed"
       return 1
   }
   return 0
 }
 
-retry_weka_install
+run_container_cmd="sudo weka local setup container --name frontend0 --base-port 14000 --cores $NUM_FRONTEND_CORES --frontend-dedicated-cores $NUM_FRONTEND_CORES --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips $backend_ip"
+retry_command "$run_container_cmd"  "install frontend0 container"
 
 # check that frontend container is up
 ready_containers=0
@@ -133,9 +136,12 @@ done
 echo "$(date -u): frontend is up"
 
 # login to weka
+echo "$(date -u): try to run weka login command"
 TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
 weka_password=$(aws secretsmanager get-secret-value --region "$region" --secret-id ${weka_password_id} --query SecretString --output text)
 
-weka user login admin $weka_password
+retry_command "weka user login admin $weka_password" "login to weka cluster"
+echo "$(date -u): success to run weka login command"
 
 rm -rf $INSTALLATION_PATH
+

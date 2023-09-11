@@ -113,13 +113,16 @@ function retry {
   return 0
 }
 
+echo "$(date -u): Retry mount client"
 mount_command="mount -t wekafs -o net=udp $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 if [[ ${mount_clients_dpdk} == true ]]; then
-  getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$gateways"
-  mount_command="mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
+    getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$gateways"
+    mount_command="mount -t wekafs $net -o num_cores=1 -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
 retry 60 45 $mount_command
+echo "$(date -u): wekafs mount complete"
+
 
 rm -rf $INSTALLATION_PATH
-echo "$(date -u): wekafs mount complete"
+echo "$(date -u): client setup complete"
