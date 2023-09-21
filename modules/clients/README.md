@@ -65,5 +65,6 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | n/a |
 | <a name="output_clients_name"></a> [clients\_name](#output\_clients\_name) | n/a |
 <!-- END_TF_DOCS -->
