@@ -1,5 +1,5 @@
 locals {
-  ips_type = var.private_network ? "PrivateIpAddress" : "PublicIpAddress"
+  ips_type = var.assign_public_ip ? "PrivateIpAddress" : "PublicIpAddress"
 }
 
 output "ssh_user" {
@@ -43,9 +43,7 @@ EOT
 }
 
 output "client_ips" {
-  value = var.clients_number == 0 ? null : <<EOT
-echo $(aws ec2 describe-instances --filters "Name=tag-value,Values='${module.clients[0].clients_name}'" --query "Reservations[*].Instances[*].${local.ips_type}" --output text)
-EOT
+  value = var.clients_number == 0 ? null : module.clients[0].client_ips
 }
 
 output "smb_protocol_gateways_ips" {
