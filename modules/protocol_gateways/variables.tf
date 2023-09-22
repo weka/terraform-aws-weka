@@ -3,9 +3,9 @@ variable "availability_zone" {
   description = "AZ in which all the resources will be deployed"
 }
 
-variable "cluster_name" {
+variable "backends_asg_name" {
   type        = string
-  description = "Cluster prefix for all resources"
+  description = "Name of the backends autoscaling group"
 }
 
 variable "nics_numbers" {
@@ -218,7 +218,7 @@ variable "smb_dns_ip_address" {
 }
 
 variable "smb_share_name" {
-  type       = string
+  type        = string
   description = "The name of the SMB share"
   default     = ""
 }
