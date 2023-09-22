@@ -1,5 +1,5 @@
 locals {
-  ips_type = var.assign_public_ip ? "PrivateIpAddress" : "PublicIpAddress"
+  ips_type = var.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
 }
 
 output "ssh_user" {
