@@ -37,7 +37,7 @@ locals {
     all_gateways       = join(" ", [for i in range(var.nics_numbers) : cidrhost(data.aws_subnet.selected.cidr_block, 1)])
     nics_num           = var.nics_numbers
     weka_cluster_size  = var.weka_cluster_size
-    weka_cluster_name  = var.weka_cluster_name
+    backends_asg_name  = var.backends_asg_name
     mount_clients_dpdk = var.mount_clients_dpdk
     region             = local.region
     alb_dns_name       = var.alb_dns_name != null ? var.alb_dns_name : ""

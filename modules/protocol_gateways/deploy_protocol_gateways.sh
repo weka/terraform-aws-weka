@@ -68,7 +68,7 @@ echo "$(date -u): setting up weka frontend"
 if [ -z "${lb_arn_suffix}" ]; then
   # Function to get the private IPs of instances in Auto Scaling Group
   get_private_ips() {
-    instance_ids=$(aws autoscaling describe-auto-scaling-groups --query "AutoScalingGroups[?contains(Tags[?Value=='${weka_cluster_name}'].Value, '${weka_cluster_name}')].Instances[].InstanceId" --output text --region ${region})
+    instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${backends_asg_name}" --query "AutoScalingGroups[].Instances[].InstanceId" --output text --region ${region})
     private_ips=$(aws ec2 describe-instances --instance-ids $instance_ids --query "Reservations[].Instances[].PrivateIpAddress" --output text --region ${region})
     private_ips_array=($private_ips)
   }
@@ -144,4 +144,3 @@ retry_command "weka user login admin $weka_password" "login to weka cluster"
 echo "$(date -u): success to run weka login command"
 
 rm -rf $INSTALLATION_PATH
-

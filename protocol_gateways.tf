@@ -10,7 +10,7 @@ module "smb_protocol_gateways" {
   nics_numbers             = var.smb_protocol_gateway_nics_num
   secondary_ips_per_nic    = var.smb_protocol_gateway_secondary_ips_per_nic
   lb_arn_suffix            = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
-  cluster_name             = var.cluster_name
+  backends_asg_name        = aws_autoscaling_group.autoscaling_group.name
   instance_type            = var.smb_protocol_gateway_instance_type
   weka_cluster_size        = var.cluster_size
   key_pair_name            = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
@@ -51,7 +51,7 @@ module "nfs_protocol_gateways" {
   nics_numbers             = var.nfs_protocol_gateway_nics_num
   secondary_ips_per_nic    = var.nfs_protocol_gateway_secondary_ips_per_nic
   lb_arn_suffix            = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
-  cluster_name             = var.cluster_name
+  backends_asg_name        = aws_autoscaling_group.autoscaling_group.name
   instance_type            = var.nfs_protocol_gateway_instance_type
   weka_cluster_size        = var.cluster_size
   key_pair_name            = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name

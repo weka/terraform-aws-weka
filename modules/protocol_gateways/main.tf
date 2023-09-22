@@ -40,7 +40,7 @@ locals {
     nics_num              = var.nics_numbers
     secondary_ips_per_nic = var.secondary_ips_per_nic
     weka_cluster_size     = var.weka_cluster_size
-    weka_cluster_name     = var.cluster_name
+    backends_asg_name     = var.backends_asg_name
     region                = local.region
     weka_password_id      = var.weka_password_id
     lb_arn_suffix         = var.lb_arn_suffix
@@ -62,7 +62,7 @@ locals {
     gateways_name       = var.gateways_name
     frontend_cores_num  = var.frontend_cores_num
     share_name          = var.smb_share_name
-    region               = local.region
+    region              = local.region
 
   })
 

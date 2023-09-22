@@ -13,9 +13,9 @@ variable "weka_cluster_size" {
   description = "Number of backends in the weka cluster"
 }
 
-variable "weka_cluster_name" {
+variable "backends_asg_name" {
   type        = string
-  description = "Name of the weka cluster"
+  description = "Name of the backends autoscaling group"
 }
 
 variable "nics_numbers" {

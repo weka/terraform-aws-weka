@@ -9,7 +9,7 @@ module "clients" {
   proxy_url                = var.proxy_url
   nics_numbers             = var.mount_clients_dpdk ? var.client_nics_num : 1
   instance_type            = var.client_instance_type
-  weka_cluster_name        = var.cluster_name
+  backends_asg_name        = aws_autoscaling_group.autoscaling_group.name
   weka_cluster_size        = var.cluster_size
   alb_dns_name             = var.create_alb ? aws_lb.alb[0].dns_name : null
   key_pair_name            = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
