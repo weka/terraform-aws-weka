@@ -1,6 +1,6 @@
 locals {
-  handler_name = "lambdas"
-  source_dir   = "${path.module}/${local.handler_name}"
+  handler_name = "bootstrap"
+  source_dir   = "${path.module}/lambdas"
   s3_bucket    = "weka-tf-aws-releases-${local.region}"
   s3_key       = "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions = toset([
@@ -28,7 +28,8 @@ resource "aws_lambda_function" "deploy_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA                  = "deploy"
@@ -69,7 +70,8 @@ resource "aws_lambda_function" "clusterize_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA                  = "clusterize"
@@ -107,7 +109,8 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA               = "clusterizeFinalization"
@@ -129,7 +132,8 @@ resource "aws_lambda_function" "report_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA               = "report"
@@ -151,7 +155,8 @@ resource "aws_lambda_function" "status_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA               = "status"
@@ -173,7 +178,8 @@ resource "aws_lambda_function" "fetch_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA                     = "fetch"
@@ -199,7 +205,8 @@ resource "aws_lambda_function" "scale_down_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   vpc_config {
     security_group_ids = local.sg_ids
     subnet_ids         = local.subnet_ids
@@ -225,7 +232,8 @@ resource "aws_lambda_function" "transient_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA       = "transient"
@@ -245,7 +253,8 @@ resource "aws_lambda_function" "terminate_lambda" {
   role          = local.lambda_iam_role_arn
   memory_size   = 128
   timeout       = 20
-  runtime       = "go1.x"
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
   environment {
     variables = {
       LAMBDA       = "terminate"
