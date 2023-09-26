@@ -27,10 +27,11 @@ mkdir -p $func_zip_dir
 cd $function_code_path
 
 # Build the function app
-GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o lambdas
+# See: https://aws.amazon.com/blogs/compute/migrating-aws-lambda-functions-from-the-go1-x-runtime-to-the-custom-runtime-on-amazon-linux-2/
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -tags lambda.norpc -o bootstrap
 echo "Function code built."
 
 echo "Creating zip archive..."
-zip $function_zip_path lambdas
-rm lambdas
+zip $function_zip_path bootstrap
+rm bootstrap
 echo "Zip archive created: $function_zip_path"
