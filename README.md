@@ -723,6 +723,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_use_secretmanager_endpoint"></a> [use\_secretmanager\_endpoint](#input\_use\_secretmanager\_endpoint) | Use secret manager endpoint | `bool` | `true` | no |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | The user name for logging in to the virtual machines. | `string` | `"ec2-user"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID, required only for security group creation | `string` | `""` | no |
+| <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
 | <a name="input_weka_username"></a> [weka\_username](#input\_weka\_username) | Weka cluster username | `string` | `"admin"` | no |
 | <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.1"` | no |
 
