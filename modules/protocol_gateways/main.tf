@@ -93,10 +93,10 @@ resource "aws_launch_template" "this" {
   update_default_version               = true
 
   block_device_mappings {
-    device_name = "/dev/xvda" # root device
+    device_name = "/dev/xvda"
     ebs {
       volume_size           = var.disk_size
-      volume_type           = "gp2"
+      volume_type           = "gp3"
       delete_on_termination = true
     }
   }
