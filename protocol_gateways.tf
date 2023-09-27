@@ -24,7 +24,6 @@ module "smb_protocol_gateways" {
   frontend_cores_num       = var.smb_protocol_gateway_frontend_cores_num
   install_weka_url         = local.install_weka_url
   weka_token_id            = aws_secretsmanager_secret.get_weka_io_token.id
-  vm_username              = var.weka_username
   weka_password_id         = aws_secretsmanager_secret.weka_password.id
   proxy_url                = var.proxy_url
   secret_prefix            = local.secret_prefix
@@ -65,7 +64,6 @@ module "nfs_protocol_gateways" {
   frontend_cores_num       = var.nfs_protocol_gateway_frontend_cores_num
   install_weka_url         = local.install_weka_url
   weka_token_id            = aws_secretsmanager_secret.get_weka_io_token.id
-  vm_username              = var.weka_username
   weka_password_id         = aws_secretsmanager_secret.weka_password.id
   proxy_url                = var.proxy_url
   secret_prefix            = local.secret_prefix
