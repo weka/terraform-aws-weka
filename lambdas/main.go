@@ -62,6 +62,7 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("NUM_FRONTEND_CONTAINERS"))
 	proxyUrl := os.Getenv("PROXY_URL")
 	smbwEnabled, _ := strconv.ParseBool(os.Getenv("SMBW_ENABLED"))
+	wekaHomeUrl := os.Getenv("WEKA_HOME_URL")
 
 	addFrontend := false
 	if addFrontendNum > 0 {
@@ -94,6 +95,7 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 			},
 			AddFrontend: addFrontend,
 			ProxyUrl:    proxyUrl,
+			WekaHomeUrl: wekaHomeUrl,
 		},
 		Obs: protocol.ObsParams{
 			Name:              obsName,

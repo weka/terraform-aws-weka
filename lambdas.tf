@@ -93,6 +93,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
       PROXY_URL               = var.proxy_url
       SMBW_ENABLED            = var.smbw_enabled
+      WEKA_HOME_URL           = var.weka_home_url
       # pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name

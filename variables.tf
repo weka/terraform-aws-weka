@@ -272,7 +272,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "3f3116162411b91d15a1c22a6d1f4401"
+  default     = "4044dfdcd83a6ce5a23d96e1454b0c06"
 }
 
 variable "lambdas_dist" {
@@ -546,4 +546,10 @@ variable "smb_share_name" {
   type        = string
   description = "The name of the SMB share"
   default     = "default"
+}
+
+variable "weka_home_url" {
+  type        = string
+  description = "Weka Home url"
+  default     = ""
 }
