@@ -4,11 +4,11 @@ output "clients_name" {
 
 locals {
   public_ips = [
-    for i in range(var.var.clients_number) :
+    for i in range(var.clients_number) :
     aws_instance.this[i].public_ip
   ]
   private_ips = [
-    for i in range(var.var.clients_number) :
+    for i in range(var.clients_number) :
     aws_instance.this[i].private_ip
   ]
 }

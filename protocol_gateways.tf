@@ -33,7 +33,6 @@ module "smb_protocol_gateways" {
   smb_dns_ip_address       = var.smb_dns_ip_address
   smb_share_name           = var.smb_share_name
   smbw_enabled             = var.smbw_enabled
-  backend_frontend_num     = var.cluster_size * var.container_number_map[var.instance_type].frontend
   depends_on               = [aws_autoscaling_group.autoscaling_group, aws_lb.alb, module.network]
 }
 
