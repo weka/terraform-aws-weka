@@ -60,7 +60,7 @@ locals {
     frontend_container_cores_num = var.frontend_container_cores_num
     share_name                   = var.smb_share_name
     region                       = local.region
-
+    secondary_ips_number         = var.secondary_ips_per_nic
   })
 
   protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
