@@ -75,7 +75,7 @@ variable "container_number_map" {
     memory   = list(string)
   }))
   description = "Maps the number of objects and memory size per machine type."
-  default = {
+  default     = {
     "i3en.2xlarge" = {
       compute  = 1
       drive    = 1
@@ -552,4 +552,28 @@ variable "weka_home_url" {
   type        = string
   description = "Weka Home url"
   default     = ""
+}
+
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR block of the vpc"
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnets_cidr" {
+  type        = list(string)
+  description = "CIDR block for public subnet"
+  default     = ["10.0.1.0/24"]
+}
+
+variable "additional_subnet_cidr" {
+  type        = string
+  description = "Additional CIDR block for public subnet"
+  default     = "10.0.3.0/24"
+}
+
+variable "private_subnets_cidr" {
+  type        = list(string)
+  description = "CIDR block for private subnet"
+  default     = ["10.0.2.0/24"]
 }

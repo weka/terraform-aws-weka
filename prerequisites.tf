@@ -5,12 +5,17 @@ locals {
 }
 
 module "network" {
-  count              = length(var.subnet_ids) == 0 ? 1 : 0
-  source             = "./modules/network"
-  prefix             = var.prefix
-  availability_zones = var.availability_zones
-  private_network    = var.private_network
-  additional_subnet  = var.create_alb
+  count                  = length(var.subnet_ids) == 0 ? 1 : 0
+  source                 = "./modules/network"
+  prefix                 = var.prefix
+  availability_zones     = var.availability_zones
+  private_network        = var.private_network
+  additional_subnet      = var.create_alb
+  vpc_cidr               = var.vpc_cidr
+  public_subnets_cidr    = var.public_subnets_cidr
+  additional_subnet_cidr = var.additional_subnet_cidr
+  private_subnets_cidr   = var.private_subnets_cidr
+
 }
 
 module "security_group" {
@@ -58,7 +63,7 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   security_group_ids  = local.secretmanager_endpoint_sg_ids
   subnet_ids          = local.subnet_ids
   private_dns_enabled = true
-  tags = {
+  tags                = {
     Name        = "${var.prefix}-secretmanager-endpoint"
     Environment = var.prefix
   }
