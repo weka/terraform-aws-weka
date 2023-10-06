@@ -17,12 +17,12 @@ if [ -z "${alb_dns_name}" ]; then
   while true; do
     get_private_ips
     length=$${#private_ips_array[@]}
-    # if the length == weka_cluster_size , break out of the loop
-    if [ $length -eq ${weka_cluster_size} ]; then
+    # if the length >= weka_cluster_size , break out of the loop
+    if [ $length -ge ${weka_cluster_size} ]; then
       break
     fi
     # sleep for a while (optional) and retry
-    echo "Waiting for all backend instances to be up... $length/$${weka_cluster_size}"
+    echo "Waiting for all backend instances to be up... $length/${weka_cluster_size}"
     sleep 5
   done
 
