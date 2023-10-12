@@ -43,7 +43,7 @@ locals {
     alb_dns_name       = var.alb_dns_name != null ? var.alb_dns_name : ""
   })
 
-  custom_data_parts = [local.preparation_script, local.mount_wekafs_script]
+  custom_data_parts = [local.preparation_script, local.mount_wekafs_script, "${var.custom_data}\n"]
   custom_data       = base64encode(join("\n", local.custom_data_parts))
 }
 

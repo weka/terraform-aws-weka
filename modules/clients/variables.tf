@@ -100,3 +100,9 @@ variable "alb_dns_name" {
   description = "ALB DNS name"
   default     = null
 }
+
+variable "custom_data" {
+    type        = string
+    description = "Custom data to pass to the instances"
+    default     = ""
+}
