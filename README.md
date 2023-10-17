@@ -681,7 +681,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | Lambda IAM role ARN | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"9a9cfb96bd2a9411d5a3683c3ef5e69d"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"daa0aa6a387bc8ed0b58b066b0ad598a"` | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_nfs_protocol_gateway_disk_size"></a> [nfs\_protocol\_gateway\_disk\_size](#input\_nfs\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateway_frontend_cores_num"></a> [nfs\_protocol\_gateway\_frontend\_cores\_num](#input\_nfs\_protocol\_gateway\_frontend\_cores\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
