@@ -114,7 +114,15 @@ variable "container_number_map" {
       frontend = 1
       nvme     = 8
       nics     = 15
-      memory   = ["637.1GB", "573.6GB"]
+      memory   = ["384GB", "384GB"]
+    },
+    "p5.48xlarge" = {
+      compute  = 12
+      drive    = 3
+      frontend = 2
+      nvme     = 6
+      nics     = 18
+      memory   = ["384GB", "384GB"]
     }
   }
 }
