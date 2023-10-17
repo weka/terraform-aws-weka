@@ -272,7 +272,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "e59e6d00e963d71434b3d7aa08883bfa"
+  default     = "3aec35033eef8d8e7805ef952c74a7cf"
 }
 
 variable "lambdas_dist" {
@@ -552,4 +552,23 @@ variable "weka_home_url" {
   type        = string
   description = "Weka Home url"
   default     = ""
+}
+
+############################### vpc endpoint services ############################
+variable "create_ec2_endpoint" {
+  type        = bool
+  default     = false
+  description = "Create Ec2 endpoint"
+}
+
+variable "create_s3_gateway_endpoint" {
+  type        = bool
+  default     = false
+  description = "Create S3 gateway endpoint"
+}
+
+variable "create_proxy_endpoint" {
+  type        = bool
+  default     = false
+  description = "Create proxy endpoint"
 }
