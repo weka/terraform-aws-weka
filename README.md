@@ -560,6 +560,18 @@ On your weka deployment module and we not use it. In this case the weka username
 <br>In case you want to use secret manager, and would like to create the endpoint automatically,
 you can set: `create_secretmanager_endpoint=true`
 
+### Endpoint
+In case you want to use endpoints for `S3 gateway endpoint` / `proxy endpoint`/ `ec2 endpoint`.
+The default value is `False`
+<br>you can set:
+```
+create_proxy_endpoint = true
+create_s3_gateway_endpoint = true
+create_ec2_endpoint = true
+```
+
+
+
 ## Terraform output
 The module output contains useful information about the created resources.
 For example: ssh username, weka password secret id etc.

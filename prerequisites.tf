@@ -35,11 +35,26 @@ module "iam" {
   set_obs_integration = var.set_obs_integration
 }
 
+module "vpc_endpoint" {
+  count                      = var.create_ec2_endpoint || var.create_s3_gateway_endpoint || var.create_proxy_endpoint ? 1 : 0
+  source                     = "./modules/endpoint"
+  region                     = data.aws_region.current.name
+  create_ec2_endpoint        = var.create_ec2_endpoint
+  create_s3_gateway_endpoint = var.create_s3_gateway_endpoint
+  create_proxy_endpoint      = var.create_proxy_endpoint
+  prefix                     = var.prefix
+  vpc_id                     = local.vpc_id
+  sg_ids                     = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
+  subnet_ids                 = local.subnet_ids
+  depends_on                 = [module.network]
+}
+
 locals {
+  endpoint_sg_id                = var.create_proxy_endpoint ? [module.vpc_endpoint[0].endpoint_sg_id] : []
   subnet_ids                    = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
   additional_subnet_id          = var.create_alb ? var.additional_alb_subnet == "" ? module.network[0].additional_subnet_id : var.additional_alb_subnet : ""
   vpc_id                        = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
-  sg_ids                        = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
+  sg_ids                        = length(var.sg_ids) == 0 ? concat(module.security_group[0].sg_ids, local.endpoint_sg_id) : concat(var.sg_ids, local.endpoint_sg_id)
   alb_sg_ids                    = var.create_alb ? length(var.alb_sg_ids) > 0 ? var.alb_sg_ids : local.sg_ids : []
   instance_iam_profile_arn      = var.instance_iam_profile_arn == "" ? module.iam[0].instance_iam_profile_arn : var.instance_iam_profile_arn
   lambda_iam_role_arn           = var.lambda_iam_role_arn == "" ? module.iam[0].lambda_iam_role_arn : var.lambda_iam_role_arn
