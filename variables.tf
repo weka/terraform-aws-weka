@@ -257,12 +257,6 @@ variable "proxy_url" {
   default     = ""
 }
 
-variable "weka_home_proxy_url" {
-  type        = string
-  description = "Weka home proxy url"
-  default     = ""
-}
-
 variable "dynamodb_table_name" {
   type        = string
   description = "DynamoDB table name, if not supplied a new table will be created"
@@ -278,7 +272,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "9b8aa1a338703a7aa2ec2dc2728485ad"
+  default     = "e59e6d00e963d71434b3d7aa08883bfa"
 }
 
 variable "lambdas_dist" {
