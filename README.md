@@ -607,6 +607,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="module_nfs_protocol_gateways"></a> [nfs\_protocol\_gateways](#module\_nfs\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | ./modules/security_group | n/a |
 | <a name="module_smb_protocol_gateways"></a> [smb\_protocol\_gateways](#module\_smb\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
+| <a name="module_vpc_endpoint"></a> [vpc\_endpoint](#module\_vpc\_endpoint) | ./modules/endpoint | n/a |
 
 ## Resources
 
@@ -681,6 +682,9 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_cluster_size"></a> [cluster\_size](#input\_cluster\_size) | The number of virtual machines to deploy. | `number` | `6` | no |
 | <a name="input_container_number_map"></a> [container\_number\_map](#input\_container\_number\_map) | Maps the number of objects and memory size per machine type. | <pre>map(object({<br>    compute  = number<br>    drive    = number<br>    frontend = number<br>    nvme     = number<br>    nics     = number<br>    memory   = list(string)<br>  }))</pre> | <pre>{<br>  "i3en.12xlarge": {<br>    "compute": 4,<br>    "drive": 2,<br>    "frontend": 1,<br>    "memory": [<br>      "310.7GB",<br>      "310.4GB"<br>    ],<br>    "nics": 8,<br>    "nvme": 4<br>  },<br>  "i3en.24xlarge": {<br>    "compute": 9,<br>    "drive": 4,<br>    "frontend": 1,<br>    "memory": [<br>      "637.1GB",<br>      "573.6GB"<br>    ],<br>    "nics": 15,<br>    "nvme": 8<br>  },<br>  "i3en.2xlarge": {<br>    "compute": 1,<br>    "drive": 1,<br>    "frontend": 1,<br>    "memory": [<br>      "32.9GB",<br>      "32.64GB"<br>    ],<br>    "nics": 4,<br>    "nvme": 2<br>  },<br>  "i3en.3xlarge": {<br>    "compute": 1,<br>    "drive": 1,<br>    "frontend": 1,<br>    "memory": [<br>      "62.GB",<br>      "61.7GB"<br>    ],<br>    "nics": 4,<br>    "nvme": 1<br>  },<br>  "i3en.6xlarge": {<br>    "compute": 5,<br>    "drive": 1,<br>    "frontend": 1,<br>    "memory": [<br>      "136.5GB",<br>      "136.2GB"<br>    ],<br>    "nics": 8,<br>    "nvme": 2<br>  }<br>}</pre> | no |
 | <a name="input_create_alb"></a> [create\_alb](#input\_create\_alb) | Create ALB | `bool` | `true` | no |
+| <a name="input_create_ec2_endpoint"></a> [create\_ec2\_endpoint](#input\_create\_ec2\_endpoint) | Create Ec2 endpoint | `bool` | `false` | no |
+| <a name="input_create_proxy_endpoint"></a> [create\_proxy\_endpoint](#input\_create\_proxy\_endpoint) | Create proxy endpoint | `bool` | `false` | no |
+| <a name="input_create_s3_gateway_endpoint"></a> [create\_s3\_gateway\_endpoint](#input\_create\_s3\_gateway\_endpoint) | Create S3 gateway endpoint | `bool` | `false` | no |
 | <a name="input_create_secretmanager_endpoint"></a> [create\_secretmanager\_endpoint](#input\_create\_secretmanager\_endpoint) | Enable secret manager endpoint on vpc | `bool` | `true` | no |
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default) | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
@@ -693,7 +697,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | Lambda IAM role ARN | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"e59e6d00e963d71434b3d7aa08883bfa"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"3aec35033eef8d8e7805ef952c74a7cf"` | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_nfs_protocol_gateway_disk_size"></a> [nfs\_protocol\_gateway\_disk\_size](#input\_nfs\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateway_frontend_cores_num"></a> [nfs\_protocol\_gateway\_frontend\_cores\_num](#input\_nfs\_protocol\_gateway\_frontend\_cores\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
