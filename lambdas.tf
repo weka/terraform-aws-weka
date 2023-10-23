@@ -91,7 +91,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       OBS_NAME                = var.obs_name
       OBS_TIERING_SSD_PERCENT = var.tiering_ssd_percent
       NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
-      WEKA_HOME_PROXY_URL     = var.weka_home_proxy_url
+      PROXY_URL               = var.proxy_url
       SMBW_ENABLED            = var.smbw_enabled
       WEKA_HOME_URL           = var.weka_home_url
       # pass lambda function names
