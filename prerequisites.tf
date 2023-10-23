@@ -50,7 +50,7 @@ module "vpc_endpoint" {
 }
 
 locals {
-  endpoint_sg_id                = length(var.endpoint_sg_ids) == 0 ? [module.vpc_endpoint[0].endpoint_sg_id] : var.endpoint_sg_ids
+  endpoint_sg_id                = var.create_proxy_endpoint && length(var.endpoint_sg_ids) == 0 ? [module.vpc_endpoint[0].endpoint_sg_id] : var.endpoint_sg_ids
   subnet_ids                    = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
   additional_subnet_id          = var.create_alb ? var.additional_alb_subnet == "" ? module.network[0].additional_subnet_id : var.additional_alb_subnet : ""
   vpc_id                        = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
