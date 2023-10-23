@@ -681,7 +681,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | Lambda IAM role ARN | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"9b8aa1a338703a7aa2ec2dc2728485ad"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"e59e6d00e963d71434b3d7aa08883bfa"` | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_nfs_protocol_gateway_disk_size"></a> [nfs\_protocol\_gateway\_disk\_size](#input\_nfs\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateway_frontend_cores_num"></a> [nfs\_protocol\_gateway\_frontend\_cores\_num](#input\_nfs\_protocol\_gateway\_frontend\_cores\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
@@ -723,7 +723,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_use_secretmanager_endpoint"></a> [use\_secretmanager\_endpoint](#input\_use\_secretmanager\_endpoint) | Use secret manager endpoint | `bool` | `true` | no |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | The user name for logging in to the virtual machines. | `string` | `"ec2-user"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID, required only for security group creation | `string` | `""` | no |
-| <a name="input_weka_home_proxy_url"></a> [weka\_home\_proxy\_url](#input\_weka\_home\_proxy\_url) | Weka home proxy url | `string` | `""` | no |
 | <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
 | <a name="input_weka_username"></a> [weka\_username](#input\_weka\_username) | Weka cluster username | `string` | `"admin"` | no |
 | <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.1"` | no |
