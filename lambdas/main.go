@@ -60,7 +60,7 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	obsName := os.Getenv("OBS_NAME")
 	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("NUM_FRONTEND_CONTAINERS"))
-	proxyUrl := os.Getenv("PROXY_URL")
+	wekaHomeProxyUrl := os.Getenv("WEKA_HOME_PROXY_URL")
 	smbwEnabled, _ := strconv.ParseBool(os.Getenv("SMBW_ENABLED"))
 	wekaHomeUrl := os.Getenv("WEKA_HOME_URL")
 
@@ -93,9 +93,9 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 				ProtectionLevel: protectionLevel,
 				Hotspare:        hotspare,
 			},
-			AddFrontend: addFrontend,
-			ProxyUrl:    proxyUrl,
-			WekaHomeUrl: wekaHomeUrl,
+			AddFrontend:      addFrontend,
+			WekaHomeProxyUrl: wekaHomeProxyUrl,
+			WekaHomeUrl:      wekaHomeUrl,
 		},
 		Obs: protocol.ObsParams{
 			Name:              obsName,
