@@ -688,6 +688,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_create_secretmanager_endpoint"></a> [create\_secretmanager\_endpoint](#input\_create\_secretmanager\_endpoint) | Enable secret manager endpoint on vpc | `bool` | `true` | no |
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default) | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
+| <a name="input_endpoint_sg_ids"></a> [endpoint\_sg\_ids](#input\_endpoint\_sg\_ids) | n/a | `list(string)` | `[]` | no |
 | <a name="input_event_iam_role_arn"></a> [event\_iam\_role\_arn](#input\_event\_iam\_role\_arn) | Event iam role arn | `string` | `""` | no |
 | <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
 | <a name="input_hotspare"></a> [hotspare](#input\_hotspare) | Hot-spare value. | `number` | `1` | no |
