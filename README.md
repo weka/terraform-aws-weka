@@ -681,7 +681,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | Lambda IAM role ARN | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"daa0aa6a387bc8ed0b58b066b0ad598a"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"9b8aa1a338703a7aa2ec2dc2728485ad"` | no |
 | <a name="input_mount_clients_dpdk"></a> [mount\_clients\_dpdk](#input\_mount\_clients\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_nfs_protocol_gateway_disk_size"></a> [nfs\_protocol\_gateway\_disk\_size](#input\_nfs\_protocol\_gateway\_disk\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateway_frontend_cores_num"></a> [nfs\_protocol\_gateway\_frontend\_cores\_num](#input\_nfs\_protocol\_gateway\_frontend\_cores\_num) | The number of frontend cores on single protocol gateway machine. | `number` | `1` | no |
@@ -696,7 +696,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_private_network"></a> [private\_network](#input\_private\_network) | Determines whether to enable a private or public network. The default is public network. Relevant only when subnet\_ids is empty. | `bool` | `false` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_protocol_gateway_instance_iam_profile_arn"></a> [protocol\_gateway\_instance\_iam\_profile\_arn](#input\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
-| <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka home proxy url | `string` | `""` | no |
+| <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
 | <a name="input_route53_zone_id"></a> [route53\_zone\_id](#input\_route53\_zone\_id) | Route53 zone id | `string` | `""` | no |
 | <a name="input_secretmanager_endpoint_sg_ids"></a> [secretmanager\_endpoint\_sg\_ids](#input\_secretmanager\_endpoint\_sg\_ids) | Secret manager endpoint security groups ids | `list(string)` | `[]` | no |
 | <a name="input_set_obs_integration"></a> [set\_obs\_integration](#input\_set\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
@@ -723,6 +723,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_use_secretmanager_endpoint"></a> [use\_secretmanager\_endpoint](#input\_use\_secretmanager\_endpoint) | Use secret manager endpoint | `bool` | `true` | no |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | The user name for logging in to the virtual machines. | `string` | `"ec2-user"` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID, required only for security group creation | `string` | `""` | no |
+| <a name="input_weka_home_proxy_url"></a> [weka\_home\_proxy\_url](#input\_weka\_home\_proxy\_url) | Weka home proxy url | `string` | `""` | no |
 | <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
 | <a name="input_weka_username"></a> [weka\_username](#input\_weka\_username) | Weka cluster username | `string` | `"admin"` | no |
 | <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.1"` | no |
