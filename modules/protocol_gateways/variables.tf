@@ -149,7 +149,7 @@ variable "weka_password_id" {
 
 variable "proxy_url" {
   type        = string
-  description = "Weka home proxy url"
+  description = "Weka proxy url"
   default     = ""
 }
 
