@@ -1,9 +1,7 @@
 locals {
-  create_ec2_endpoint        = var.create_ec2_endpoint ? 1 : 0
-  create_s3_gateway_endpoint = var.create_s3_gateway_endpoint ? 1 : 0
-  create_proxy_endpoint      = var.create_proxy_endpoint ? 1 : 0
+  create_ec2_endpoint   = var.create_ec2_endpoint ? 1 : 0
+  create_proxy_endpoint = var.create_proxy_endpoint ? 1 : 0
 }
-
 
 # Endpoint Security Group
 resource "aws_security_group" "this" {
@@ -57,6 +55,7 @@ resource "aws_vpc_endpoint" "ec2_endpoint" {
     Name        = "${var.prefix}-ec2-endpoint"
     Environment = var.prefix
   }
+  depends_on = [aws_security_group.this]
 }
 
 data "aws_vpc" "this" {
@@ -65,11 +64,11 @@ data "aws_vpc" "this" {
 
 # s3 endpoint
 resource "aws_vpc_endpoint" "s3_gateway_endpoint" {
-  count               = var.create_s3_gateway_endpoint ? 1 : 0
-  vpc_id              = var.vpc_id
-  service_name        = "com.amazonaws.${var.region}.s3"
-  vpc_endpoint_type   = "Gateway"
-  route_table_ids     = [data.aws_vpc.this.main_route_table_id]
+  count             = var.create_s3_gateway_endpoint ? 1 : 0
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.s3"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = [data.aws_vpc.this.main_route_table_id]
   tags = {
     Name        = "${var.prefix}-s3-gateway-endpoint"
     Environment = var.prefix

@@ -572,8 +572,3 @@ variable "create_proxy_endpoint" {
   default     = false
   description = "Create proxy endpoint"
 }
-
-variable "endpoint_sg_ids" {
-  type    = list(string)
-  default = []
-}

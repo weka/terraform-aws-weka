@@ -26,3 +26,9 @@ variable "allow_weka_api_ranges" {
   description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
   default     = []
 }
+
+variable "private_network" {
+  type        = bool
+  default     = false
+  description = "Determines whether to enable a private or public network. The default is public network. Relevant only when subnet_ids is empty."
+}
