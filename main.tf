@@ -106,7 +106,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   placement {
-    availability_zone = "${local.region}${var.availability_zones[0]}"
+   # availability_zone = data.aws_subnet.this[0].availability_zone
     group_name        = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
   }
 
