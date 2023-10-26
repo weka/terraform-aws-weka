@@ -1,8 +1,3 @@
-variable "availability_zone" {
-  type        = string
-  description = "AZ in which all the resources will be deployed"
-}
-
 variable "subnet_id" {
   type        = string
   description = "Id of the subnet"

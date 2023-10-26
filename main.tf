@@ -16,6 +16,12 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_subnet" "this" {
+  count      = length(local.subnet_ids)
+  id         = local.subnet_ids[count.index]
+  depends_on = [module.network]
+}
+
 data "aws_ami" "amzn_ami" {
   count       = var.ami_id == null ? 1 : 0
   most_recent = true
@@ -106,7 +112,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   placement {
-    availability_zone = "${local.region}${var.availability_zones[0]}"
+    availability_zone = data.aws_subnet.this[0].availability_zone
     group_name        = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
   }
 

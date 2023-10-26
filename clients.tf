@@ -1,7 +1,6 @@
 module "clients" {
   count                    = var.clients_number > 0 ? 1 : 0
   source                   = "./modules/clients"
-  availability_zone        = var.availability_zones[0]
   subnet_id                = local.subnet_ids[0]
   clients_name             = "${var.prefix}-${var.cluster_name}-client"
   clients_number           = var.clients_number

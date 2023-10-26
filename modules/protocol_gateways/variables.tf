@@ -1,8 +1,3 @@
-variable "availability_zone" {
-  type        = string
-  description = "AZ in which all the resources will be deployed"
-}
-
 variable "backends_asg_name" {
   type        = string
   description = "Name of the backends autoscaling group"
