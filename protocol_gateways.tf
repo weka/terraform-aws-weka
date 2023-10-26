@@ -1,7 +1,6 @@
 module "smb_protocol_gateways" {
   count                    = var.smb_protocol_gateways_number > 0 ? 1 : 0
   source                   = "./modules/protocol_gateways"
-  availability_zone        = var.availability_zones[0]
   subnet_id                = local.subnet_ids[0]
   setup_protocol           = var.smb_setup_protocol
   gateways_number          = var.smb_protocol_gateways_number
@@ -40,7 +39,6 @@ module "smb_protocol_gateways" {
 module "nfs_protocol_gateways" {
   count                    = var.nfs_protocol_gateways_number > 0 ? 1 : 0
   source                   = "./modules/protocol_gateways"
-  availability_zone        = var.availability_zones[0]
   subnet_id                = local.subnet_ids[0]
   setup_protocol           = var.nfs_setup_protocol
   gateways_number          = var.nfs_protocol_gateways_number
