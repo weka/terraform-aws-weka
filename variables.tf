@@ -1,8 +1,9 @@
 variable "availability_zones" {
   type        = list(string)
   description = "AZ in which all the resources will be deployed"
+  default     = []
   validation {
-    condition     = length(var.availability_zones) == 1
+    condition     = length(var.availability_zones) <= 1
     error_message = "Multiple AZs are not supported. Please provide only one AZ."
   }
 }
