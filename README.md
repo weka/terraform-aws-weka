@@ -230,7 +230,6 @@ module "deploy_weka" {
   source             = "../../"
   prefix             = "weka-tf"
   cluster_name       = "test"
-  availability_zones = ["a"]
   allow_ssh_ranges   = ["0.0.0.0/0"]
   get_weka_io_token  = "..."
   sg_ids             = [
@@ -260,7 +259,7 @@ We provide iam, network and security_group modules to help you create the prereq
 - When sg_ids isn't provided we automatically create a security group using our module.
 - When subnet_ids isn't provided we automatically create a subnet using our module.
 - When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
-
+- var `availability_zones` need to provide only when we create network module
 
 ### Private network deployment:
 #### To avoid public ip assignment:
