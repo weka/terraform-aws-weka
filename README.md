@@ -670,7 +670,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_allow_weka_api_ranges"></a> [allow\_weka\_api\_ranges](#input\_allow\_weka\_api\_ranges) | Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG | `list(string)` | `[]` | no |
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ami id | `string` | `null` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | `true` | no |
-| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | AZ in which all the resources will be deployed | `list(string)` | n/a | yes |
+| <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | AZ in which all the resources will be deployed | `list(string)` | `[]` | no |
 | <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | The client instance AMI ID | `string` | `null` | no |
 | <a name="input_client_instance_iam_profile_arn"></a> [client\_instance\_iam\_profile\_arn](#input\_client\_instance\_iam\_profile\_arn) | The client instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client instance type (sku) to deploy | `string` | `"c5.2xlarge"` | no |
