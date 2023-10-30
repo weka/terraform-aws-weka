@@ -1,8 +1,9 @@
 locals {
-  ssh_path       = "/tmp/${var.prefix}-${var.cluster_name}"
-  nics           = var.container_number_map[var.instance_type].nics
-  public_ssh_key = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
-  tags_dest      = ["instance", "network-interface", "volume"]
+  ssh_path                  = "/tmp/${var.prefix}-${var.cluster_name}"
+  nics                      = var.container_number_map[var.instance_type].nics
+  public_ssh_key            = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
+  tags_dest                 = ["instance", "network-interface", "volume"]
+  backends_weka_volume_size = 48 + 10 * (local.nics - 1)
   user_data = templatefile("${path.module}/user_data.sh", {
     region              = local.region
     proxy               = var.proxy_url
@@ -78,7 +79,7 @@ resource "aws_launch_template" "launch_template" {
   block_device_mappings {
     device_name = "/dev/sdp"
     ebs {
-      volume_size           = 48 + 10 * (local.nics - 1)
+      volume_size           = local.backends_weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
     }

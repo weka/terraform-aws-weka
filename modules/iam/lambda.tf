@@ -73,7 +73,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 }
 
 resource "aws_iam_policy" "lambda_obs_iam_policy" {
-  count = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  count = var.tiering_enable_obs_integration && var.tiering_obs_name == "" ? 1 : 0
   name  = "${var.prefix}-${var.cluster_name}-lambda-obs-policy"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -90,7 +90,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
 }
 
 resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {
-  count      = var.set_obs_integration && var.obs_name == "" ? 1 : 0
+  count      = var.tiering_enable_obs_integration && var.tiering_obs_name == "" ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.lambda_obs_iam_policy[0].arn
   roles      = [aws_iam_role.lambda_iam_role.name]

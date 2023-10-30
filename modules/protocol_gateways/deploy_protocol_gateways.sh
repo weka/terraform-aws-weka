@@ -1,5 +1,5 @@
 FAILURE_DOMAIN=$(printf $(hostname -I) | sha256sum | tr -d '-' | cut -c1-16)
-NUM_FRONTEND_CORES=${frontend_cores_num}
+NUM_FRONTEND_CORES=${frontend_container_num}
 NICS_NUM=${nics_num}
 SUBNET_PREFIXES=( "${subnet_prefixes}" )
 GATEWAYS=""

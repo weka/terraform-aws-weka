@@ -10,7 +10,7 @@ variable "public_subnets_cidr" {
   default     = ["10.0.1.0/24"]
 }
 
-variable "additional_subnet_cidr" {
+variable "alb_additional_subnet_cidr_block" {
   type        = string
   description = "Additional CIDR block for public subnet"
   default     = "10.0.3.0/24"
@@ -33,7 +33,7 @@ variable "prefix" {
   default     = "weka"
 }
 
-variable "private_network" {
+variable "subnet_autocreate_as_private" {
   type        = bool
   default     = false
   description = "Determines whether to enable a private or public network. The default is public network."

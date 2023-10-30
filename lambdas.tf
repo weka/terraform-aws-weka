@@ -41,9 +41,9 @@ resource "aws_lambda_function" "deploy_lambda" {
       STATE_TABLE_HASH_KEY    = local.dynamodb_hash_key_name
       PREFIX                  = var.prefix
       CLUSTER_NAME            = var.cluster_name
-      COMPUTE_MEMORY          = var.add_frontend_container ? var.container_number_map[var.instance_type].memory[1] : var.container_number_map[var.instance_type].memory[0]
-      NUM_COMPUTE_CONTAINERS  = var.add_frontend_container ? var.container_number_map[var.instance_type].compute : var.container_number_map[var.instance_type].compute + 1
-      NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
+      COMPUTE_MEMORY          = var.set_dedicated_fe_container ? var.container_number_map[var.instance_type].memory[1] : var.container_number_map[var.instance_type].memory[0]
+      NUM_COMPUTE_CONTAINERS  = var.set_dedicated_fe_container ? var.container_number_map[var.instance_type].compute : var.container_number_map[var.instance_type].compute + 1
+      NUM_FRONTEND_CONTAINERS = var.set_dedicated_fe_container ? var.container_number_map[var.instance_type].frontend : 0
       NUM_DRIVE_CONTAINERS    = var.container_number_map[var.instance_type].drive
       INSTALL_URL             = local.install_weka_url
       NICS_NUM                = var.container_number_map[var.instance_type].nics
@@ -87,10 +87,10 @@ resource "aws_lambda_function" "clusterize_lambda" {
       STRIPE_WIDTH            = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
       PROTECTION_LEVEL        = var.protection_level
       HOTSPARE                = var.hotspare
-      SET_OBS                 = var.set_obs_integration
-      OBS_NAME                = var.obs_name
-      OBS_TIERING_SSD_PERCENT = var.tiering_ssd_percent
-      NUM_FRONTEND_CONTAINERS = var.add_frontend_container ? var.container_number_map[var.instance_type].frontend : 0
+      SET_OBS                 = var.tiering_enable_obs_integration
+      OBS_NAME                = var.tiering_obs_name
+      OBS_TIERING_SSD_PERCENT = var.tiering_enable_ssd_percent
+      NUM_FRONTEND_CONTAINERS = var.set_dedicated_fe_container ? var.container_number_map[var.instance_type].frontend : 0
       PROXY_URL               = var.proxy_url
       SMBW_ENABLED            = var.smbw_enabled
       WEKA_HOME_URL           = var.weka_home_url
@@ -192,7 +192,7 @@ resource "aws_lambda_function" "fetch_lambda" {
       ASG_NAME                   = "${var.prefix}-${var.cluster_name}-autoscaling-group"
       USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID                = aws_secretsmanager_secret.weka_password.id
-      USE_SECRETMANAGER_ENDPOINT = var.use_secretmanager_endpoint
+      USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]

@@ -9,13 +9,13 @@ variable "cluster_name" {
   description = "Cluster name"
 }
 
-variable "set_obs_integration" {
+variable "tiering_enable_obs_integration" {
   type        = bool
   default     = false
   description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
 }
 
-variable "obs_name" {
+variable "tiering_obs_name" {
   type        = string
   description = "Obs name"
 }

@@ -7,7 +7,7 @@ data "aws_subnet" "selected" {
 }
 
 data "aws_ami" "selected" {
-  count       = var.ami_id == null ? 1 : 0
+  count       = var.client_instance_ami_id == null ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
 
@@ -25,7 +25,7 @@ locals {
 
   preparation_script = templatefile("${path.module}/init.sh", {
     proxy               = var.proxy_url
-    nics_num            = var.nics_numbers
+    nics_num            = var.client_frontend_cores
     subnet_id           = var.subnet_id
     region              = local.region
     groups              = join(" ", var.sg_ids)
@@ -34,13 +34,13 @@ locals {
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
     # all_subnets        = split("/", data.aws_subnet.selected.cidr_block)[0]
-    all_gateways       = join(" ", [for i in range(var.nics_numbers) : cidrhost(data.aws_subnet.selected.cidr_block, 1)])
-    nics_num           = var.nics_numbers
-    weka_cluster_size  = var.weka_cluster_size
-    backends_asg_name  = var.backends_asg_name
-    mount_clients_dpdk = var.mount_clients_dpdk
-    region             = local.region
-    alb_dns_name       = var.alb_dns_name != null ? var.alb_dns_name : ""
+    all_gateways      = join(" ", [for i in range(var.client_frontend_cores) : cidrhost(data.aws_subnet.selected.cidr_block, 1)])
+    nics_num          = var.client_frontend_cores
+    weka_cluster_size = var.weka_cluster_size
+    backends_asg_name = var.backends_asg_name
+    clients_use_dpdk  = var.clients_use_dpdk
+    region            = local.region
+    alb_dns_name      = var.alb_dns_name != null ? var.alb_dns_name : ""
   })
 
   custom_data_parts = [local.preparation_script, local.mount_wekafs_script, "${var.custom_data}\n"]
@@ -57,7 +57,7 @@ resource "aws_launch_template" "this" {
   name                                 = "${var.clients_name}-launch-template"
   disable_api_termination              = false
   ebs_optimized                        = true
-  image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.selected[0].id
+  image_id                             = var.client_instance_ami_id != null ? var.client_instance_ami_id : data.aws_ami.selected[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.key_pair_name
@@ -66,7 +66,7 @@ resource "aws_launch_template" "this" {
   block_device_mappings {
     device_name = "/dev/xvda" # root device
     ebs {
-      volume_size           = var.root_volume_size
+      volume_size           = var.client_root_volume_size
       volume_type           = "gp2"
       delete_on_termination = true
     }
