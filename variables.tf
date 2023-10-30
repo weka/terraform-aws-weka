@@ -1,6 +1,6 @@
 variable "availability_zones" {
   type        = list(string)
-  description = "AZ in which all the resources will be deployed"
+  description = "Required only if not specifying subnet_ids, this zone(s) will be used to create subnet that will be used by weka. Currently limited to single subnet"
   default     = []
   validation {
     condition     = length(var.availability_zones) <= 1
@@ -24,21 +24,21 @@ variable "prefix" {
   default     = "weka"
 }
 
-variable "private_network" {
+variable "subnet_autocreate_as_private" {
   type        = bool
   default     = false
-  description = "Determines whether to enable a private or public network. The default is public network. Relevant only when subnet_ids is empty."
+  description = "Create private subnet using nat gateway to route traffic. The default is public network. Relevant only when subnet_ids is empty."
 }
 
 variable "assign_public_ip" {
   type        = bool
   default     = true
-  description = "Determines whether to assign public ip."
+  description = "Determines whether to assign public IP to all instances deployed by TF module. Includes backends, clients and protocol gateways"
 }
 
 variable "vm_username" {
   type        = string
-  description = "The user name for logging in to the virtual machines."
+  description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
   default     = "ec2-user"
 }
 
@@ -50,7 +50,7 @@ variable "instance_type" {
 
 variable "ami_id" {
   type        = string
-  description = "ami id"
+  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
   default     = null
 }
 
@@ -58,12 +58,6 @@ variable "sg_ids" {
   type        = list(string)
   default     = []
   description = "Security group ids"
-}
-
-variable "alb_sg_ids" {
-  type        = list(string)
-  default     = []
-  description = "Security group ids for ALB"
 }
 
 variable "container_number_map" {
@@ -182,9 +176,9 @@ variable "tags_map" {
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
 }
 
-variable "add_frontend_container" {
+variable "set_dedicated_fe_container" {
   type        = bool
-  default     = true
+  default     = false
   description = "Create cluster with FE containers"
 }
 
@@ -217,18 +211,18 @@ variable "stripe_width" {
 variable "hotspare" {
   type        = number
   default     = 1
-  description = "Hot-spare value."
+  description = "Number of hotspares to set on weka cluster. Refer to https://docs.weka.io/overview/ssd-capacity-management#hot-spare"
 }
 
 variable "instance_iam_profile_arn" {
   type        = string
-  description = "Instance IAM profile ARN"
+  description = "IAM Role that will be used by weka backend instances, if not specified will be created automatically. If pre-created should match policy described in readme"
   default     = ""
 }
 
 variable "lambda_iam_role_arn" {
   type        = string
-  description = "Lambda IAM role ARN"
+  description = "IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme"
   default     = ""
 }
 
@@ -238,21 +232,21 @@ variable "vpc_id" {
   default     = ""
 }
 
-variable "allow_ssh_ranges" {
+variable "allow_ssh_cidrs" {
   type        = list(string)
   description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
   default     = []
 }
 
-variable "allow_https_ranges" {
+variable "alb_allow_https_cidrs" {
   type        = list(string)
-  description = "Allow port 443, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  description = "CIDRs to allow connecting to ALB over 443 port, by default 443 is not opened, and port 14000 used for connection, inheriting setting from  allow_weka_api_ranges "
   default     = []
 }
 
-variable "allow_weka_api_ranges" {
+variable "allow_weka_api_cidrs" {
   type        = list(string)
-  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  description = "Allow connection to port 14000 on weka backends and ALB(if exists and not provided with dedicated SG)  from specified CIDRs, by default no CIDRs are allowed. All ports (including 14000) are allowed within VPC"
   default     = []
 }
 
@@ -270,7 +264,7 @@ variable "dynamodb_table_name" {
 
 variable "dynamodb_hash_key_name" {
   type        = string
-  description = "DynamoDB hash key name (optional configuration, will use 'Key' by default)"
+  description = "DynamoDB hash key name (optional configuration, will use 'Key' by default). This key will be used if dynamodb table will be created automatically, by not setting `dynamodb_table_name` param. In case `dynamodb_table_name` parameter is set, `dynamodb_hash_key_name` should match the key that should be used by us within pre-created table "
   default     = "Key"
 }
 
@@ -300,37 +294,44 @@ variable "sfn_iam_role_arn" {
 variable "event_iam_role_arn" {
   type        = string
   default     = ""
-  description = "Event iam role arn"
+  description = "IAM Role that will be used by cloudwatch rule(event), if not specified will be created automatically. If pre-created should match policy described in readme"
 }
 
-variable "use_secretmanager_endpoint" {
+variable "secretmanager_use_vpc_endpoint" {
   type        = bool
   default     = true
-  description = "Use secret manager endpoint"
+  description = "Use of secret manager is optional, if not used secrets will be passed between lambdas over step function. If secret manager is used, all lambdas will fetch secret directly when needed."
 }
 
-variable "create_secretmanager_endpoint" {
+variable "secretmanager_create_vpc_endpoint" {
   type        = bool
   default     = true
-  description = "Enable secret manager endpoint on vpc"
+  description = "Enable secret manager VPC endpoint"
 }
 
-variable "secretmanager_endpoint_sg_ids" {
+variable "secretmanager_sg_ids" {
   type        = list(string)
   default     = []
   description = "Secret manager endpoint security groups ids"
 }
 
+########################## alb #####################################
 variable "create_alb" {
   type        = bool
   default     = true
-  description = "Create ALB"
+  description = "Create ALB for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends"
 }
 
-variable "additional_alb_subnet" {
+variable "alb_additional_subnet_id" {
   type        = string
   default     = ""
-  description = "Additional subnet for ALB"
+  description = "Required to specify if subnet_ids were used to specify pre-defined subnets for weka. ALB requires an additional subnet, and in the case of pre-defined networking this one also should be pre-defined"
+}
+
+variable "alb_additional_subnet_cidr_block" {
+  type        = string
+  description = "Additional CIDR block for public subnet"
+  default     = "10.0.3.0/24"
 }
 
 variable "alb_cert_arn" {
@@ -345,26 +346,32 @@ variable "alb_alias_name" {
   description = "Set ALB alias name"
 }
 
-variable "route53_zone_id" {
+variable "alb_sg_ids" {
+  type        = list(string)
+  default     = []
+  description = "Security group ids for ALB"
+}
+
+variable "alb_route53_zone_id" {
   type        = string
   default     = ""
   description = "Route53 zone id"
 }
 
 ################################################## obs variables ###################################################
-variable "obs_name" {
+variable "tiering_obs_name" {
   type        = string
   default     = ""
   description = "Name of existing obs storage account"
 }
 
-variable "set_obs_integration" {
+variable "tiering_enable_obs_integration" {
   type        = bool
   default     = false
   description = "Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration."
 }
 
-variable "tiering_ssd_percent" {
+variable "tiering_enable_ssd_percent" {
   type        = number
   default     = 20
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
@@ -385,23 +392,23 @@ variable "client_instance_type" {
 
 variable "client_instance_iam_profile_arn" {
   type        = string
-  description = "The client instance IAM profile ARN"
+  description = "ARN of IAM Profile to use by client instance. If not specified Instance Profile will be automatically created"
   default     = ""
 }
 
 variable "client_instance_ami_id" {
   type        = string
-  description = "The client instance AMI ID"
+  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
   default     = null
 }
 
-variable "client_nics_num" {
+variable "client_frontend_cores" {
   type        = string
-  description = "The client NICs number"
+  description = "Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
   default     = 2
 }
 
-variable "mount_clients_dpdk" {
+variable "clients_use_dpdk" {
   type        = bool
   default     = true
   description = "Mount weka clients in DPDK mode"
@@ -409,7 +416,7 @@ variable "mount_clients_dpdk" {
 
 variable "client_placement_group_name" {
   type        = string
-  description = "The client instances placement group name"
+  description = "The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically"
   default     = ""
 }
 
@@ -419,14 +426,13 @@ variable "client_root_volume_size" {
   default     = 50
 }
 
-############################################### protocol gateways variables ###################################################
-variable "protocol_gateway_instance_iam_profile_arn" {
+############################################### NFS protocol gateways variables ###################################################
+variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string
   description = "The protocol gateway instance IAM profile ARN"
   default     = ""
 }
 
-############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateways_number" {
   type        = number
   description = "The number of protocol gateway virtual machines to deploy."
@@ -445,19 +451,19 @@ variable "nfs_protocol_gateway_instance_type" {
   default     = "c5.2xlarge"
 }
 
-variable "nfs_protocol_gateway_nics_num" {
+variable "nfs_protocol_gateway_fe_cores_num" {
   type        = string
   description = "The protocol gateways' NICs number."
   default     = 2
 }
 
-variable "nfs_protocol_gateway_disk_size" {
+variable "nfs_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
 }
 
-variable "nfs_protocol_gateway_frontend_cores_num" {
+variable "nfs_protocol_gateway_frontend_container_num" {
   type        = number
   default     = 1
   description = "The number of frontend cores on single protocol gateway machine."
@@ -470,6 +476,12 @@ variable "nfs_setup_protocol" {
 }
 
 ############################################### SMB protocol gateways variables ###################################################
+variable "smb_protocol_gateway_instance_iam_profile_arn" {
+  type        = string
+  description = "The protocol gateway instance IAM profile ARN"
+  default     = ""
+}
+
 variable "smb_protocol_gateways_number" {
   type        = number
   description = "The number of protocol gateway virtual machines to deploy."
@@ -488,19 +500,19 @@ variable "smb_protocol_gateway_instance_type" {
   default     = "c5.2xlarge"
 }
 
-variable "smb_protocol_gateway_nics_num" {
+variable "smb_protocol_gateway_fe_cores_num" {
   type        = string
   description = "The protocol gateways' NICs number."
   default     = 2
 }
 
-variable "smb_protocol_gateway_disk_size" {
+variable "smb_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
 }
 
-variable "smb_protocol_gateway_frontend_cores_num" {
+variable "smb_protocol_gateway_frontend_container_num" {
   type        = number
   default     = 1
   description = "The number of frontend cores on single protocol gateway machine."
@@ -560,20 +572,20 @@ variable "weka_home_url" {
 }
 
 ############################### vpc endpoint services ############################
-variable "create_ec2_endpoint" {
+variable "vpc_endpoint_ec2_create" {
   type        = bool
   default     = false
-  description = "Create Ec2 endpoint"
+  description = "Create Ec2 VPC endpoint"
 }
 
-variable "create_s3_gateway_endpoint" {
+variable "vpc_endpoint_s3_gateway_create" {
   type        = bool
   default     = false
-  description = "Create S3 gateway endpoint"
+  description = "Create S3 gateway VPC endpoint"
 }
 
-variable "create_proxy_endpoint" {
+variable "vpc_endpoint_proxy_create" {
   type        = bool
   default     = false
-  description = "Create proxy endpoint"
+  description = "creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy_url variable"
 }

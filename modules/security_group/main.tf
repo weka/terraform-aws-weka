@@ -1,7 +1,3 @@
-locals {
-  private_network = var.private_network ? 1 : 0
-}
-
 # Default Security Group of VPC
 resource "aws_security_group" "sg" {
   name        = "${var.prefix}-sg"
@@ -18,28 +14,19 @@ resource "aws_security_group" "sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = var.allow_ssh_ranges
+    cidr_blocks = var.allow_ssh_cidrs
   }
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = var.allow_https_ranges
+    cidr_blocks = var.alb_allow_https_cidrs
   }
   ingress {
     from_port   = 14000
     to_port     = 14000
     protocol    = "tcp"
-    cidr_blocks = var.allow_weka_api_ranges
-  }
-  dynamic "ingress" {
-    for_each = range(local.private_network)
-    content {
-      from_port   = 1080
-      to_port     = 1080
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
+    cidr_blocks = var.allow_weka_api_cidrs
   }
   egress {
     from_port = "0"

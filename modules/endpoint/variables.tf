@@ -3,19 +3,19 @@ variable "vpc_id" {
   description = "VPC ID, required only for security group creation"
 }
 
-variable "create_ec2_endpoint" {
+variable "create_vpc_endpoint_ec2" {
   type        = bool
-  description = "Create ec2 endpoint"
+  description = "Create ec2 vpc endpoint"
 }
 
-variable "create_proxy_endpoint" {
+variable "create_vpc_endpoint_proxy" {
   type        = bool
-  description = "Create proxy endpoint"
+  description = "Creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy_url variable"
 }
 
-variable "create_s3_gateway_endpoint" {
+variable "create_vpc_endpoint_s3_gateway" {
   type        = bool
-  description = "Create s3 gateway endpoint"
+  description = "Create s3 gateway vpc endpoint"
 }
 
 variable "subnet_ids" {

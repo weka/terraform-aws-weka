@@ -1,7 +1,7 @@
 # Create an IAM policy
 
 locals {
-  obs_name = var.obs_name != "" ? var.obs_name : "${var.prefix}-${var.cluster_name}-obs"
+  obs_name = var.tiering_enable_obs_integration != "" ? var.tiering_obs_name : "${var.prefix}-${var.cluster_name}-obs"
 }
 
 resource "aws_iam_policy" "backend_eni_iam_policy" {
@@ -26,7 +26,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
 }
 
 resource "aws_iam_policy" "backend_obs_iam_policy" {
-  count = var.set_obs_integration ? 1 : 0
+  count = var.tiering_enable_obs_integration ? 1 : 0
   name  = "${var.prefix}-${var.cluster_name}-obs-policy"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -113,7 +113,7 @@ resource "aws_iam_policy_attachment" "backend_eni_role_attachment" {
 }
 
 resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
-  count      = var.set_obs_integration ? 1 : 0
+  count      = var.tiering_enable_obs_integration ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
   roles      = [aws_iam_role.iam_role.name]

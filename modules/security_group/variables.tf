@@ -9,26 +9,20 @@ variable "vpc_id" {
   description = "VPC ID"
 }
 
-variable "allow_ssh_ranges" {
+variable "allow_ssh_cidrs" {
   type        = list(string)
   description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
   default     = []
 }
 
-variable "allow_https_ranges" {
+variable "alb_allow_https_cidrs" {
   type        = list(string)
-  description = "Allow port 443, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  description = "CIDRs to allow connecting to ALB over 443 port, by default 443 is not opened, and port 14000 used for connection, inheriting setting from  allow_weka_api_ranges "
   default     = []
 }
 
-variable "allow_weka_api_ranges" {
+variable "allow_weka_api_cidrs" {
   type        = list(string)
-  description = "Allow port 14000, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
+  description = "Allow connection to port 14000 on weka backends and ALB(if exists and not provided with dedicated SG)  from specified CIDRs, by default no CIDRs are allowed. All ports (including 14000) are allowed within VPC"
   default     = []
-}
-
-variable "private_network" {
-  type        = bool
-  default     = false
-  description = "Determines whether to enable a private or public network. The default is public network. Relevant only when subnet_ids is empty."
 }

@@ -82,6 +82,6 @@ resource "aws_route53_record" "lb_record" {
     name                   = aws_lb.alb[0].dns_name
     zone_id                = aws_lb.alb[0].zone_id
   }
-  zone_id    = var.route53_zone_id
+  zone_id    = var.alb_route53_zone_id
   depends_on = [aws_lb.alb]
 }

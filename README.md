@@ -227,25 +227,21 @@ provider "aws" {
 }
 
 module "deploy_weka" {
-  source             = "../../"
-  prefix             = "weka-tf"
-  cluster_name       = "test"
-  allow_ssh_ranges   = ["0.0.0.0/0"]
-  get_weka_io_token  = "..."
-  sg_ids             = [
-    "..."
-  ]
-  subnet_ids = [
-    "...",
-  ]
-  instance_iam_profile_arn = "..."
-  lambda_iam_role_arn = "..."
-  sfn_iam_role_arn = "..."
-  event_iam_role_arn = "..."
-  additional_alb_subnet         = "..."
-  vpc_id                        = "..."
-  create_secretmanager_endpoint = false
-  set_obs_integration = true
+  source                            = "../../"
+  prefix                            = "weka-tf"
+  cluster_name                      = "test"
+  allow_ssh_cidrs                   = ["0.0.0.0/0"]
+  get_weka_io_token                 = "..."
+  sg_ids                            = ["..."]
+  subnet_ids                        = ["..."]
+  instance_iam_profile_arn          = "..."
+  lambda_iam_role_arn               = "..."
+  sfn_iam_role_arn                  = "..."
+  event_iam_role_arn                = "..."
+  additional_alb_subnet_id          = "..."
+  vpc_id                            = "..."
+  secretmanager_create_vpc_endpoint = false
+  tiering_obs_name                  = true
 }
 
 output "deploy_weka_output" {
@@ -259,9 +255,15 @@ We provide iam, network and security_group modules to help you create the prereq
 - When sg_ids isn't provided we automatically create a security group using our module.
 - When subnet_ids isn't provided we automatically create a subnet using our module.
 - When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
-- var `availability_zones` need to provide only when we create network module
+- var `availability_zones` need to provide only when we create network module, Currently limited to single subnet. for example `eu-west-1c`
 
 ### Private network deployment:
+we provide module for creating private network with NAT
+To create private vpc with NAT, you must provide the following variables:
+```hcl
+subnet_autocreate_as_private = true
+private_subnets_cidr         = PRIVATE_CIDR_RANGE
+```
 #### To avoid public ip assignment:
 ```hcl
 assign_public_ip   = false
@@ -285,12 +287,35 @@ Names will be:
 /tmp/${prefix}-${cluster_name}-public-key.pub
 /tmp/${prefix}-${cluster_name}-private-key.pem
 ```
+
+## Create ALB
+We support ALB creation for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends.
+mandatory variables you must provide are:
+```hcl
+create_alb                       = true
+alb_additional_subnet_cidr_block = ADDITIONAL_SUBNET_CIDR_BLOCK
+```
+To use existing additional subnet, you must supply the following variables:
+```hcl
+additional_alb_subnet_id = SUBNET_ID
+alb_sg_ids               = ALB_SG_IDS
+```
+To add ALB dns name to zone record, you must supply the following variables:
+```hcl
+alb_alias_name      = ALB_ALIAS_NAME
+alb_route53_zone_id = ROUTE53_ZONE_ID
+```
+TO create alb listener with `certificate ARN`, you must supply the following variable:
+```hcl
+alb_cert_arn = ALB_CERT_ARN
+```
+
 ## OBS
 We support tiering to s3.
 In order to setup tiering, you must supply the following variables:
 ```hcl
-set_obs_integration = true
-obs_name = "..."
+tiering_enable_obs_integration = true
+tiering_obs_name               = "..."
 ```
 In addition, you can supply (and override our default):
 ```hcl
@@ -354,8 +379,14 @@ clients_number = 2
 This will automatically create 2 clients.
 <br>In addition you can provide these optional variables:
 ```hcl
-client_instance_type = "c5.2xlarge"
-client_nics_num = DESIRED_NUM
+client_instance_type   = "c5.2xlarge"
+client_nics_num        = DESIRED_NUM
+client_instance_ami_id = AMI_ID
+```
+
+<br>In order to use exising iam profile ARN you need to provide the following variable:
+```
+client_instance_iam_profile_arn = CLIENT_ARN
 ```
 
 ## NFS Protocol Gateways
@@ -553,21 +584,37 @@ To join an SMB cluster in Active Directory, need to run manually command:
 ## Secret manager
 We use the secret manager to store the weka username, password (and get.weka.io token).
 We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
-In case providing secret manager endpoint isn't possible, you can set `use_secretmanager_endpoint=false`
+In case providing secret manager endpoint isn't possible, you can set `secretmanager_use_vpc_endpoint=false`
 On your weka deployment module and we not use it. In this case the weka username password will be sent to
 `scale_down` lambda via `fetch` lambda and the will be shown as plain text on the state machine.
 
 <br>In case you want to use secret manager, and would like to create the endpoint automatically,
-you can set: `create_secretmanager_endpoint=true`
+you can set: `secretmanager_create_vpc_endpoint=true`
 
 ### Endpoint
-In case you want to use endpoints for `S3 gateway endpoint` / `proxy endpoint`/ `ec2 endpoint`.
-The default value is `False`
+# vpc endpoint proxy
+In case you want to use endpoints for  `vpv endpoint proxy`, you can set the `vpc_endpoint_proxy_create = true`, default value is `false`
+VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”.
 <br>you can set:
+```hcl
+vpc_endpoint_proxy_create = true
 ```
-create_proxy_endpoint = true
-create_s3_gateway_endpoint = true
-create_ec2_endpoint = true
+Alternatively appropriate customer-managed proxy can be provided by `proxy_url` variable:
+```hcl
+proxy_url = "..."
+```
+
+# vpc endpoint ec2
+In case you want to create EC2 Instance Connect Endpoint allows you to connect to an instance without requiring the instance to have a public IPv4 address.
+<br>you can set:
+```hcl
+vpc_endpoint_ec2_create = true
+```
+# vpc endpoint s3 gateway
+In case you want to create amazon S3 gateway endpoints allows you access s3 from your VPC, without requiring an internet gateway or NAT device for your VPC.
+<br>you can set:
+```hcl
+vpc_endpoint_s3_gateway_create = true
 ```
 
 ## Terraform output

@@ -13,15 +13,15 @@ variable "backends_asg_name" {
   description = "Name of the backends autoscaling group"
 }
 
-variable "nics_numbers" {
+variable "client_frontend_cores" {
   type        = number
   default     = 2
-  description = "Number of nics to set on each client vm"
+  description = "Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
 }
 
-variable "ami_id" {
+variable "client_instance_ami_id" {
   type        = string
-  description = "ami id"
+  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
   default     = null
 }
 
@@ -50,7 +50,7 @@ variable "proxy_url" {
   type = string
 }
 
-variable "mount_clients_dpdk" {
+variable "clients_use_dpdk" {
   type        = bool
   default     = true
   description = "Install weka cluster with DPDK"
@@ -85,7 +85,7 @@ variable "instance_iam_profile_arn" {
   description = "Instance IAM profile ARN"
 }
 
-variable "root_volume_size" {
+variable "client_root_volume_size" {
   type        = number
   description = "The root volume size in GB"
 }

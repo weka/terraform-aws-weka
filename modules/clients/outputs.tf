@@ -1,5 +1,6 @@
 output "clients_name" {
-  value = var.clients_name
+  value       = var.clients_name
+  description = "Name of clients"
 }
 
 locals {
@@ -13,5 +14,6 @@ locals {
   ]
 }
 output "client_ips" {
-  value = var.clients_number == 0 ? null : var.assign_public_ip ? local.public_ips : local.private_ips
+  value       = var.clients_number == 0 ? null : var.assign_public_ip ? local.public_ips : local.private_ips
+  description = "Ips of clients"
 }
