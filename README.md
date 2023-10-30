@@ -443,7 +443,7 @@ nfs_setup_protocol = true
 }
 
 ```
-
+</details>
 
 ## SMB Protocol Gateways
 We support creating protocol gateways that will be mounted automatically to the cluster.
@@ -548,6 +548,7 @@ To join an SMB cluster in Active Directory, need to run manually command:
   ]
 }
 ```
+</details>
 
 ## Secret manager
 We use the secret manager to store the weka username, password (and get.weka.io token).
@@ -568,8 +569,6 @@ create_proxy_endpoint = true
 create_s3_gateway_endpoint = true
 create_ec2_endpoint = true
 ```
-
-
 
 ## Terraform output
 The module output contains useful information about the created resources.
