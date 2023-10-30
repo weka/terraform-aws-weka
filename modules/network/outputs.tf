@@ -1,7 +1,7 @@
 locals {
   public_subnet_ids  = aws_subnet.public_subnet[*].id
   private_subnet_ids = var.private_network ? aws_subnet.private_subnet[*].id : []
-  subnets_ids        = var.private_network ? concat(local.public_subnet_ids, local.private_subnet_ids) : local.public_subnet_ids
+  subnets_ids        = var.private_network ? local.private_subnet_ids : local.public_subnet_ids
   subnet_ids_count   = length(local.subnets_ids)
 }
 
