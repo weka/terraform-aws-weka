@@ -85,7 +85,7 @@ variable "instance_iam_profile_arn" {
   description = "Instance IAM profile ARN"
 }
 
-variable "client_root_volume_size" {
+variable "weka_volume_size" {
   type        = number
   description = "The root volume size in GB"
 }
