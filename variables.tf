@@ -315,6 +315,12 @@ variable "secretmanager_sg_ids" {
   description = "Secret manager endpoint security groups ids"
 }
 
+variable "backends_weka_volume_size" {
+  type        = number
+  default     = 48
+  description = "The backends' default disk size."
+}
+
 ########################## alb #####################################
 variable "create_alb" {
   type        = bool
@@ -420,10 +426,10 @@ variable "client_placement_group_name" {
   default     = ""
 }
 
-variable "client_root_volume_size" {
+variable "client_weka_volume_size" {
   type        = number
-  description = "The client root volume size in GB"
-  default     = 50
+  description = "The client volume size in GB"
+  default     = 48
 }
 
 ############################################### NFS protocol gateways variables ###################################################
