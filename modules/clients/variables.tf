@@ -47,7 +47,9 @@ variable "key_pair_name" {
 }
 
 variable "proxy_url" {
-  type = string
+  type        = string
+  default     = ""
+  description = "Weka proxy url"
 }
 
 variable "clients_use_dpdk" {
@@ -88,6 +90,7 @@ variable "instance_iam_profile_arn" {
 variable "weka_volume_size" {
   type        = number
   description = "The root volume size in GB"
+  default     = 48
 }
 
 variable "alb_dns_name" {
