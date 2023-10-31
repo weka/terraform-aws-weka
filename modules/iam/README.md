@@ -48,18 +48,18 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Cluster name | `string` | n/a | yes |
-| <a name="input_obs_name"></a> [obs\_name](#input\_obs\_name) | Obs name | `string` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources names | `string` | `"weka"` | no |
 | <a name="input_secret_prefix"></a> [secret\_prefix](#input\_secret\_prefix) | Secrets prefix | `string` | n/a | yes |
-| <a name="input_set_obs_integration"></a> [set\_obs\_integration](#input\_set\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_state_table_name"></a> [state\_table\_name](#input\_state\_table\_name) | State DynamoDB table name | `string` | n/a | yes |
+| <a name="input_tiering_enable_obs_integration"></a> [tiering\_enable\_obs\_integration](#input\_tiering\_enable\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
+| <a name="input_tiering_obs_name"></a> [tiering\_obs\_name](#input\_tiering\_obs\_name) | Obs name | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_event_iam_role_arn"></a> [event\_iam\_role\_arn](#output\_event\_iam\_role\_arn) | n/a |
-| <a name="output_instance_iam_profile_arn"></a> [instance\_iam\_profile\_arn](#output\_instance\_iam\_profile\_arn) | n/a |
-| <a name="output_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#output\_lambda\_iam\_role\_arn) | n/a |
-| <a name="output_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#output\_sfn\_iam\_role\_arn) | n/a |
+| <a name="output_event_iam_role_arn"></a> [event\_iam\_role\_arn](#output\_event\_iam\_role\_arn) | ARN of event iam role |
+| <a name="output_instance_iam_profile_arn"></a> [instance\_iam\_profile\_arn](#output\_instance\_iam\_profile\_arn) | ARN of instance profile |
+| <a name="output_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#output\_lambda\_iam\_role\_arn) | ARN of lambda iam role |
+| <a name="output_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#output\_sfn\_iam\_role\_arn) | ARN of SFN iam role |
 <!-- END_TF_DOCS -->
