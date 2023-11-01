@@ -70,7 +70,7 @@ resource "aws_autoscaling_attachment" "alb_autoscaling_attachment" {
   count                  = var.create_alb ? 1 : 0
   autoscaling_group_name = aws_autoscaling_group.autoscaling_group.name
   lb_target_group_arn    = aws_lb_target_group.alb_target_group[0].arn
-  depends_on             = [aws_autoscaling_group.autoscaling_group]
+  depends_on             = [aws_autoscaling_group.autoscaling_group, aws_lb_target_group.alb_target_group]
 }
 
 resource "aws_route53_record" "lb_record" {

@@ -130,7 +130,7 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   user_data  = base64encode(local.user_data)
-  depends_on = [aws_placement_group.placement_group]
+  depends_on = [module.iam, aws_placement_group.placement_group]
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {

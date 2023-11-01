@@ -20,7 +20,7 @@ resource "aws_cloudwatch_event_target" "step_function_event_target" {
   rule       = aws_cloudwatch_event_rule.event_rule.name
   arn        = aws_sfn_state_machine.scale_down_state_machine.arn
   role_arn   = local.event_iam_role_arn
-  depends_on = [aws_cloudwatch_event_rule.event_rule, aws_sfn_state_machine.scale_down_state_machine]
+  depends_on = [module.iam, aws_cloudwatch_event_rule.event_rule, aws_sfn_state_machine.scale_down_state_machine]
 }
 
 resource "aws_lambda_permission" "invoke_lambda_permission" {
@@ -30,6 +30,7 @@ resource "aws_lambda_permission" "invoke_lambda_permission" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.event_rule.arn
   statement_id  = "AllowExecutionFromCloudWatch"
+  depends_on    = [aws_cloudwatch_event_rule.event_rule]
 }
 
 resource "aws_sfn_state_machine" "scale_down_state_machine" {
