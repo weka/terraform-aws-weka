@@ -1,11 +1,8 @@
-data "aws_region" "current" {}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
 locals {
-  region                  = data.aws_region.current.name
   public_subnets          = var.additional_subnet && !var.subnet_autocreate_as_private ? concat(var.public_subnets_cidr, [var.alb_additional_subnet_cidr_block]) : var.public_subnets_cidr
   private_subnets         = var.additional_subnet && var.subnet_autocreate_as_private ? concat(var.private_subnets_cidr, [var.alb_additional_subnet_cidr_block]) : var.private_subnets_cidr
   availability_zones_list = var.additional_subnet ? distinct(flatten([var.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
