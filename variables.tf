@@ -595,3 +595,9 @@ variable "vpc_endpoint_proxy_create" {
   default     = false
   description = "creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy_url variable"
 }
+
+variable "metadata_http_tokens" {
+    type        = string
+    default     = "optional"
+    description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+}
