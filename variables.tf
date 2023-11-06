@@ -597,7 +597,7 @@ variable "vpc_endpoint_proxy_create" {
 }
 
 variable "metadata_http_tokens" {
-    type        = string
-    default     = "optional"
-    description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+  type        = string
+  default     = "optional"
+  description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
 }
