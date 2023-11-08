@@ -37,7 +37,6 @@ locals {
   deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
     subnet_prefixes        = data.aws_subnet.selected.cidr_block
     frontend_container_num = var.frontend_container_num
-    nics_num               = var.frontend_cores_num
     secondary_ips_per_nic  = var.secondary_ips_per_nic
     weka_cluster_size      = var.weka_cluster_size
     backends_asg_name      = var.backends_asg_name
