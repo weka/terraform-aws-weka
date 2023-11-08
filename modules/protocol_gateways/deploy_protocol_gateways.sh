@@ -1,6 +1,5 @@
 FAILURE_DOMAIN=$(printf $(hostname -I) | sha256sum | tr -d '-' | cut -c1-16)
-NUM_FRONTEND_CORES=${frontend_container_num}
-NICS_NUM=${nics_num}
+FRONTEND_CONTAINER_CORES_NUM=${frontend_container_num}
 SUBNET_PREFIXES=( "${subnet_prefixes}" )
 GATEWAYS=""
 for subnet in $${SUBNET_PREFIXES[@]}
@@ -55,9 +54,9 @@ getNetStrForDpdk() {
 }
 
 # weka containers setup
-get_core_ids $NUM_FRONTEND_CORES frontend_core_ids
+get_core_ids $FRONTEND_CONTAINER_CORES_NUM frontend_core_ids
 
-getNetStrForDpdk $(($NICS_NUM-1)) $(($NICS_NUM)) "$GATEWAYS" "$SUBNETS"
+getNetStrForDpdk 1 $(($FRONTEND_CONTAINER_CORES_NUM + 1)) "$GATEWAYS"
 
 echo "$(date -u): setting up weka frontend"
 # changed standart frontend port to 14000 as it should be used locally for protocol setup:
@@ -121,7 +120,7 @@ function retry_command {
   return 0
 }
 
-run_container_cmd="sudo weka local setup container --name frontend0 --base-port 14000 --cores $NUM_FRONTEND_CORES --frontend-dedicated-cores $NUM_FRONTEND_CORES --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips $backend_ip"
+run_container_cmd="sudo weka local setup container --name frontend0 --base-port 14000 --cores $FRONTEND_CONTAINER_CORES_NUM --frontend-dedicated-cores $FRONTEND_CONTAINER_CORES_NUM --allow-protocols true --failure-domain $FAILURE_DOMAIN --core-ids $frontend_core_ids $net --dedicate --join-ips $backend_ip"
 retry_command "$run_container_cmd"  "install frontend0 container"
 
 # check that frontend container is up

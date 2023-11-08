@@ -60,7 +60,7 @@ variable "sg_ids" {
   description = "Security group ids"
 }
 
-variable "container_number_map" {
+variable "containers_config_map" {
   type = map(object({
     compute  = number
     drive    = number
@@ -113,7 +113,7 @@ variable "container_number_map" {
     }
   }
   validation {
-    condition     = alltrue([for m in flatten([for i in values(var.container_number_map) : (flatten(i.memory))]) : tonumber(trimsuffix(m, "GB")) <= 384])
+    condition     = alltrue([for m in flatten([for i in values(var.containers_config_map) : (flatten(i.memory))]) : tonumber(trimsuffix(m, "GB")) <= 384])
     error_message = "Compute memory can not be more then 384GB"
   }
 }
@@ -271,7 +271,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "3dcbd5c24cd54e10497f927314108a42"
+  default     = "91cc3389a99330654c119f6f9bb3f4a1"
 }
 
 variable "lambdas_dist" {
