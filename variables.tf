@@ -432,6 +432,12 @@ variable "client_weka_volume_size" {
   default     = 48
 }
 
+variable "clients_use_autoscaling_group" {
+  type        = bool
+  default     = false
+  description = "Use autoscaling group for clients"
+}
+
 ############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string

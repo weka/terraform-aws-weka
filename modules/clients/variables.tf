@@ -104,3 +104,9 @@ variable "custom_data" {
   description = "Custom data to pass to the instances"
   default     = ""
 }
+
+variable "use_autoscaling_group" {
+  type        = bool
+  description = "Use autoscaling group"
+  default     = false
+}

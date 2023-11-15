@@ -120,7 +120,7 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_instance" "this" {
-  count = var.clients_number
+  count = var.use_autoscaling_group ? 0 : var.clients_number
   launch_template {
     id = aws_launch_template.this.id
   }
@@ -130,4 +130,26 @@ resource "aws_instance" "this" {
   }
 
   depends_on = [aws_placement_group.this]
+}
+
+resource "aws_autoscaling_group" "autoscaling_group" {
+  count = var.use_autoscaling_group ? 1 : 0
+  name  = "${var.clients_name}-asg"
+  #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
+  desired_capacity      = var.clients_number
+  max_size              = var.clients_number
+  min_size              = var.clients_number
+  vpc_zone_identifier   = [var.subnet_id]
+  suspended_processes   = ["ReplaceUnhealthy"]
+  protect_from_scale_in = true
+
+  launch_template {
+    id      = aws_launch_template.this.id
+    version = aws_launch_template.this.latest_version
+  }
+
+  lifecycle {
+    ignore_changes = [desired_capacity, min_size, max_size]
+  }
+  depends_on = [aws_launch_template.this]
 }

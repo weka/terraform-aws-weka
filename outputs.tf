@@ -56,6 +56,14 @@ aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka
 EOT
 }
 
+output "client_helper_commands" {
+  value = module.clients[0].client_helper_commands
+}
+
+output "client_asg_name" {
+  value = var.clients_use_autoscaling_group == 0 ? null : module.clients[0].asg_name
+}
+
 output "client_ips" {
   value       = var.clients_number == 0 ? null : module.clients[0].client_ips
   description = "Ips of clients"
