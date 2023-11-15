@@ -20,6 +20,7 @@ No modules.
 
 | Name | Type |
 |------|------|
+| [aws_autoscaling_group.autoscaling_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_iam_instance_profile.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_instance_profile) | resource |
 | [aws_iam_policy.autoscaling](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
 | [aws_iam_policy.ec2](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_policy) | resource |
@@ -58,6 +59,7 @@ No modules.
 | <a name="input_sg_ids"></a> [sg\_ids](#input\_sg\_ids) | Security group ids | `list(string)` | `[]` | no |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | Id of the subnet | `string` | n/a | yes |
 | <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | <pre>{<br>  "creator": "tf",<br>  "env": "dev"<br>}</pre> | no |
+| <a name="input_use_autoscaling_group"></a> [use\_autoscaling\_group](#input\_use\_autoscaling\_group) | Use autoscaling group | `bool` | `false` | no |
 | <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | Number of backends in the weka cluster | `number` | n/a | yes |
 | <a name="input_weka_volume_size"></a> [weka\_volume\_size](#input\_weka\_volume\_size) | The root volume size in GB | `number` | `48` | no |
 
@@ -65,6 +67,8 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_asg_name"></a> [asg\_name](#output\_asg\_name) | Name of ASG |
+| <a name="output_client_helper_commands"></a> [client\_helper\_commands](#output\_client\_helper\_commands) | n/a |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Ips of clients |
 | <a name="output_clients_name"></a> [clients\_name](#output\_clients\_name) | Name of clients |
 <!-- END_TF_DOCS -->

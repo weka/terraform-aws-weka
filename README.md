@@ -726,6 +726,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_placement_group_name"></a> [client\_placement\_group\_name](#input\_client\_placement\_group\_name) | The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically | `string` | `""` | no |
 | <a name="input_client_weka_volume_size"></a> [client\_weka\_volume\_size](#input\_client\_weka\_volume\_size) | The client volume size in GB | `number` | `48` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client instances to deploy | `number` | `0` | no |
+| <a name="input_clients_use_autoscaling_group"></a> [clients\_use\_autoscaling\_group](#input\_clients\_use\_autoscaling\_group) | Use autoscaling group for clients | `bool` | `false` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | `"poc"` | no |
 | <a name="input_cluster_size"></a> [cluster\_size](#input\_cluster\_size) | The number of virtual machines to deploy. | `number` | `6` | no |
@@ -800,6 +801,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_alb_alias_record"></a> [alb\_alias\_record](#output\_alb\_alias\_record) | If 'alb\_alias\_name` not null, it will output fqdn of the ALB` |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | If 'create\_alb` set to true, it will output dns name of the ALB` |
 | <a name="output_asg_name"></a> [asg\_name](#output\_asg\_name) | Name of ASG |
+| <a name="output_client_asg_name"></a> [client\_asg\_name](#output\_client\_asg\_name) | n/a |
+| <a name="output_client_helper_commands"></a> [client\_helper\_commands](#output\_client\_helper\_commands) | n/a |
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Ips of clients |
 | <a name="output_cluster_helper_commands"></a> [cluster\_helper\_commands](#output\_cluster\_helper\_commands) | n/a |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The cluster name |
