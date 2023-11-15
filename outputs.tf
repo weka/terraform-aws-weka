@@ -57,11 +57,11 @@ EOT
 }
 
 output "client_helper_commands" {
-  value = module.clients[0].client_helper_commands
+  value = var.clients_number == 0 ? null : module.clients[0].client_helper_commands
 }
 
 output "client_asg_name" {
-  value = var.clients_use_autoscaling_group == 0 ? null : module.clients[0].asg_name
+  value =  var.clients_number == 0 ? null : var.clients_use_autoscaling_group ? module.clients[0].asg_name : null
 }
 
 output "client_ips" {
