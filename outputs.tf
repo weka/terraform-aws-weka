@@ -48,6 +48,11 @@ output "asg_name" {
   description = "Name of ASG"
 }
 
+output "placement_group_name" {
+  value = var.placement_group_name != "" ? var.placement_group_name : aws_placement_group.placement_group.name
+  description = "Name of placement group"
+}
+
 output "cluster_helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${local.asg_name} --query "AutoScalingGroups[].Instances[].InstanceId" --output text) --query 'Reservations[].Instances[].${local.ips_type}' --output json
@@ -61,7 +66,7 @@ output "client_helper_commands" {
 }
 
 output "client_asg_name" {
-  value =  var.clients_number == 0 ? null : var.clients_use_autoscaling_group ? module.clients[0].asg_name : null
+  value = var.clients_number == 0 ? null : var.clients_use_autoscaling_group ? module.clients[0].asg_name : null
 }
 
 output "client_ips" {
