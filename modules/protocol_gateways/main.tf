@@ -24,7 +24,7 @@ locals {
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
 
   init_script = templatefile("${path.module}/init.sh", {
-    nics_num            = var.frontend_cores_num
+    nics_num            = var.frontend_container_cores_num + 1
     subnet_id           = var.subnet_id
     region              = local.region
     groups              = join(" ", var.sg_ids)
@@ -35,14 +35,14 @@ locals {
   })
 
   deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
-    subnet_prefixes        = data.aws_subnet.selected.cidr_block
-    frontend_container_num = var.frontend_container_num
-    secondary_ips_per_nic  = var.secondary_ips_per_nic
-    weka_cluster_size      = var.weka_cluster_size
-    backends_asg_name      = var.backends_asg_name
-    region                 = local.region
-    weka_password_id       = var.weka_password_id
-    lb_arn_suffix          = var.lb_arn_suffix
+    subnet_prefixes              = data.aws_subnet.selected.cidr_block
+    frontend_container_cores_num = var.frontend_container_cores_num
+    secondary_ips_per_nic        = var.secondary_ips_per_nic
+    weka_cluster_size            = var.weka_cluster_size
+    backends_asg_name            = var.backends_asg_name
+    region                       = local.region
+    weka_password_id             = var.weka_password_id
+    lb_arn_suffix                = var.lb_arn_suffix
   })
 
   setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
@@ -52,16 +52,16 @@ locals {
   })
 
   setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {
-    cluster_name           = var.smb_cluster_name
-    domain_name            = var.smb_domain_name
-    domain_netbios_name    = var.smb_domain_netbios_name
-    smbw_enabled           = var.smbw_enabled
-    dns_ip                 = var.smb_dns_ip_address
-    gateways_number        = var.gateways_number
-    gateways_name          = var.gateways_name
-    frontend_container_num = var.frontend_container_num
-    share_name             = var.smb_share_name
-    region                 = local.region
+    cluster_name                 = var.smb_cluster_name
+    domain_name                  = var.smb_domain_name
+    domain_netbios_name          = var.smb_domain_netbios_name
+    smbw_enabled                 = var.smbw_enabled
+    dns_ip                       = var.smb_dns_ip_address
+    gateways_number              = var.gateways_number
+    gateways_name                = var.gateways_name
+    frontend_container_cores_num = var.frontend_container_cores_num
+    share_name                   = var.smb_share_name
+    region                       = local.region
 
   })
 

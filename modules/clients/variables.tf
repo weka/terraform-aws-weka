@@ -13,9 +13,9 @@ variable "backends_asg_name" {
   description = "Name of the backends autoscaling group"
 }
 
-variable "client_frontend_cores" {
+variable "frontend_container_cores_num" {
   type        = number
-  default     = 2
+  default     = 1
   description = "Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
 }
 

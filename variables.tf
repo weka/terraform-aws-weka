@@ -409,9 +409,9 @@ variable "client_instance_ami_id" {
 }
 
 variable "client_frontend_cores" {
-  type        = string
+  type        = number
   description = "Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
-  default     = 2
+  default     = 1
 }
 
 variable "clients_use_dpdk" {
@@ -464,21 +464,15 @@ variable "nfs_protocol_gateway_instance_type" {
 }
 
 variable "nfs_protocol_gateway_fe_cores_num" {
-  type        = string
+  type        = number
   description = "The protocol gateways' NICs number."
-  default     = 2
+  default     = 1
 }
 
 variable "nfs_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
-}
-
-variable "nfs_protocol_gateway_frontend_container_num" {
-  type        = number
-  default     = 1
-  description = "The number of frontend cores on single protocol gateway machine."
 }
 
 variable "nfs_setup_protocol" {
@@ -513,21 +507,15 @@ variable "smb_protocol_gateway_instance_type" {
 }
 
 variable "smb_protocol_gateway_fe_cores_num" {
-  type        = string
+  type        = number
   description = "The protocol gateways' NICs number."
-  default     = 2
+  default     = 1
 }
 
 variable "smb_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
-}
-
-variable "smb_protocol_gateway_frontend_container_num" {
-  type        = number
-  default     = 1
-  description = "The number of frontend cores on single protocol gateway machine."
 }
 
 variable "smb_setup_protocol" {
