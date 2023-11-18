@@ -25,7 +25,7 @@ locals {
 
   preparation_script = templatefile("${path.module}/init.sh", {
     proxy               = var.proxy_url
-    nics_num            = var.client_frontend_cores
+    nics_num            = var.frontend_container_cores_num + 1
     subnet_id           = var.subnet_id
     region              = local.region
     groups              = join(" ", var.sg_ids)
@@ -33,14 +33,12 @@ locals {
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
-    # all_subnets        = split("/", data.aws_subnet.selected.cidr_block)[0]
-    all_gateways      = join(" ", [for i in range(var.client_frontend_cores) : cidrhost(data.aws_subnet.selected.cidr_block, 1)])
-    nics_num          = var.client_frontend_cores
-    weka_cluster_size = var.weka_cluster_size
-    backends_asg_name = var.backends_asg_name
-    clients_use_dpdk  = var.clients_use_dpdk
-    region            = local.region
-    alb_dns_name      = var.alb_dns_name != null ? var.alb_dns_name : ""
+    frontend_container_cores_num = var.frontend_container_cores_num
+    weka_cluster_size            = var.weka_cluster_size
+    backends_asg_name            = var.backends_asg_name
+    clients_use_dpdk             = var.clients_use_dpdk
+    region                       = local.region
+    alb_dns_name                 = var.alb_dns_name != null ? var.alb_dns_name : ""
   })
 
   custom_data_parts = [local.preparation_script, local.mount_wekafs_script, "${var.custom_data}\n"]

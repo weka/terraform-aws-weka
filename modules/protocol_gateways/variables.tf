@@ -3,15 +3,10 @@ variable "backends_asg_name" {
   description = "Name of the backends autoscaling group"
 }
 
-variable "frontend_cores_num" {
+variable "frontend_container_cores_num" {
   type        = number
   description = "Number of frontend cores to use on instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
-  default     = -1
-
-  validation {
-    condition     = var.frontend_cores_num == -1 || var.frontend_cores_num > 0
-    error_message = "The frontend_cores_num value can take values > 0 or -1 (for using defaults)."
-  }
+  default     = 1
 }
 
 variable "ami_id" {
@@ -76,12 +71,6 @@ variable "assign_public_ip" {
 variable "weka_volume_size" {
   type        = number
   description = "The disk size."
-}
-
-variable "frontend_container_num" {
-  type        = number
-  default     = 1
-  description = "The number of frontend ionodes per instance."
 }
 
 variable "install_weka_url" {
