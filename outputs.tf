@@ -3,7 +3,7 @@ locals {
   asg_name = aws_autoscaling_group.autoscaling_group.name
 }
 
-output "ssh_user" {
+output "vm_username" {
   value       = var.vm_username
   description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
 }
@@ -49,7 +49,7 @@ output "asg_name" {
 }
 
 output "placement_group_name" {
-  value = var.placement_group_name != "" ? var.placement_group_name : aws_placement_group.placement_group[0].name
+  value       = var.placement_group_name != "" ? var.placement_group_name : aws_placement_group.placement_group[0].name
   description = "Name of placement group"
 }
 
