@@ -49,7 +49,7 @@ output "asg_name" {
 }
 
 output "placement_group_name" {
-  value       = var.placement_group_name != "" ? var.placement_group_name : aws_placement_group.placement_group[0].name
+  value       = var.placement_group_name != null ? var.placement_group_name : aws_placement_group.placement_group[0].name
   description = "Name of placement group"
 }
 

@@ -162,6 +162,11 @@ variable "key_pair_name" {
 variable "placement_group_name" {
   type    = string
   default = null
+
+  validation {
+    condition     = var.placement_group_name != ""
+    error_message = "Placement group name may not be and empty string"
+  }
 }
 
 variable "install_weka_url" {
