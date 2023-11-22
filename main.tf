@@ -13,6 +13,7 @@ locals {
     deploy_func_name    = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
   })
+  backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
 }
 
 data "aws_caller_identity" "current" {}
@@ -114,7 +115,7 @@ resource "aws_launch_template" "launch_template" {
 
   placement {
     availability_zone = data.aws_subnet.this[0].availability_zone
-    group_name        = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
+    group_name        = local.backends_placement_group_name
   }
 
   dynamic "tag_specifications" {
