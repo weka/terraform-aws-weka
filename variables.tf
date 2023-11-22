@@ -431,7 +431,7 @@ variable "client_placement_group_name" {
   default     = null
 
   validation {
-    condition     = var.placement_group_name != ""
+    condition     = var.client_placement_group_name != ""
     error_message = "Placement group name may not be and empty string"
   }
 }
