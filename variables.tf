@@ -428,7 +428,12 @@ variable "clients_use_dpdk" {
 variable "client_placement_group_name" {
   type        = string
   description = "The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically"
-  default     = ""
+  default     = null
+
+  validation {
+    condition     = var.placement_group_name != ""
+    error_message = "Placement group name may not be and empty string"
+  }
 }
 
 variable "client_weka_volume_size" {

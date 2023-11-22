@@ -61,7 +61,6 @@ locals {
   sfn_iam_role_arn              = var.sfn_iam_role_arn == "" ? module.iam[0].sfn_iam_role_arn : var.sfn_iam_role_arn
   event_iam_role_arn            = var.event_iam_role_arn == "" ? module.iam[0].event_iam_role_arn : var.event_iam_role_arn
   secretmanager_endpoint_sg_ids = length(var.secretmanager_sg_ids) > 1 ? var.secretmanager_sg_ids : local.sg_ids
-  placement_group_name          = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
 }
 
 # endpoint to secret manager

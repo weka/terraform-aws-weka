@@ -13,7 +13,7 @@ module "clients" {
   alb_dns_name                 = var.create_alb ? aws_lb.alb[0].dns_name : null
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip             = var.assign_public_ip
-  placement_group_name         = var.client_placement_group_name
+  placement_group_name         = var.client_placement_group_name != null ? var.client_placement_group_name : local.backends_placement_group_name
   weka_volume_size             = var.client_weka_volume_size
   client_instance_ami_id       = var.client_instance_ami_id
   sg_ids                       = local.sg_ids
