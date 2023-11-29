@@ -27,7 +27,6 @@ module "smb_protocol_gateways" {
   secret_prefix                = local.secret_prefix
   smb_cluster_name             = var.smb_cluster_name
   smb_domain_name              = var.smb_domain_name
-  smb_domain_netbios_name      = var.smb_domain_netbios_name
   smb_share_name               = var.smb_share_name
   smbw_enabled                 = var.smbw_enabled
   depends_on                   = [aws_autoscaling_group.autoscaling_group, aws_lb.alb, module.network]
