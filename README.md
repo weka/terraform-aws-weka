@@ -497,7 +497,6 @@ smb_protocol_gateway_frontend_cores_num       = 1
 smb_protocol_gateway_instance_iam_profile_arn = ""
 smb_cluster_name                              = ""
 smb_domain_name                               = ""
-smb_domain_netbios_name                       = ""
 smb_share_name                                = ""
 
 ```
