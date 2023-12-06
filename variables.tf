@@ -138,7 +138,7 @@ variable "cluster_name" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.5"
+  default     = "4.2.6"
 }
 
 variable "get_weka_io_token" {
@@ -590,6 +590,6 @@ variable "vpc_endpoint_proxy_create" {
 
 variable "metadata_http_tokens" {
   type        = string
-  default     = "optional"
+  default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
 }
