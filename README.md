@@ -221,32 +221,43 @@ AWS terraform weka deployment module.
 ```
 </details>
 
-## Usage example
+## Usage example:
+This example will automatically create a vpc, subnets, security group and iam roles.
 ```hcl
 provider "aws" {
 }
 
 module "deploy_weka" {
-  source                            = "../../"
+  source                            = "weka/weka/aws"
+  version                           = "1.0.1"
   prefix                            = "weka-tf"
   cluster_name                      = "test"
   allow_ssh_cidrs                   = ["0.0.0.0/0"]
   get_weka_io_token                 = "..."
-  sg_ids                            = ["..."]
-  subnet_ids                        = ["..."]
-  instance_iam_profile_arn          = "..."
-  lambda_iam_role_arn               = "..."
-  sfn_iam_role_arn                  = "..."
-  event_iam_role_arn                = "..."
-  additional_alb_subnet_id          = "..."
-  vpc_id                            = "..."
-  secretmanager_create_vpc_endpoint = false
-  tiering_obs_name                  = true
 }
 
 output "deploy_weka_output" {
   value = module.deploy_weka
 }
+```
+### Using existing vpc:
+```hcl
+vpc_id                            = "..."
+```
+### Using existing subnet:
+```hcl
+subnet_ids                        = ["..."]
+```
+### Using existing security groups:
+```hcl
+sg_ids                            = ["..."]
+```
+### Using existing iam roles:
+```hcl
+instance_iam_profile_arn          = "..."
+lambda_iam_role_arn               = "..."
+sfn_iam_role_arn                  = "..."
+event_iam_role_arn                = "..."
 ```
 
 ## Helper modules
