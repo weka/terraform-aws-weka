@@ -616,11 +616,11 @@ We use the secret manager to store the weka username, password (and get.weka.io 
 from the fetch lambda to the scale down lambda.
 
 
-### Endpoint
-# vpc endpoint proxy
-In case you want to use endpoints for  `vpv endpoint proxy`, you can set the `vpc_endpoint_proxy_create = true`, default value is `false`
-VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”.
-<br>you can set:
+# Endpoints
+In case you want to deploy a weka cluster inside a vpc with no internet access, you will need to set the following endpoints:
+## vpc endpoint proxy
+We need an endpoint to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services.
+<br>To use weka vpc endpoint service, set:
 ```hcl
 vpc_endpoint_proxy_create = true
 ```
@@ -629,20 +629,26 @@ Alternatively appropriate customer-managed proxy can be provided by `proxy_url` 
 proxy_url = "..."
 ```
 
-# vpc endpoint ec2
-In case you want to create EC2 Instance Connect Endpoint allows you to connect to an instance without requiring the instance to have a public IPv4 address.
-<br>you can set:
+## vpc endpoint ec2
+Weka deployment requires access to EC2 services.
+<br>To let terraform create ec2 endpoint, set:
 ```hcl
 vpc_endpoint_ec2_create = true
 ```
-# vpc endpoint s3 gateway
-In case you want to create amazon S3 gateway endpoints allows you access s3 from your VPC, without requiring an internet gateway or NAT device for your VPC.
-<br>you can set:
+## vpc endpoint s3 gateway
+Weka deployment requires access to S3 services.
+<br>To let terraform create s3 gateway, set:
+```hcl
+vpc_endpoint_s3_gateway_create = true
+```
+## vpc endpoint lambda
+Weka deployment requires access to lambda services.
+<br>To let terraform create lambda endpoint, set:
 ```hcl
 vpc_endpoint_s3_gateway_create = true
 ```
 
-## Terraform output
+# Terraform output
 The module output contains useful information about the created resources.
 For example: ssh username, weka password secret id etc.
 The `helper_commands` part in the output provides lambda call that can be used to learn about the clusterization process.
