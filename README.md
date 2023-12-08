@@ -591,14 +591,30 @@ To join an SMB cluster in Active Directory, need to run manually command:
 </details>
 
 ## Secret manager
+By default, if not provided explicitly to the module, we will set:
+```hcl
+secretmanager_use_vpc_endpoint = true
+secretmanager_create_vpc_endpoint = true
+```
+This means we will create a secretmanager endpoint and will use it in the scale down lambda function.
+<br>If a secretmanager endpoint already exists, then set:
+```hcl
+secretmanager_create_vpc_endpoint = false
+```
+It is possible to not use the secretmanager endpoint, but not recommended.
+<br>To not use the secretmanager endpoint, set:
+```hcl
+secretmanager_use_vpc_endpoint = false
+secretmanager_create_vpc_endpoint = false
+```
+#### Further explanation:
 We use the secret manager to store the weka username, password (and get.weka.io token).
-We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
-In case providing secret manager endpoint isn't possible, you can set `secretmanager_use_vpc_endpoint=false`
-On your weka deployment module and we not use it. In this case the weka username password will be sent to
-`scale_down` lambda via `fetch` lambda and the will be shown as plain text on the state machine.
+<br>We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
+<br>This is the reason we need the secret manager endpoint on the vpc.
+<br>In case setting secret manager endpoint isn't possible, you will need to set the variables as described above.
+<br> In this case the weka password will be shown as plain text on the state machine, since it will need to be sent
+from the fetch lambda to the scale down lambda.
 
-<br>In case you want to use secret manager, and would like to create the endpoint automatically,
-you can set: `secretmanager_create_vpc_endpoint=true`
 
 ### Endpoint
 # vpc endpoint proxy
