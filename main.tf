@@ -153,6 +153,16 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     propagate_at_launch = true
     value               = var.cluster_name
   }
+
+  dynamic "tag" {
+    for_each = var.tags_map
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = false # already propagated by launch template
+    }
+  }
+
   lifecycle {
     ignore_changes = [desired_capacity, min_size, max_size]
   }
