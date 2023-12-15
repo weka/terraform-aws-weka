@@ -6,6 +6,7 @@ variable "subnet_id" {
 variable "weka_cluster_size" {
   type        = number
   description = "Number of backends in the weka cluster"
+  default     = 0
 }
 
 variable "backends_asg_name" {
