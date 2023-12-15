@@ -737,6 +737,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_additional_instance_iam_policy_statement"></a> [additional\_instance\_iam\_policy\_statement](#input\_additional\_instance\_iam\_policy\_statement) | Additional IAM policy statement to be added to the instance IAM role. | <pre>list(object({<br>    Effect   = string<br>    Action   = list(string)<br>    Resource = list(string)<br>  }))</pre> | `null` | no |
 | <a name="input_alb_additional_subnet_cidr_block"></a> [alb\_additional\_subnet\_cidr\_block](#input\_alb\_additional\_subnet\_cidr\_block) | Additional CIDR block for public subnet | `string` | `"10.0.3.0/24"` | no |
 | <a name="input_alb_additional_subnet_id"></a> [alb\_additional\_subnet\_id](#input\_alb\_additional\_subnet\_id) | Required to specify if subnet\_ids were used to specify pre-defined subnets for weka. ALB requires an additional subnet, and in the case of pre-defined networking this one also should be pre-defined | `string` | `""` | no |
 | <a name="input_alb_alias_name"></a> [alb\_alias\_name](#input\_alb\_alias\_name) | Set ALB alias name | `string` | `""` | no |
