@@ -1,12 +1,22 @@
 weka local ps
 
+current_mngmnt_ip=$(weka local resources | grep 'Management IPs' | awk '{print $NF}')
+gateway=$(ip r | grep default | awk '{print $3}')
+# get device to use
+port=$(ip -o -f inet addr show | grep "$current_mngmnt_ip/"| awk '{print $2}')
+subnet_mask=$(ifconfig $port | grep 'inet ' | awk '{print $4}')
+# get array of secondary ips
+secondary_ips=($(ip -o -4 addr show dev $port | grep 'secondary' | awk '{print $4}' | grep -oE '([0-9]{1,3}\.){3}[0-9]{1,3}'))
+
+echo "$(date -u): secondary_ips: $${secondary_ips[@]}"
+
 function create_interface_group() {
   if weka nfs interface-group | grep ${interface_group_name}; then
     echo "$(date -u): interface group ${interface_group_name} already exists"
     return
   fi
   echo "$(date -u): creating interface group"
-  weka nfs interface-group add ${interface_group_name} NFS
+  weka nfs interface-group add ${interface_group_name} NFS --subnet $subnet_mask --gateway $gateway
   echo "$(date -u): interface group ${interface_group_name} created"
 }
 
@@ -76,11 +86,38 @@ if [ -z "$container_id" ]; then
   exit 1
 fi
 
-# get device to use
-port=$(ip -o -f inet addr show | grep "$current_mngmnt_ip/"| awk '{print $2}')
-
+# add “port” to the interface group - basically it means adding a host and its net device to the group
 weka nfs interface-group port add ${interface_group_name} $container_id $port
 # show interface group
+weka nfs interface-group
+
+
+function wait_for_nfs_interface_group(){
+  max_retries=12 # 12 * 10 = 2 minutes
+  for ((i=0; i<max_retries; i++)); do
+    status=$(weka nfs interface-group -J | jq -r '.[] | select(.name == "'${interface_group_name}'").status')
+    if [ "$status" == "OK" ]; then
+        echo "$(date -u): interface group status: $status"
+        break
+    fi
+    echo "$(date -u): waiting for interface group status to be OK, current status: $status"
+    sleep 10
+  done
+  if [ "$status" != "OK" ]; then
+    echo "$(date -u): failed to wait for the interface group status to be OK"
+    return 1
+  fi
+}
+
+# add secondary IPs for the group to use - these IPs will be used in order to mount
+for seconday_ip in "$${secondary_ips[@]}"; do
+  wait_for_nfs_interface_group || exit 1
+  # add secondary ip to the interface group
+  retry_command "weka nfs interface-group ip-range add ${interface_group_name} $seconday_ip"
+
+  wait_for_nfs_interface_group || exit 1
+done
+
 weka nfs interface-group
 
 # create client group if not exists and add rules / premissions
