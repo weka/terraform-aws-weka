@@ -231,6 +231,16 @@ variable "lambda_iam_role_arn" {
   default     = ""
 }
 
+variable "additional_instance_iam_policy_statement" {
+  type = list(object({
+    Effect   = string
+    Action   = list(string)
+    Resource = list(string)
+  }))
+  default     = null
+  description = "Additional IAM policy statement to be added to the instance IAM role."
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID, required only for security group creation"

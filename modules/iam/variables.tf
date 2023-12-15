@@ -29,3 +29,18 @@ variable "secret_prefix" {
   type        = string
   description = "Secrets prefix"
 }
+
+variable "additional_iam_policy_statement" {
+  type = list(object({
+    Effect   = string
+    Action   = list(string)
+    Resource = list(string)
+  }))
+  default     = null
+  description = "Additional IAM policy statement to be added to the instance IAM role."
+
+  validation {
+    condition     = var.additional_iam_policy_statement != null ? length(var.additional_iam_policy_statement) > 0 : true
+    error_message = "Additional IAM policy statement must be a non-empty list (if provided)."
+  }
+}
