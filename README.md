@@ -756,6 +756,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client instance type (sku) to deploy | `string` | `"c5.2xlarge"` | no |
 | <a name="input_client_placement_group_name"></a> [client\_placement\_group\_name](#input\_client\_placement\_group\_name) | The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically | `string` | `null` | no |
 | <a name="input_client_weka_volume_size"></a> [client\_weka\_volume\_size](#input\_client\_weka\_volume\_size) | The client volume size in GB | `number` | `48` | no |
+| <a name="input_clients_custom_data"></a> [clients\_custom\_data](#input\_clients\_custom\_data) | Custom data to pass to the client instances | `string` | `""` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client instances to deploy | `number` | `0` | no |
 | <a name="input_clients_use_autoscaling_group"></a> [clients\_use\_autoscaling\_group](#input\_clients\_use\_autoscaling\_group) | Use autoscaling group for clients | `bool` | `false` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
@@ -838,7 +839,9 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_local_ssh_private_key"></a> [local\_ssh\_private\_key](#output\_local\_ssh\_private\_key) | If 'ssh\_public\_key' is set to null and no key\_pair\_name provided, it will output the private ssh key location. |
 | <a name="output_nfs_protocol_gateways_ips"></a> [nfs\_protocol\_gateways\_ips](#output\_nfs\_protocol\_gateways\_ips) | Ips of NFS protocol gateways |
 | <a name="output_placement_group_name"></a> [placement\_group\_name](#output\_placement\_group\_name) | Name of placement group |
+| <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security group ids of backends |
 | <a name="output_smb_protocol_gateways_ips"></a> [smb\_protocol\_gateways\_ips](#output\_smb\_protocol\_gateways\_ips) | Ips of SMB protocol gateways |
+| <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
 | <a name="output_vm_username"></a> [vm\_username](#output\_vm\_username) | Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection |
 | <a name="output_weka_cluster_password_secret_id"></a> [weka\_cluster\_password\_secret\_id](#output\_weka\_cluster\_password\_secret\_id) | Secret id of weka\_password |
 <!-- END_TF_DOCS -->

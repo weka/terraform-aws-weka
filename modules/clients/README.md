@@ -60,7 +60,7 @@ No modules.
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | Id of the subnet | `string` | n/a | yes |
 | <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | <pre>{<br>  "creator": "tf",<br>  "env": "dev"<br>}</pre> | no |
 | <a name="input_use_autoscaling_group"></a> [use\_autoscaling\_group](#input\_use\_autoscaling\_group) | Use autoscaling group | `bool` | `false` | no |
-| <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | Number of backends in the weka cluster | `number` | n/a | yes |
+| <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | Number of backends in the weka cluster | `number` | `0` | no |
 | <a name="input_weka_volume_size"></a> [weka\_volume\_size](#input\_weka\_volume\_size) | The root volume size in GB | `number` | `48` | no |
 
 ## Outputs

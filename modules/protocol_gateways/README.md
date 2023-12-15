@@ -53,7 +53,7 @@ No modules.
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy | `string` | n/a | yes |
 | <a name="input_interface_group_name"></a> [interface\_group\_name](#input\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | n/a | yes |
-| <a name="input_lb_arn_suffix"></a> [lb\_arn\_suffix](#input\_lb\_arn\_suffix) | Backend Load ARN suffix | `string` | n/a | yes |
+| <a name="input_lb_arn_suffix"></a> [lb\_arn\_suffix](#input\_lb\_arn\_suffix) | Backend Load Balancer ARN suffix | `string` | `null` | no |
 | <a name="input_placement_group_name"></a> [placement\_group\_name](#input\_placement\_group\_name) | Placement group name | `string` | `""` | no |
 | <a name="input_protocol"></a> [protocol](#input\_protocol) | Name of the protocol. | `string` | `"NFS"` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
@@ -67,7 +67,7 @@ No modules.
 | <a name="input_smbw_enabled"></a> [smbw\_enabled](#input\_smbw\_enabled) | Enable SMBW protocol. | `bool` | `false` | no |
 | <a name="input_subnet_id"></a> [subnet\_id](#input\_subnet\_id) | subnet id | `string` | n/a | yes |
 | <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | <pre>{<br>  "creator": "tf",<br>  "env": "dev"<br>}</pre> | no |
-| <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | Number of backends in the weka cluster | `number` | n/a | yes |
+| <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | Number of backends in the weka cluster | `number` | `0` | no |
 | <a name="input_weka_password_id"></a> [weka\_password\_id](#input\_weka\_password\_id) | Weka password id | `string` | n/a | yes |
 | <a name="input_weka_token_id"></a> [weka\_token\_id](#input\_weka\_token\_id) | Weka token id | `string` | n/a | yes |
 | <a name="input_weka_volume_size"></a> [weka\_volume\_size](#input\_weka\_volume\_size) | The disk size. | `number` | n/a | yes |

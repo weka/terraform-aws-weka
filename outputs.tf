@@ -53,6 +53,16 @@ output "placement_group_name" {
   description = "Name of placement group"
 }
 
+output "subnet_ids" {
+  value       = local.subnet_ids
+  description = "Subnet ids of backends"
+}
+
+output "sg_ids" {
+  value       = local.sg_ids
+  description = "Security group ids of backends"
+}
+
 output "cluster_helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${local.asg_name} --query "AutoScalingGroups[].Instances[].InstanceId" --output text) --query 'Reservations[].Instances[].${local.ips_type}' --output json

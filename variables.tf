@@ -448,6 +448,12 @@ variable "clients_use_autoscaling_group" {
   description = "Use autoscaling group for clients"
 }
 
+variable "clients_custom_data" {
+  type        = string
+  description = "Custom data to pass to the client instances"
+  default     = ""
+}
+
 ############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string
