@@ -20,5 +20,6 @@ module "clients" {
   tags_map                     = var.tags_map
   instance_iam_profile_arn     = var.client_instance_iam_profile_arn
   use_autoscaling_group        = var.clients_use_autoscaling_group
+  custom_data                  = var.clients_custom_data
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }
