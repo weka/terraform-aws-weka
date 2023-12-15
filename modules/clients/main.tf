@@ -113,7 +113,13 @@ resource "aws_launch_template" "this" {
       })
     }
   }
-  user_data  = local.custom_data
+  user_data = local.custom_data
+  lifecycle {
+    precondition {
+      condition     = var.alb_dns_name == null ? var.weka_cluster_size > 0 : true
+      error_message = "Please povide weka_cluster size in case of not using ALB"
+    }
+  }
   depends_on = [aws_placement_group.this]
 }
 

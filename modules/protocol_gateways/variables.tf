@@ -124,6 +124,7 @@ variable "key_pair_name" {
 variable "weka_cluster_size" {
   type        = number
   description = "Number of backends in the weka cluster"
+  default     = 0
 }
 
 variable "weka_password_id" {
@@ -139,7 +140,8 @@ variable "proxy_url" {
 
 variable "lb_arn_suffix" {
   type        = string
-  description = "Backend Load ARN suffix"
+  description = "Backend Load Balancer ARN suffix"
+  default     = null
 }
 
 variable "secret_prefix" {

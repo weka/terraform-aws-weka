@@ -143,7 +143,15 @@ resource "aws_launch_template" "this" {
       })
     }
   }
-  user_data  = base64encode(local.custom_data)
+  user_data = base64encode(local.custom_data)
+
+  lifecycle {
+    precondition {
+      condition     = var.lb_arn_suffix == null ? var.weka_cluster_size > 0 : true
+      error_message = "Please povide weka_cluster size in case of not using LB"
+    }
+  }
+
   depends_on = [aws_placement_group.this]
 }
 
