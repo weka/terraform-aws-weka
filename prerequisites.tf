@@ -26,14 +26,15 @@ module "security_group" {
 }
 
 module "iam" {
-  count                          = var.instance_iam_profile_arn == "" ? 1 : 0
-  source                         = "./modules/iam"
-  prefix                         = var.prefix
-  cluster_name                   = var.cluster_name
-  state_table_name               = local.dynamodb_table_name
-  tiering_obs_name               = var.tiering_obs_name
-  secret_prefix                  = local.secret_prefix
-  tiering_enable_obs_integration = var.tiering_enable_obs_integration
+  count                           = var.instance_iam_profile_arn == "" ? 1 : 0
+  source                          = "./modules/iam"
+  prefix                          = var.prefix
+  cluster_name                    = var.cluster_name
+  state_table_name                = local.dynamodb_table_name
+  tiering_obs_name                = var.tiering_obs_name
+  secret_prefix                   = local.secret_prefix
+  tiering_enable_obs_integration  = var.tiering_enable_obs_integration
+  additional_iam_policy_statement = var.additional_instance_iam_policy_statement
 }
 
 module "vpc_endpoint" {

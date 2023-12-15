@@ -45,6 +45,15 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
   })
 }
 
+resource "aws_iam_policy" "additional" {
+  count = var.additional_iam_policy_statement != null ? 1 : 0
+  name  = "${var.prefix}-${var.cluster_name}-additional-policy"
+  policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = var.additional_iam_policy_statement
+  })
+}
+
 resource "aws_iam_policy" "invoke_lambda_function" {
   name = "${var.prefix}-${var.cluster_name}-invoke-lambda-function"
   policy = jsonencode({
@@ -116,6 +125,13 @@ resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
   count      = var.tiering_enable_obs_integration ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
+  roles      = [aws_iam_role.iam_role.name]
+}
+
+resource "aws_iam_policy_attachment" "additional" {
+  count      = var.additional_iam_policy_statement != null ? 1 : 0
+  name       = "${aws_iam_policy.additional[0].name}-attachment"
+  policy_arn = aws_iam_policy.additional[0].arn
   roles      = [aws_iam_role.iam_role.name]
 }
 
