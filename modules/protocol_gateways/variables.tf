@@ -121,9 +121,9 @@ variable "key_pair_name" {
   description = "Ssh key pair name to pass to the instances."
 }
 
-variable "weka_cluster_size" {
+variable "weka_cluster_size" { # tflint-ignore: terraform_unused_declarations
   type        = number
-  description = "Number of backends in the weka cluster"
+  description = "[Deprecated] Number of backends in the weka cluster"
   default     = 0
 }
 

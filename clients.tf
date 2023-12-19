@@ -9,7 +9,6 @@ module "clients" {
   frontend_container_cores_num = var.clients_use_dpdk ? var.client_frontend_cores : 1
   instance_type                = var.client_instance_type
   backends_asg_name            = aws_autoscaling_group.autoscaling_group.name
-  weka_cluster_size            = var.cluster_size
   alb_dns_name                 = var.create_alb ? aws_lb.alb[0].dns_name : null
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip             = var.assign_public_ip
