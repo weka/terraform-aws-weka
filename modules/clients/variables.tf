@@ -3,9 +3,9 @@ variable "subnet_id" {
   description = "Id of the subnet"
 }
 
-variable "weka_cluster_size" {
+variable "weka_cluster_size" { # tflint-ignore: terraform_unused_declarations
   type        = number
-  description = "Number of backends in the weka cluster"
+  description = "[Deprecated] Number of backends in the weka cluster"
   default     = 0
 }
 

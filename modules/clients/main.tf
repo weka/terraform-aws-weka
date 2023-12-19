@@ -34,7 +34,6 @@ locals {
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
     frontend_container_cores_num = var.frontend_container_cores_num
-    weka_cluster_size            = var.weka_cluster_size
     backends_asg_name            = var.backends_asg_name
     clients_use_dpdk             = var.clients_use_dpdk
     region                       = local.region
@@ -114,12 +113,7 @@ resource "aws_launch_template" "this" {
     }
   }
   user_data = local.custom_data
-  lifecycle {
-    precondition {
-      condition     = var.alb_dns_name == null ? var.weka_cluster_size > 0 : true
-      error_message = "Please povide weka_cluster size in case of not using ALB"
-    }
-  }
+
   depends_on = [aws_placement_group.this]
 }
 

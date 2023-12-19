@@ -68,20 +68,22 @@ if [ -z "${lb_arn_suffix}" ]; then
   # Function to get the private IPs of instances in Auto Scaling Group
   get_private_ips() {
     instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${backends_asg_name}" --query "AutoScalingGroups[].Instances[].InstanceId" --output text --region ${region})
+    cluster_min_size=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${backends_asg_name}" --query "AutoScalingGroups[].MinSize" --output text --region ${region})
     private_ips=$(aws ec2 describe-instances --instance-ids $instance_ids --query "Reservations[].Instances[].PrivateIpAddress" --output text --region ${region})
     private_ips_array=($private_ips)
   }
 
-  # Retry until the length of the array is not 'weka_cluster_size'
+  # Retry until the length of the array is not the same as the cluster min size
   while true; do
     get_private_ips
     length=$${#private_ips_array[@]}
-    # if the length >= weka_cluster_size , break out of the loop
-    if [ $length -ge ${weka_cluster_size} ]; then
+    expected_length=$${cluster_min_size}
+    # if the length >= expected_length , break out of the loop
+    if [ $length -ge $expected_length ]; then
       break
     fi
     # sleep for a while (optional) and retry
-    echo "Waiting for all backend instances to be up... $length/${weka_cluster_size}"
+    echo "Waiting for all backend instances to be up... $length/$expected_length"
     sleep 5
   done
 
