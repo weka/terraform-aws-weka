@@ -38,7 +38,6 @@ locals {
     subnet_prefixes              = data.aws_subnet.selected.cidr_block
     frontend_container_cores_num = var.frontend_container_cores_num
     secondary_ips_per_nic        = var.secondary_ips_per_nic
-    weka_cluster_size            = var.weka_cluster_size
     backends_asg_name            = var.backends_asg_name
     region                       = local.region
     weka_password_id             = var.weka_password_id
@@ -144,13 +143,6 @@ resource "aws_launch_template" "this" {
     }
   }
   user_data = base64encode(local.custom_data)
-
-  lifecycle {
-    precondition {
-      condition     = var.lb_arn_suffix == null ? var.weka_cluster_size > 0 : true
-      error_message = "Please povide weka_cluster size in case of not using LB"
-    }
-  }
 
   depends_on = [aws_placement_group.this]
 }
