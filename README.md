@@ -773,8 +773,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | `"i3en.2xlarge"` | no |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
-| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"release"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"91cc3389a99330654c119f6f9bb3f4a1"` | no |
+| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"28e6ea7a283aa8e692dfbf2656cc471a"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nfs_protocol_gateway_fe_cores_num"></a> [nfs\_protocol\_gateway\_fe\_cores\_num](#input\_nfs\_protocol\_gateway\_fe\_cores\_num) | The protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_nfs_protocol_gateway_instance_iam_profile_arn"></a> [nfs\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_nfs\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
