@@ -400,15 +400,28 @@ func DetachInstancesFromASG(instancesIds []string, autoScalingGroupsName string)
 	return nil
 }
 
-func setDisableInstanceApiTermination(instanceId string, value bool) (*ec2.ModifyInstanceAttributeOutput, error) {
+func setDisableInstanceApiStopAndTermination(instanceId string, value bool) (err error) {
+	// aws sdk doesn't allow to set both attrs in one api call
+
 	svc := connectors.GetAWSSession().EC2
-	input := &ec2.ModifyInstanceAttributeInput{
+
+	_, err = svc.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
 		DisableApiTermination: &ec2.AttributeBooleanValue{
 			Value: aws.Bool(value),
 		},
 		InstanceId: aws.String(instanceId),
+	})
+	if err != nil {
+		return
 	}
-	return svc.ModifyInstanceAttribute(input)
+
+	_, err = svc.ModifyInstanceAttribute(&ec2.ModifyInstanceAttributeInput{
+		DisableApiStop: &ec2.AttributeBooleanValue{
+			Value: aws.Bool(value),
+		},
+		InstanceId: aws.String(instanceId),
+	})
+	return
 }
 
 var terminationSemaphore *semaphore.Weighted
@@ -417,7 +430,7 @@ func init() {
 	terminationSemaphore = semaphore.NewWeighted(20)
 }
 
-func SetDisableInstancesApiTermination(instanceIds []string, value bool) (updated []string, errs []error) {
+func SetDisableInstancesApiStopAndTermination(instanceIds []string, value bool) (updated []string, errs []error) {
 	var wg sync.WaitGroup
 	var responseLock sync.Mutex
 
@@ -431,7 +444,7 @@ func SetDisableInstancesApiTermination(instanceIds []string, value bool) (update
 
 			responseLock.Lock()
 			defer responseLock.Unlock()
-			_, err := setDisableInstanceApiTermination(instanceIds[i], value)
+			err := setDisableInstanceApiStopAndTermination(instanceIds[i], value)
 			if err != nil {
 				errs = append(errs, err)
 				log.Error().Err(err)
