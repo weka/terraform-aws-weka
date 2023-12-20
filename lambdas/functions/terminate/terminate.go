@@ -118,7 +118,7 @@ func terminateAsgInstances(asgName string, terminateInstanceIds []string) (termi
 	if len(terminateInstanceIds) == 0 {
 		return
 	}
-	setToTerminate, errs := common.SetDisableInstancesApiTermination(
+	setToTerminate, errs := common.SetDisableInstancesApiStopAndTermination(
 		terminateInstanceIds[:common.Min(len(terminateInstanceIds), 50)],
 		false,
 	)
