@@ -1,6 +1,10 @@
 echo "$(date -u): running smb script"
 weka local ps
 
+current_mngmnt_ip=$(weka local resources | grep 'Management IPs' | awk '{print $NF}')
+cluster_size="${gateways_number}"
+secondary_ips_num="${secondary_ips_number}"
+
 function wait_for_weka_fs(){
   filesystem_name="default"
   max_retries=30 # 30 * 10 = 5 minutes
@@ -33,9 +37,7 @@ if (( i > max_retries )); then
     exit 1
 fi
 
-cluster_size="${gateways_number}"
 
-current_mngmnt_ip=$(weka local resources | grep 'Management IPs' | awk '{print $NF}')
 # get container id
 for ((i=0; i<20; i++)); do
   container_id=$(weka cluster container | grep frontend0 | grep $HOSTNAME | grep $current_mngmnt_ip | grep UP | awk '{print $1}')
@@ -76,7 +78,7 @@ for (( retry=1; retry<=max_retries; retry++ )); do
     all_container_ids=$(weka cluster container | grep frontend0 | grep $gw_ips | grep UP | awk '{print $1}')
     # if number of all_container_ids < cluster_size, do nothing
     all_container_ids_number=$(echo "$all_container_ids" | wc -l)
-    if (( all_container_ids_number <  cluster_size )); then
+    if (( all_container_ids_number < cluster_size )); then
         echo "$(date -u): not all containers are ready - do retry $retry of $max_retries"
         sleep 20
     else
@@ -103,10 +105,8 @@ if (( all_hosts > 0 && not_ready_hosts == 0 && all_hosts == cluster_size )); the
 fi
 
 if (( all_hosts > 0 && not_ready_hosts == 0 && all_hosts < cluster_size )); then
-    echo "$(date -u): SMB cluster already exists, adding current container to it"
+    echo "$(date -u): SMB cluster already exists, you can add new container manually"
 
-    weka smb cluster containers add --container-ids $container_id
-    weka smb cluster wait
     weka smb cluster status
     exit 0
 fi
@@ -115,38 +115,32 @@ echo "$(date -u): weka SMB cluster does not exist, creating it"
 # get all protocol gateways fromtend container ids separated by comma
 all_container_ids_str=$(echo "$all_container_ids" | tr '\n' ',' | sed 's/,$//')
 
+# all secondary ips of all GW hosts
+all_secondary_ips=($(aws ec2 describe-instances \
+  --filters "Name=tag:Name,Values=${gateways_name}" "Name=tag:weka_hostgroup_type,Values=gateways-protocol" \
+  --query 'Reservations[*].Instances[*].NetworkInterfaces[*].PrivateIpAddresses[?Primary==`false`].PrivateIpAddress' \
+  --region ${region} \
+  --output json | jq -r 'flatten[]'))
+# if number of all_secondary_ips < cluster_size * secondary_ips_num, do nothing
+# length of all_secondary_ips array should be cluster_size * secondary_ips_num
+all_secondary_ips_number=$${#all_secondary_ips[@]}
+if (( all_secondary_ips_number < cluster_size * secondary_ips_num )); then
+    echo "$(date -u): not all secondary ips are in the list - do nothing"
+    exit 1
+else
+    echo "$(date -u): all containers are ready"
+fi
+
+# get all secondary ips separated by comma
+secondary_ips_str=$(IFS=,; printf "%s" "$${all_secondary_ips[*]}")
+
 # if smbw_enabled is true, enable SMBW by adding --smbw flag
 smbw_cmd_extention=""
 if [[ ${smbw_enabled} == true ]]; then
     smbw_cmd_extention="--smbw --config-fs-name .config_fs"
 fi
 
-
-function retry_create_smb_cluster {
-  retry_max=60
-  retry_sleep=30
-  count=$retry_max
-
-  while [ $count -gt 0 ]; do
-      weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str && break
-      count=$(($count - 1))
-      echo "Retrying create SMB cluster in $retry_sleep seconds..."
-      sleep $retry_sleep
-  done
-  [ $count -eq 0 ] && {
-      echo "create SMB cluster command failed after $retry_max attempts"
-      echo "$(date -u): create SMB cluster failed"
-      return 1
-  }
-  return 0
-}
-
-echo "$(date -u): Retrying create SMB cluster..."
-
-retry_create_smb_cluster
-
-echo "$(date -u): Successfully create SMB cluster..."
-
+weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str --smb-ips-pool $secondary_ips_str
 weka smb cluster wait
 
 # add an SMB share if share_name is not empty
