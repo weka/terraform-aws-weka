@@ -56,7 +56,7 @@ resource "aws_lambda_function" "deploy_lambda" {
 
   lifecycle {
     precondition {
-      condition     = var.lambdas_version == local.lambdas_hash
+      condition     = var.lambdas_dist == "release" || var.lambdas_version == local.lambdas_hash
       error_message = "Please update lambdas version."
     }
   }
