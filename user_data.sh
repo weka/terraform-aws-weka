@@ -61,6 +61,10 @@ region=${region}
 subnet_id=${subnet_id}
 nics_num=${nics_num}
 
+# AWS retry settings (https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-retries.html)
+export AWS_MAX_ATTEMPTS=150
+export AWS_RETRY_MODE=standard
+
 for (( i=1; i<nics_num; i++ ))
 do
   eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
