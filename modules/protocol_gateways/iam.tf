@@ -77,6 +77,31 @@ resource "aws_iam_policy" "autoscaling" {
   })
 }
 
+resource "aws_iam_policy" "invoke_lambda_function" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name = "${var.gateways_name}-invoke-lambda-function"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          "arn:aws:lambda:*:*:function:${var.deploy_lambda_name}*",
+          "arn:aws:lambda:*:*:function:${var.report_lambda_name}*",
+          "arn:aws:lambda:*:*:function:${var.fetch_lambda_name}*",
+          "arn:aws:lambda:*:*:function:${var.status_lambda_name}*",
+          "arn:aws:lambda:*:*:function:${var.clusterize_lambda_name}*",
+          "arn:aws:lambda:*:*:function:${var.clusterize_finalization_lambda_name}*"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_iam_role" "this" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
@@ -118,6 +143,14 @@ resource "aws_iam_policy_attachment" "autoscaling" {
 
   name       = "${var.gateways_name}-autoscaling-policy-attachment"
   policy_arn = aws_iam_policy.autoscaling[0].arn
+  roles      = [aws_iam_role.this[0].name]
+}
+
+resource "aws_iam_policy_attachment" "lambda_invoke" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name       = "${var.gateways_name}-lambda-invoke-policy-attachment"
+  policy_arn = aws_iam_policy.invoke_lambda_function[0].arn
   roles      = [aws_iam_role.this[0].name]
 }
 
