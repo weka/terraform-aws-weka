@@ -24,7 +24,8 @@ import (
 )
 
 type Vm struct {
-	Vm string `json:"vm"`
+	Vm       string              `json:"vm"`
+	Protocol protocol.ProtocolGW `json:"protocol"`
 }
 
 type StatusRequest struct {
@@ -120,6 +121,8 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 	installUrl := os.Getenv("INSTALL_URL")
 	nicsNumStr := os.Getenv("NICS_NUM")
 	proxyUrl := os.Getenv("PROXY_URL")
+	nfsInterfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
+	nfsClientGroupName := os.Getenv("NFS_CLIENT_GROUP_NAME")
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
 
@@ -139,6 +142,9 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 		computeContainerNum,
 		frontendContainerNum,
 		driveContainerNum,
+		vm.Protocol,
+		nfsInterfaceGroupName,
+		nfsClientGroupName,
 	)
 	if err != nil {
 		return " ", err
@@ -163,15 +169,11 @@ func reportHandler(ctx context.Context, currentReport protocol.Report) (string, 
 func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
-	//clusterName := os.Getenv("CLUSTER_NAME")
-	//usernameId := os.Getenv("USERNAME_ID")
-	//passwordId := os.Getenv("PASSWORD_ID")
 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
-		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
-		clusterStatus = "Not implemented yet"
+		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey)
 	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
 	} else {

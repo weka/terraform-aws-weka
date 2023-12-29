@@ -35,6 +35,9 @@ func GetDeployScript(
 	computeContainerNum,
 	frontendContainerNum,
 	driveContainerNum int,
+	protocolGW protocol.ProtocolGW,
+	nfsInterfaceGroupName,
+	nfsClientGroupName string,
 ) (bashScript string, err error) {
 
 	log.Info().Msg("Getting deploy script")
@@ -55,7 +58,16 @@ func GetDeployScript(
 		return "", err
 	}
 
-	if !state.Clusterized {
+	var creds protocol.ClusterCreds
+	if protocolGW != "" || state.Clusterized {
+		creds, err = common.GetUsernameAndPassword(usernameId, passwordId)
+		if err != nil {
+			log.Error().Msgf("Error while getting weka creds: %v", err)
+			return
+		}
+	}
+
+	if protocolGW != "" || !state.Clusterized {
 		var token string
 		token, err = common.GetWekaIoToken(tokenId)
 		if err != nil {
@@ -63,13 +75,18 @@ func GetDeployScript(
 		}
 
 		deploymentParams := deploy.DeploymentParams{
-			VMName:         instanceName,
-			InstanceParams: instanceParams,
-			WekaInstallUrl: installUrl,
-			WekaToken:      token,
-			NicsNum:        nicsNum,
-			InstallDpdk:    true,
-			ProxyUrl:       proxyUrl,
+			VMName:                instanceName,
+			InstanceParams:        instanceParams,
+			WekaInstallUrl:        installUrl,
+			WekaToken:             token,
+			NicsNum:               nicsNum,
+			InstallDpdk:           true,
+			ProxyUrl:              proxyUrl,
+			Protocol:              protocolGW,
+			WekaUsername:          creds.Username,
+			WekaPassword:          creds.Password,
+			NFSInterfaceGroupName: nfsInterfaceGroupName,
+			NFSClientGroupName:    nfsClientGroupName,
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
 			FuncDef:          funcDef,
@@ -79,12 +96,6 @@ func GetDeployScript(
 		}
 		bashScript = deployScriptGenerator.GetDeployScript()
 	} else {
-		creds, err2 := common.GetUsernameAndPassword(usernameId, passwordId)
-		if err2 != nil {
-			log.Error().Msgf("Error while getting weka creds: %v", err2)
-			return "", err2
-		}
-
 		ips, err2 := common.GetBackendsPrivateIps(clusterName)
 
 		if err2 != nil {
