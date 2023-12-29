@@ -151,51 +151,62 @@ func Handler(scaleResponse protocol.ScaleResponse) (response protocol.Terminated
 	}
 
 	asgName := os.Getenv("ASG_NAME")
+	nfsAsgName := os.Getenv("NFS_ASG_NAME")
 	if asgName == "" {
 		err = errors.New("ASG_NAME env var is mandatory")
 		return
 	}
+	asgNames := []string{asgName}
+	if nfsAsgName != "" {
+		asgNames = append(asgNames, nfsAsgName)
+	}
 	response.TransientErrors = scaleResponse.TransientErrors[0:len(scaleResponse.TransientErrors):len(scaleResponse.TransientErrors)]
 
-	asgInstances, err := common.GetASGInstances(asgName)
-	asgInstanceIds := common.UnpackASGInstanceIds(asgInstances)
-	log.Info().Msgf("Found %d instances on ASG", len(asgInstanceIds))
+	asgInstances, err := common.GetASGInstances(asgNames)
 	if err != nil {
 		return
 	}
 
-	errs := detachUnhealthyInstances(asgInstances, asgName)
-	if len(errs) != 0 {
+	for asgNameKey, instances := range asgInstances {
+		log.Info().Msgf("Handling ASG: %s", asgNameKey)
+		var errs []error
+
+		detachUnhealthyInstancesErrs := detachUnhealthyInstances(instances, asgNameKey)
+		errs = append(errs, detachUnhealthyInstancesErrs...)
+
+		asgInstanceIds := common.UnpackASGInstanceIds(instances)
+		deltaInstanceIds, err1 := getDeltaInstancesIds(asgInstanceIds, scaleResponse)
+		if err1 != nil {
+			errs = append(errs, err1)
+			continue
+		}
+
+		if len(deltaInstanceIds) == 0 {
+			log.Info().Msgf("No delta instances ids on %s", asgNameKey)
+			continue
+		} else {
+			log.Info().Msgf("Delta instances on %s: %s", asgNameKey, strings.RefListToList(deltaInstanceIds))
+		}
+
+		candidatesToTerminate, err1 := common.GetInstances(deltaInstanceIds)
+		if err1 != nil {
+			errs = append(errs, err1)
+			continue
+		}
+
+		terminatedInstances, terminateUnneededInstancesErrs := terminateUnneededInstances(asgNameKey, candidatesToTerminate, scaleResponse.ToTerminate)
+		errs = append(errs, terminateUnneededInstancesErrs...)
+
 		response.AddTransientErrors(errs)
-	}
 
-	deltaInstanceIds, err := getDeltaInstancesIds(asgInstanceIds, scaleResponse)
-	if err != nil {
-		return
-	}
+		//detachTerminated(asgName)
 
-	if len(deltaInstanceIds) == 0 {
-		log.Info().Msgf("No delta instances ids")
-		return
-	} else {
-		log.Info().Msgf("Delta instances: %s", strings.RefListToList(deltaInstanceIds))
-	}
-
-	candidatesToTerminate, err := common.GetInstances(deltaInstanceIds)
-	if err != nil {
-		return
-	}
-
-	terminatedInstances, errs := terminateUnneededInstances(asgName, candidatesToTerminate, scaleResponse.ToTerminate)
-	response.AddTransientErrors(errs)
-
-	//detachTerminated(asgName)
-
-	for _, instance := range terminatedInstances {
-		response.Instances = append(response.Instances, protocol.TerminatedInstance{
-			InstanceId: *instance.InstanceId,
-			Creation:   *instance.LaunchTime,
-		})
+		for _, instance := range terminatedInstances {
+			response.Instances = append(response.Instances, protocol.TerminatedInstance{
+				InstanceId: *instance.InstanceId,
+				Creation:   *instance.LaunchTime,
+			})
+		}
 	}
 
 	return
