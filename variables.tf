@@ -306,13 +306,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "0a22fc8d038c0f9d34f7d473fdf92ce0"
+  default     = "f28306c3ac61dd426d75da565bd13879"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
@@ -537,6 +537,17 @@ variable "nfs_setup_protocol" {
   default     = false
 }
 
+variable "nfs_interface_group_name" {
+  type        = string
+  description = "Interface group name."
+  default     = "weka-ig"
+
+  validation {
+    condition     = length(var.nfs_interface_group_name) <= 11
+    error_message = "The interface group name should be up to 11 characters long."
+  }
+}
+
 ############################################### SMB protocol gateways variables ###################################################
 variable "smb_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -628,8 +639,20 @@ variable "vpc_endpoint_proxy_create" {
   description = "creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy_url variable"
 }
 
+variable "vpc_endpoint_lambda_create" {
+  type        = bool
+  default     = false
+  description = "Create Ec2 VPC endpoint"
+}
+
 variable "metadata_http_tokens" {
   type        = string
   default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+}
+
+variable "debug_down_backends_removal_timeout" {
+  type        = string
+  default     = "3h"
+  description = "Don't change this value without consulting weka support team. Timeout for removing down backends. Valid time units are ns, us (or µs), ms, s, m, h."
 }

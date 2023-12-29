@@ -5,10 +5,12 @@ locals {
   s3_key       = "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions = toset([
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
-    "transient"
+    "transient", "join-nfs-finalization"
   ])
-  function_name           = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
-  lambdas_hash            = md5(join("", [for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")]))
+  function_name = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+  lambdas_hash = md5(join("", [
+    for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")
+  ]))
   stripe_width_calculated = var.cluster_size - var.protection_level - 1
   stripe_width            = local.stripe_width_calculated < 16 ? local.stripe_width_calculated : 16
   install_weka_url        = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}?provider=aws&region=${data.aws_region.current.name}"
@@ -32,24 +34,31 @@ resource "aws_lambda_function" "deploy_lambda" {
   architectures = ["arm64"]
   environment {
     variables = {
-      LAMBDA                       = "deploy"
-      REGION                       = local.region
-      USERNAME_ID                  = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID                  = aws_secretsmanager_secret.weka_password.id
-      TOKEN_ID                     = aws_secretsmanager_secret.get_weka_io_token.id
-      STATE_TABLE                  = local.dynamodb_table_name
-      STATE_TABLE_HASH_KEY         = local.dynamodb_hash_key_name
-      PREFIX                       = var.prefix
-      CLUSTER_NAME                 = var.cluster_name
-      COMPUTE_MEMORY               = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].memory[1] : var.containers_config_map[var.instance_type].memory[0]
-      COMPUTE_CONTAINER_CORES_NUM  = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].compute : var.containers_config_map[var.instance_type].compute + 1
-      FRONTEND_CONTAINER_CORES_NUM = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].frontend : 0
-      DRIVE_CONTAINER_CORES_NUM    = var.containers_config_map[var.instance_type].drive
-      INSTALL_URL                  = local.install_weka_url
-      NICS_NUM                     = var.containers_config_map[var.instance_type].nics
-      CLUSTERIZE_LAMBDA_NAME       = aws_lambda_function.clusterize_lambda.function_name
-      REPORT_LAMBDA_NAME           = aws_lambda_function.report_lambda.function_name
-      PROXY_URL                    = var.proxy_url
+      LAMBDA                            = "deploy"
+      REGION                            = local.region
+      USERNAME_ID                       = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID                       = aws_secretsmanager_secret.weka_password.id
+      TOKEN_ID                          = aws_secretsmanager_secret.get_weka_io_token.id
+      STATE_TABLE                       = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY              = local.dynamodb_hash_key_name
+      PREFIX                            = var.prefix
+      CLUSTER_NAME                      = var.cluster_name
+      COMPUTE_MEMORY                    = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].memory[1] : var.containers_config_map[var.instance_type].memory[0]
+      COMPUTE_CONTAINER_CORES_NUM       = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].compute : var.containers_config_map[var.instance_type].compute + 1
+      FRONTEND_CONTAINER_CORES_NUM      = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].frontend : 0
+      DRIVE_CONTAINER_CORES_NUM         = var.containers_config_map[var.instance_type].drive
+      INSTALL_URL                       = local.install_weka_url
+      NICS_NUM                          = var.containers_config_map[var.instance_type].nics
+      CLUSTERIZE_LAMBDA_NAME            = aws_lambda_function.clusterize_lambda.function_name
+      REPORT_LAMBDA_NAME                = aws_lambda_function.report_lambda.function_name
+      FETCH_LAMBDA_NAME                 = aws_lambda_function.fetch_lambda.function_name
+      STATUS_LAMBDA_NAME                = aws_lambda_function.status_lambda.function_name
+      JOIN_NFS_FINALIZATION_LAMBDA_NAME = aws_lambda_function.join_nfs_finalization_lambda.function_name
+      PROXY_URL                         = var.proxy_url
+      NFS_INTERFACE_GROUP_NAME          = var.nfs_interface_group_name
+      NFS_SECONDARY_IPS_NUM             = var.nfs_protocol_gateway_secondary_ips_per_nic
+      NFS_PROTOCOL_GATEWAY_FE_CORES_NUM = var.nfs_protocol_gateway_fe_cores_num
+      ALB_ARN_SUFFIX                    = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -97,6 +106,10 @@ resource "aws_lambda_function" "clusterize_lambda" {
       # pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name
+      FETCH_LAMBDA_NAME                   = aws_lambda_function.fetch_lambda.function_name
+      NFS_INTERFACE_GROUP_NAME            = var.nfs_interface_group_name
+      NFS_PROTOCOL_GATEWAYS_NUM           = var.nfs_protocol_gateways_number
+      ALB_ARN_SUFFIX                      = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -115,11 +128,28 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   environment {
     variables = {
       LAMBDA               = "clusterizeFinalization"
-      REGION               = local.region
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
-      PREFIX               = var.prefix
-      CLUSTER_NAME         = var.cluster_name
+      STATE_KEY            = local.state_key
+      NFS_STATE_KEY        = local.nfs_state_key
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+resource "aws_lambda_function" "join_nfs_finalization_lambda" {
+  function_name = substr("${var.prefix}-${var.cluster_name}-join-nfs-finalization-lambda", 0, 64)
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.handler_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
+  environment {
+    variables = {
+      LAMBDA = "joinNfsFinalization"
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -141,8 +171,7 @@ resource "aws_lambda_function" "report_lambda" {
       REGION               = local.region
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
-      PREFIX               = var.prefix
-      CLUSTER_NAME         = var.cluster_name
+      STATE_KEY            = local.state_key
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -161,11 +190,9 @@ resource "aws_lambda_function" "status_lambda" {
   environment {
     variables = {
       LAMBDA               = "status"
-      REGION               = local.region
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
-      PREFIX               = var.prefix
-      CLUSTER_NAME         = var.cluster_name
+      STATE_KEY            = local.state_key
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -183,16 +210,18 @@ resource "aws_lambda_function" "fetch_lambda" {
   architectures = ["arm64"]
   environment {
     variables = {
-      LAMBDA                     = "fetch"
-      REGION                     = local.region
-      STATE_TABLE                = local.dynamodb_table_name
-      ROLE                       = "backend"
-      PREFIX                     = var.prefix
-      CLUSTER_NAME               = var.cluster_name
-      ASG_NAME                   = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-      USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID                = aws_secretsmanager_secret.weka_password.id
-      USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
+      LAMBDA                        = "fetch"
+      REGION                        = local.region
+      STATE_TABLE                   = local.dynamodb_table_name
+      ROLE                          = "backend"
+      DOWN_BACKENDS_REMOVAL_TIMEOUT = var.debug_down_backends_removal_timeout
+      PREFIX                        = var.prefix
+      CLUSTER_NAME                  = var.cluster_name
+      ASG_NAME                      = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+      NFS_ASG_NAME                  = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
+      USERNAME_ID                   = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID                   = aws_secretsmanager_secret.weka_password.id
+      USE_SECRETMANAGER_ENDPOINT    = var.secretmanager_use_vpc_endpoint
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -263,7 +292,7 @@ resource "aws_lambda_function" "terminate_lambda" {
       PREFIX       = var.prefix
       CLUSTER_NAME = var.cluster_name
       ASG_NAME     = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-
+      NFS_ASG_NAME = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]

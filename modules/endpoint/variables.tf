@@ -18,6 +18,11 @@ variable "create_vpc_endpoint_s3_gateway" {
   description = "Create s3 gateway vpc endpoint"
 }
 
+variable "create_vpc_endpoint_lambda" {
+  type        = bool
+  description = "Create lambda vpc endpoint"
+}
+
 variable "subnet_ids" {
   type        = list(string)
   description = "List of subnet ids"

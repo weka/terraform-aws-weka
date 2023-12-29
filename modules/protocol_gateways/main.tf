@@ -24,30 +24,14 @@ locals {
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
 
   init_script = templatefile("${path.module}/init.sh", {
-    nics_num            = var.frontend_container_cores_num + 1
-    subnet_id           = var.subnet_id
-    region              = local.region
-    groups              = join(" ", var.sg_ids)
-    weka_log_group_name = "/wekaio/${var.gateways_name}"
-    weka_token_id       = var.weka_token_id
-    proxy_url           = var.proxy_url
-    install_weka_url    = var.install_weka_url
-  })
-
-  deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
-    subnet_prefixes              = data.aws_subnet.selected.cidr_block
-    frontend_container_cores_num = var.frontend_container_cores_num
-    secondary_ips_per_nic        = var.secondary_ips_per_nic
-    backends_asg_name            = var.backends_asg_name
-    region                       = local.region
-    weka_password_id             = var.weka_password_id
-    lb_arn_suffix                = var.lb_arn_suffix
-  })
-
-  setup_nfs_protocol_script = templatefile("${path.module}/setup_nfs.sh", {
-    gateways_name        = var.gateways_name
-    interface_group_name = var.interface_group_name
-    client_group_name    = var.client_group_name
+    nics_num              = var.frontend_container_cores_num + 1
+    subnet_id             = var.subnet_id
+    region                = local.region
+    groups                = join(" ", var.sg_ids)
+    weka_log_group_name   = "/wekaio/${var.gateways_name}"
+    proxy_url             = var.proxy_url
+    deploy_lambda_name    = var.deploy_lambda_name
+    secondary_ips_per_nic = var.secondary_ips_per_nic
   })
 
   setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {
@@ -61,12 +45,12 @@ locals {
 
   })
 
-  protocol_script = var.protocol == "NFS" ? local.setup_nfs_protocol_script : local.setup_smb_protocol_script
+  protocol_script = var.protocol == "NFS" ? "" : local.setup_smb_protocol_script
 
   setup_protocol_script = var.setup_protocol ? local.protocol_script : ""
 
   custom_data_parts = [
-    local.init_script, local.deploy_script, local.setup_protocol_script
+    local.init_script, local.setup_protocol_script
   ]
   custom_data = join("\n", local.custom_data_parts)
 }
@@ -79,7 +63,8 @@ resource "aws_placement_group" "this" {
 
 resource "aws_launch_template" "this" {
   name                                 = "${var.gateways_name}-launch-template"
-  disable_api_termination              = false
+  disable_api_termination              = true
+  disable_api_stop                     = true
   ebs_optimized                        = true
   image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.selected[0].id
   instance_initiated_shutdown_behavior = "terminate"
@@ -88,7 +73,7 @@ resource "aws_launch_template" "this" {
   update_default_version               = true
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = "/dev/sdp"
     ebs {
       volume_size           = var.weka_volume_size
       volume_type           = "gp3"
@@ -106,7 +91,7 @@ resource "aws_launch_template" "this" {
 
   metadata_options {
     http_endpoint               = "enabled"
-    http_tokens                 = "optional" #required
+    http_tokens                 = var.metadata_http_tokens
     http_put_response_hop_limit = 1
     instance_metadata_tags      = "enabled"
   }
@@ -121,7 +106,6 @@ resource "aws_launch_template" "this" {
     device_index                = 0
     security_groups             = var.sg_ids
     subnet_id                   = var.subnet_id
-    ipv4_address_count          = var.secondary_ips_per_nic
   }
 
   placement {
@@ -147,7 +131,7 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_instance" "this" {
-  count = var.gateways_number
+  count = var.protocol == "SMB" ? var.gateways_number : 0
   launch_template {
     id = aws_launch_template.this.id
   }
@@ -169,4 +153,39 @@ resource "aws_instance" "this" {
   }
 
   depends_on = [aws_placement_group.this, aws_iam_instance_profile.this, aws_iam_role.this]
+}
+
+resource "aws_autoscaling_group" "autoscaling_group" {
+  count                 = var.protocol == "NFS" ? 1 : 0
+  name                  = var.gateways_name
+  desired_capacity      = var.gateways_number
+  max_size              = var.gateways_number
+  min_size              = var.gateways_number
+  vpc_zone_identifier   = [var.subnet_id]
+  suspended_processes   = ["ReplaceUnhealthy"]
+  protect_from_scale_in = true
+
+  launch_template {
+    id      = aws_launch_template.this.id
+    version = aws_launch_template.this.latest_version
+  }
+  tag {
+    key                 = var.gateways_name
+    propagate_at_launch = true
+    value               = var.gateways_name
+  }
+
+  dynamic "tag" {
+    for_each = var.tags_map
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = false # already propagated by launch template
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [desired_capacity, min_size, max_size]
+  }
+  depends_on = [aws_launch_template.this]
 }

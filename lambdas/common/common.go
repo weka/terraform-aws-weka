@@ -3,7 +3,6 @@ package common
 import (
 	"context"
 	"fmt"
-	"os"
 	"sync"
 	"time"
 
@@ -26,9 +25,11 @@ import (
 )
 
 var (
-	StateKey           = getStateKey()
 	WaitForLockTimeout = time.Minute * 5
 )
+
+const NfsInterfaceGroupPortKey = "nfs_interface_group_port"
+const NfsInterfaceGroupPortValue = "ready"
 
 type InstancePrivateIpsSet map[string]types.Nilt
 
@@ -53,16 +54,7 @@ type AwsObsParams struct {
 	TieringSsdPercent string
 }
 
-func getStateKey() string {
-	prefix := os.Getenv("PREFIX")
-	clusterName := os.Getenv("CLUSTER_NAME")
-	if prefix == "" || clusterName == "" {
-		log.Fatal().Msgf("Missing PREFIX or CLUSTER_NAME env vars")
-	}
-	return fmt.Sprintf("%s-%s-state", prefix, clusterName)
-}
-
-func LockState(table, hashKey string) (err error) {
+func LockState(table, hashKey, stateKey string) (err error) {
 	client := connectors.GetAWSSession().DynamoDB
 	log.Debug().Msgf("Trying to lock state in table %s", table)
 
@@ -79,7 +71,7 @@ func LockState(table, hashKey string) (err error) {
 
 		input := &dynamodb.UpdateItemInput{
 			TableName:                 aws.String(table),
-			Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+			Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
 			UpdateExpression:          expr.Update(),
 			ConditionExpression:       expr.Condition(),
 			ExpressionAttributeNames:  expr.Names(),
@@ -105,7 +97,7 @@ func LockState(table, hashKey string) (err error) {
 	return
 }
 
-func UnlockState(table, hashKey string) (err error) {
+func UnlockState(table, hashKey, stateKey string) (err error) {
 	client := connectors.GetAWSSession().DynamoDB
 
 	expr, err := expression.NewBuilder().WithUpdate(
@@ -118,7 +110,7 @@ func UnlockState(table, hashKey string) (err error) {
 
 	input := &dynamodb.UpdateItemInput{
 		TableName:                 aws.String(table),
-		Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
 		UpdateExpression:          expr.Update(),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
@@ -131,11 +123,11 @@ func UnlockState(table, hashKey string) (err error) {
 	return
 }
 
-func GetClusterStateWithoutLock(table, hashKey string) (state protocol.ClusterState, err error) {
+func GetClusterStateWithoutLock(table, hashKey, stateKey string) (state protocol.ClusterState, err error) {
 	client := connectors.GetAWSSession().DynamoDB
 	input := dynamodb.GetItemInput{
 		TableName:      aws.String(table),
-		Key:            map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		Key:            map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
 		ConsistentRead: aws.Bool(true),
 	}
 
@@ -155,18 +147,18 @@ func GetClusterStateWithoutLock(table, hashKey string) (state protocol.ClusterSt
 	return
 }
 
-func GetClusterState(table, hashKey string) (state protocol.ClusterState, err error) {
-	log.Info().Msgf("Fetching cluster state %s from dynamodb", StateKey)
+func GetClusterState(table, hashKey, stateKey string) (state protocol.ClusterState, err error) {
+	log.Info().Msgf("Fetching cluster state %s from dynamodb", stateKey)
 
-	err = LockState(table, hashKey)
+	err = LockState(table, hashKey, stateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return state, err
 	}
 
-	state, err = GetClusterStateWithoutLock(table, hashKey)
+	state, err = GetClusterStateWithoutLock(table, hashKey, stateKey)
 
-	unlockErr := UnlockState(table, hashKey)
+	unlockErr := UnlockState(table, hashKey, stateKey)
 	if unlockErr != nil {
 		// expand existing error
 		err = fmt.Errorf("%v; %v", err, unlockErr)
@@ -181,7 +173,7 @@ func GetClusterState(table, hashKey string) (state protocol.ClusterState, err er
 	return
 }
 
-func UpdateClusterState(table, hashKey string, state protocol.ClusterState) (err error) {
+func UpdateClusterState(table, hashKey, stateKey string, state protocol.ClusterState) (err error) {
 	client := connectors.GetAWSSession().DynamoDB
 
 	value, err := dynamodbattribute.Marshal(state)
@@ -192,7 +184,7 @@ func UpdateClusterState(table, hashKey string, state protocol.ClusterState) (err
 
 	_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName: aws.String(table),
-		Key:       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(StateKey)}},
+		Key:       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
 		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
 			"Value": {
 				Action: aws.String("PUT"),
@@ -276,18 +268,18 @@ func GetBackendWekaVolumeId(InstanceId string) (volumeId string, err error) {
 	return
 }
 
-func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesNames []string, err error) {
-	err = LockState(table, hashKey)
+func AddInstanceToStateInstances(table, hashKey, stateKey string, newInstance protocol.Vm) (state protocol.ClusterState, err error) {
+	err = LockState(table, hashKey, stateKey)
 	if err != nil {
 		return
 	}
 
-	instancesNames, err = addInstanceToStateInstances(table, hashKey, newInstance)
+	state, err = addInstanceToStateInstances(table, hashKey, stateKey, newInstance)
 	if err != nil {
 		log.Error().Err(err).Send()
 	}
 
-	unlockErr := UnlockState(table, hashKey)
+	unlockErr := UnlockState(table, hashKey, stateKey)
 	if unlockErr != nil {
 		// expand existing error
 		err = fmt.Errorf("%v; %v", err, unlockErr)
@@ -297,8 +289,8 @@ func AddInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 
 // NOTE: Modifies state in dynamodb
 // This function should be called only using Lock and Unlock state functions surrounding it
-func addInstanceToStateInstances(table, hashKey, newInstance string) (instancesNames []string, err error) {
-	state, err := GetClusterStateWithoutLock(table, hashKey)
+func addInstanceToStateInstances(table, hashKey, stateKey string, newInstance protocol.Vm) (state protocol.ClusterState, err error) {
+	state, err = GetClusterStateWithoutLock(table, hashKey, stateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
@@ -318,19 +310,16 @@ func addInstanceToStateInstances(table, hashKey, newInstance string) (instancesN
 	}
 	state.Instances = append(state.Instances, newInstance)
 
-	err = UpdateClusterState(table, hashKey, state)
-	if err == nil {
-		instancesNames = state.Instances
-	}
+	err = UpdateClusterState(table, hashKey, stateKey, state)
+
 	return
 }
 
-func UnpackASGInstanceIds(instances []*autoscaling.Instance) []*string {
-	instanceIds := []*string{}
-	if len(instances) == 0 {
+func UnpackASGInstanceIds(asgInstances []*autoscaling.Instance) (instanceIds []*string) {
+	if len(asgInstances) == 0 {
 		return instanceIds
 	}
-	for _, instance := range instances {
+	for _, instance := range asgInstances {
 		instanceIds = append(instanceIds, instance.InstanceId)
 	}
 	return instanceIds
@@ -457,17 +446,23 @@ func SetDisableInstancesApiStopAndTermination(instanceIds []string, value bool) 
 	return
 }
 
-func GetASGInstances(asgName string) ([]*autoscaling.Instance, error) {
+func GetASGInstances(asgNames []string) (asgInstances map[string][]*autoscaling.Instance, err error) {
 	svc := connectors.GetAWSSession().ASG
+	asgInstances = make(map[string][]*autoscaling.Instance)
+	asgNamesRefList := strings.ListToRefList(asgNames)
 	asgOutput, err := svc.DescribeAutoScalingGroups(
 		&autoscaling.DescribeAutoScalingGroupsInput{
-			AutoScalingGroupNames: []*string{&asgName},
+			AutoScalingGroupNames: asgNamesRefList,
 		},
 	)
 	if err != nil {
-		return []*autoscaling.Instance{}, err
+		return
 	}
-	return asgOutput.AutoScalingGroups[0].Instances, nil
+
+	for _, asg := range asgOutput.AutoScalingGroups {
+		asgInstances[*asg.AutoScalingGroupName] = asg.Instances
+	}
+	return
 }
 
 func CreateBucket(bucketName string) (err error) {
@@ -501,5 +496,69 @@ func GetUsernameAndPassword(usernameId, passwordId string) (clusterCreds protoco
 		return
 	}
 	clusterCreds.Password, err = GetSecret(passwordId)
+	return
+}
+
+func GetALBIp(albArnSuffix string) (albIp string, err error) {
+	if albArnSuffix == "" {
+		return
+	}
+
+	svc := connectors.GetAWSSession().EC2
+	log.Debug().Msgf("Fetching ALB %s ip...", albArnSuffix)
+
+	describeOutput, err := svc.DescribeNetworkInterfaces(&ec2.DescribeNetworkInterfacesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name: aws.String("description"),
+				Values: []*string{
+					aws.String("ELB " + albArnSuffix),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return
+	}
+
+	if len(describeOutput.NetworkInterfaces) > 0 {
+		albIp = *describeOutput.NetworkInterfaces[0].PrivateIpAddress
+		log.Debug().Msgf("ALB ip %s", albIp)
+	} else {
+		log.Debug().Msgf("No ALB network interface was found")
+	}
+
+	return
+}
+
+func GetInstancesNames(instances []protocol.Vm) (vmNames []string) {
+	for _, instance := range instances {
+		vmNames = append(vmNames, instance.Name)
+	}
+	return
+}
+
+func GetClusterSecondaryIps(gatewaysName string) (secondaryIps []string, err error) {
+	svc := connectors.GetAWSSession().EC2
+	log.Debug().Msgf("Fetching cluster %s secondary ips...", gatewaysName)
+
+	describeOutput, err := svc.DescribeNetworkInterfaces(&ec2.DescribeNetworkInterfacesInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("tag:Name"),
+				Values: []*string{&gatewaysName},
+			},
+		},
+	})
+	if err != nil {
+		return
+	}
+
+	for _, networkInterface := range describeOutput.NetworkInterfaces {
+		for _, privateIp := range networkInterface.PrivateIpAddresses {
+			secondaryIps = append(secondaryIps, *privateIp.PrivateIpAddress)
+		}
+	}
+
 	return
 }
