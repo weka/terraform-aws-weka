@@ -86,14 +86,18 @@ output "client_ips" {
 
 output "smb_protocol_gateways_ips" {
   value       = var.smb_protocol_gateways_number == 0 ? null : <<EOT
- echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.smb_protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
+ echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.smb_protocol_gateways[0].gateways_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
 EOT
   description = "Ips of SMB protocol gateways"
 }
 
 output "nfs_protocol_gateways_ips" {
   value       = var.nfs_protocol_gateways_number == 0 ? null : <<EOT
- echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.nfs_protocol_gateways[0].gateways_name}" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
+ echo $(aws ec2 describe-instances --filters "Name=tag:Name,Values=${module.nfs_protocol_gateways[0].gateways_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
 EOT
   description = "Ips of NFS protocol gateways"
+}
+
+output "deploy_lambda_name" {
+  value = aws_lambda_function.deploy_lambda.function_name
 }
