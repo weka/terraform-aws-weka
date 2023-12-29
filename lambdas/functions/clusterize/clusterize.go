@@ -23,16 +23,32 @@ type ClusterizationParams struct {
 	PasswordId        string
 	StateTable        string
 	StateTableHashKey string
-	VmName            string
+	Vm                protocol.Vm
 	Cluster           clusterize.ClusterParams
+	NFSParams         protocol.NFSParams
 	Obs               protocol.ObsParams
+	AlbArnSuffix      string
 }
 
 func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	funcDef := aws_functions_def.NewFuncDef()
 	reportFunction := funcDef.GetFunctionCmdDefinition(functions_def.Report)
 
-	clusterizeScript, err := doClusterize(p, funcDef)
+	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+	log.Info().Msgf("Fetched weka cluster creds successfully")
+	p.Cluster.WekaPassword = creds.Password
+	p.Cluster.WekaUsername = creds.Username
+
+	if p.Vm.Protocol == protocol.NFS {
+		clusterizeScript, err = doNFSClusterize(p, funcDef)
+	} else {
+		clusterizeScript, err = doClusterize(p, funcDef)
+	}
+
 	if err != nil {
 		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction)
 	}
@@ -40,16 +56,16 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 }
 
 func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
-	instancesNames, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.VmName)
+	stateKey := fmt.Sprintf("%s-%s-state", p.Cluster.Prefix, p.Cluster.ClusterName)
+	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, stateKey, p.Vm)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
 	}
 
-	initialSize := p.Cluster.HostsNum
-	msg := fmt.Sprintf("This (%s) is instance %d/%d that is ready for clusterization", p.VmName, len(instancesNames), initialSize)
+	msg := fmt.Sprintf("This (%s) is instance %d/%d that is ready for clusterization", p.Vm.Name, len(state.Instances), state.DesiredSize)
 	log.Info().Msgf(msg)
-	if len(instancesNames) != initialSize {
+	if len(state.Instances) != p.Cluster.ClusterizationTarget {
 		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report))
 		return
 	}
@@ -63,9 +79,9 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 				err = report.Report(
 					protocol.Report{
 						Type:     "error",
-						Hostname: p.VmName,
+						Hostname: p.Vm.Name,
 						Message:  fmt.Sprintf("Failed creating obs bucket %s: %s", p.Obs.Name, err),
-					}, p.StateTable, p.StateTableHashKey)
+					}, p.StateTable, p.StateTableHashKey, stateKey)
 				if err != nil {
 					log.Error().Err(err).Send()
 				}
@@ -75,13 +91,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		}
 	}
 
-	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
-	}
-	log.Info().Msgf("Fetched weka cluster creds successfully")
-
+	instancesNames := common.GetInstancesNames(state.Instances)
 	ips, err := common.GetBackendsPrivateIPsFromInstanceIds(cloudStrings.ListToRefList(instancesNames))
 	if err != nil {
 		log.Error().Err(err).Send()
@@ -91,9 +101,6 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames
 	clusterParams.IPs = ips
-	clusterParams.DebugOverrideCmds = "echo 'nothing here'"
-	clusterParams.WekaPassword = creds.Password
-	clusterParams.WekaUsername = creds.Username
 	clusterParams.InstallDpdk = true
 	clusterParams.FindDrivesScript = common.FindDrivesScript
 	clusterParams.ObsScript = GetObsScript(p.Obs)
@@ -104,6 +111,61 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	}
 	clusterizeScript = scriptGenerator.GetClusterizeScript()
 
+	log.Info().Msg("Clusterization script generated")
+	return
+}
+
+func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
+	stateKey := fmt.Sprintf("%s-%s-nfs-state", p.Cluster.Prefix, p.Cluster.ClusterName)
+	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, stateKey, p.Vm)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	initialSize := p.NFSParams.HostsNum
+	msg := fmt.Sprintf("This (%s) is nfs instance %d/%d that is ready for joining the interface group", p.Vm.Name, len(state.Instances), initialSize)
+	log.Info().Msgf(msg)
+	if len(state.Instances) != initialSize {
+		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report))
+		return
+	}
+
+	var containersUid []string
+	var nicNames []string
+	for _, instance := range state.Instances {
+		containersUid = append(containersUid, instance.ContainerUid)
+		nicNames = append(nicNames, instance.NicName)
+	}
+
+	gatewaysName := fmt.Sprintf("%s-%s-nfs-protocol-gateway", p.Cluster.Prefix, p.Cluster.ClusterName)
+	secondaryIps, err := common.GetClusterSecondaryIps(gatewaysName)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	nfsParams := protocol.NFSParams{
+		InterfaceGroupName: p.NFSParams.InterfaceGroupName,
+		ClientGroupName:    p.NFSParams.ClientGroupName,
+		SecondaryIps:       secondaryIps,
+		ContainersUid:      containersUid,
+		NicNames:           nicNames,
+	}
+
+	albIp, err := common.GetALBIp(p.AlbArnSuffix)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	scriptGenerator := clusterize.ConfigureNfsScriptGenerator{
+		Params:         nfsParams,
+		FuncDef:        funcDef,
+		LoadBalancerIP: albIp,
+		Name:           p.Vm.Name,
+	}
+
+	clusterizeScript = scriptGenerator.GetNFSSetupScript()
 	log.Info().Msg("Clusterization script generated")
 	return
 }

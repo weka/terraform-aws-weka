@@ -36,6 +36,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "ec2:ModifyInstanceAttribute",
           "ec2:TerminateInstances",
           "ec2:DescribeInstances",
+          "ec2:CreateTags"
         ]
         Resource = ["*"]
       },

@@ -1,8 +1,3 @@
-variable "backends_asg_name" {
-  type        = string
-  description = "Name of the backends autoscaling group"
-}
-
 variable "frontend_container_cores_num" {
   type        = number
   description = "Number of frontend cores to use on instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC"
@@ -46,23 +41,6 @@ variable "gateways_name" {
   description = "The protocol group name."
 }
 
-variable "client_group_name" {
-  type        = string
-  description = "Client access group name."
-  default     = "weka-cg"
-}
-
-variable "interface_group_name" {
-  type        = string
-  description = "Interface group name."
-  default     = "weka-ig"
-
-  validation {
-    condition     = length(var.interface_group_name) <= 11
-    error_message = "The interface group name should be up to 11 characters long."
-  }
-}
-
 variable "assign_public_ip" {
   type        = bool
   description = "Determines whether to assign public ip."
@@ -81,11 +59,6 @@ variable "install_weka_url" {
     condition     = length(var.install_weka_url) > 0
     error_message = "The URL should not be empty."
   }
-}
-
-variable "weka_token_id" {
-  type        = string
-  description = "Weka token id"
 }
 
 variable "instance_iam_profile_arn" {
@@ -127,21 +100,10 @@ variable "weka_cluster_size" { # tflint-ignore: terraform_unused_declarations
   default     = 0
 }
 
-variable "weka_password_id" {
-  type        = string
-  description = "Weka password id"
-}
-
 variable "proxy_url" {
   type        = string
   description = "Weka proxy url"
   default     = ""
-}
-
-variable "lb_arn_suffix" {
-  type        = string
-  description = "Backend Load Balancer ARN suffix"
-  default     = null
 }
 
 variable "secret_prefix" {
@@ -177,4 +139,45 @@ variable "smb_domain_name" {
   type        = string
   description = "The domain to join the SMB cluster to."
   default     = ""
+}
+
+variable "deploy_lambda_name" {
+  type        = string
+  description = "The name of the deploy function"
+}
+
+variable "report_lambda_name" {
+  type        = string
+  description = "The name of the report function"
+}
+
+variable "fetch_lambda_name" {
+  type        = string
+  description = "The name of the fetch function"
+}
+
+variable "status_lambda_name" {
+  type        = string
+  description = "The name of the status function"
+}
+
+variable "clusterize_lambda_name" {
+  type        = string
+  description = "The name of the clusterize function"
+}
+
+variable "clusterize_finalization_lambda_name" {
+  type        = string
+  description = "The name of the clusterize finalization function"
+}
+
+variable "join_nfs_finalization_lambda_name" {
+  type        = string
+  description = "The name of the join finalization function"
+}
+
+variable "metadata_http_tokens" {
+  type        = string
+  default     = "required"
+  description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
 }

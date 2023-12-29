@@ -16,12 +16,15 @@ type AWSFuncDef struct {
 func NewFuncDef() functions_def.FunctionDef {
 	region := os.Getenv("REGION")
 	mapping := map[functions_def.FunctionName]string{
-		functions_def.Clusterize:              os.Getenv("CLUSTERIZE_LAMBDA_NAME"),
-		functions_def.ClusterizeFinalizaition: os.Getenv("CLUSTERIZE_FINALIZATION_LAMBDA_NAME"),
-		functions_def.Deploy:                  os.Getenv("DEPLOY_LAMBDA_NAME"),
-		functions_def.Report:                  os.Getenv("REPORT_LAMBDA_NAME"),
-		functions_def.Join:                    os.Getenv("JOIN_LAMBDA_NAME"),
-		functions_def.JoinFinalization:        os.Getenv("JOIN_FINALIZATION_LAMBDA_NAME"),
+		functions_def.Clusterize:             os.Getenv("CLUSTERIZE_LAMBDA_NAME"),
+		functions_def.ClusterizeFinalization: os.Getenv("CLUSTERIZE_FINALIZATION_LAMBDA_NAME"),
+		functions_def.Deploy:                 os.Getenv("DEPLOY_LAMBDA_NAME"),
+		functions_def.Report:                 os.Getenv("REPORT_LAMBDA_NAME"),
+		functions_def.Join:                   os.Getenv("JOIN_LAMBDA_NAME"),
+		functions_def.JoinFinalization:       os.Getenv("JOIN_FINALIZATION_LAMBDA_NAME"),
+		functions_def.JoinNfsFinalization:    os.Getenv("JOIN_NFS_FINALIZATION_LAMBDA_NAME"),
+		functions_def.Fetch:                  os.Getenv("FETCH_LAMBDA_NAME"),
+		functions_def.Status:                 os.Getenv("STATUS_LAMBDA_NAME"),
 	}
 	return &AWSFuncDef{lambdaNamesMapping: mapping, region: region}
 }
