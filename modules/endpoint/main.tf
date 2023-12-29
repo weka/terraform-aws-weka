@@ -112,6 +112,7 @@ resource "aws_vpc_endpoint_security_group_association" "ec2_association_sg" {
 }
 
 resource "aws_vpc_endpoint" "lambda_endpoint" {
+  count               = var.create_vpc_endpoint_lambda ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.lambda"
   vpc_endpoint_type   = "Interface"

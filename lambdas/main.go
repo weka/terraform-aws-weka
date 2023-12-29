@@ -3,14 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
+	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
+	"github.com/weka/go-cloud-lib/logging"
+	"github.com/weka/go-cloud-lib/scale_down"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
-	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
-	"github.com/weka/go-cloud-lib/scale_down"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
@@ -20,30 +24,93 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/status"
 	clusterizeCommon "github.com/weka/go-cloud-lib/clusterize"
+	strings2 "github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/protocol"
 )
-
-type Vm struct {
-	Vm string `json:"vm"`
-}
 
 type StatusRequest struct {
 	Type string `json:"type"`
 }
 
-func clusterizeFinalizationHandler() (string, error) {
+type Protocol struct {
+	Protocol protocol.ProtocolGW `json:"protocol"`
+}
+
+type vmName struct {
+	Name string `json:"name"`
+}
+
+func clusterizeFinalizationHandler(ctx context.Context, VmProtocol Protocol) (string, error) {
+	logger := logging.LoggerFromCtx(ctx)
+
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
-	err := clusterize_finalization.ClusterizeFinalization(stateTable, stateTableHashKey)
+	var stateKey string
+	svc := connectors.GetAWSSession().EC2
+
+	if VmProtocol.Protocol == protocol.NFS {
+		stateKey = os.Getenv("NFS_STATE_KEY")
+
+		state, err := common.GetClusterStateWithoutLock(stateTable, stateTableHashKey, stateKey)
+		if err != nil {
+			logger.Error().Err(err).Send()
+			return err.Error(), err
+		}
+		var instanceIds []*string
+		for i, _ := range state.Instances {
+			instanceIds = append(instanceIds, &state.Instances[i].Name)
+		}
+		logger.Info().Msgf("Adding tag %s to instances %v", common.NfsInterfaceGroupPortKey, strings2.RefListToList(instanceIds))
+		_, err = svc.CreateTags(&ec2.CreateTagsInput{
+			Resources: instanceIds,
+			Tags: []*ec2.Tag{
+				{
+					Key:   aws.String(common.NfsInterfaceGroupPortKey),
+					Value: aws.String(common.NfsInterfaceGroupPortValue),
+				},
+			},
+		})
+		if err != nil {
+			logger.Error().Err(err).Send()
+			return err.Error(), err
+		}
+	} else {
+		stateKey = os.Getenv("STATE_KEY")
+	}
+
+	err := clusterize_finalization.ClusterizeFinalization(stateTable, stateTableHashKey, stateKey)
 
 	if err != nil {
+		logger.Error().Err(err).Send()
 		return err.Error(), err
 	} else {
 		return "ClusterizeFinalization completed successfully", nil
 	}
 }
 
-func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
+func joinNfsFinalizationHandler(ctx context.Context, vm vmName) (string, error) {
+	logger := logging.LoggerFromCtx(ctx)
+	svc := connectors.GetAWSSession().EC2
+	logger.Info().Msgf("Adding tag %s to instance %s", common.NfsInterfaceGroupPortKey, vm.Name)
+	_, err := svc.CreateTags(&ec2.CreateTagsInput{
+		Resources: []*string{aws.String(vm.Name)},
+		Tags: []*ec2.Tag{
+			{
+				Key:   aws.String(common.NfsInterfaceGroupPortKey),
+				Value: aws.String(common.NfsInterfaceGroupPortValue),
+			},
+		},
+	})
+
+	if err != nil {
+		logger.Error().Err(err).Send()
+		return err.Error(), err
+	} else {
+		return "JoinFinalizationFinalization completed successfully", nil
+	}
+}
+
+func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
@@ -63,6 +130,9 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 	proxyUrl := os.Getenv("PROXY_URL")
 	smbwEnabled, _ := strconv.ParseBool(os.Getenv("SMBW_ENABLED"))
 	wekaHomeUrl := os.Getenv("WEKA_HOME_URL")
+	interfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
+	nfsProtocolgwsNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAYS_NUM"))
+	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 
 	addFrontend := false
 	if addFrontendNum > 0 {
@@ -79,15 +149,15 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 		PasswordId:        passwordId,
 		StateTable:        stateTable,
 		StateTableHashKey: stateTableHashKey,
-		VmName:            vm.Vm,
+		Vm:                vm,
 		Cluster: clusterizeCommon.ClusterParams{
-			HostsNum:    hostsNum,
-			ClusterName: clusterName,
-			Prefix:      prefix,
-			NvmesNum:    nvmesNum,
-			SetObs:      setObs,
-			InstallDpdk: true,
-			SmbwEnabled: smbwEnabled,
+			ClusterizationTarget: hostsNum,
+			ClusterName:          clusterName,
+			Prefix:               prefix,
+			NvmesNum:             nvmesNum,
+			SetObs:               setObs,
+			InstallDpdk:          true,
+			SmbwEnabled:          smbwEnabled,
 			DataProtection: clusterizeCommon.DataProtectionParams{
 				StripeWidth:     stripeWidth,
 				ProtectionLevel: protectionLevel,
@@ -101,12 +171,17 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 			Name:              obsName,
 			TieringSsdPercent: tieringSsdPercent,
 		},
+		NFSParams: protocol.NFSParams{
+			InterfaceGroupName: interfaceGroupName,
+			HostsNum:           nfsProtocolgwsNum,
+		},
+		AlbArnSuffix: albArnSuffix,
 	}
 
 	return clusterize.Clusterize(params), nil
 }
 
-func deployHandler(ctx context.Context, vm Vm) (string, error) {
+func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
@@ -120,37 +195,49 @@ func deployHandler(ctx context.Context, vm Vm) (string, error) {
 	installUrl := os.Getenv("INSTALL_URL")
 	nicsNumStr := os.Getenv("NICS_NUM")
 	proxyUrl := os.Getenv("PROXY_URL")
+	nfsInterfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
+	nfsSecondaryIpsNum, _ := strconv.Atoi(os.Getenv("NFS_SECONDARY_IPS_NUM"))
+	nfsProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAY_FE_CORES_NUM"))
+	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
+	prefix := os.Getenv("PREFIX")
 
-	log.Info().Msgf("generating deploy script for vm: %s", vm.Vm)
+	log.Info().Msgf("generating deploy script for vm: %s", vm.Name)
 
-	bashScript, err := deploy.GetDeployScript(
-		ctx,
-		usernameId,
-		passwordId,
-		tokenId,
-		clusterName,
-		stateTable,
-		stateTableHashKey,
-		vm.Vm,
-		nicsNumStr,
-		computeMemory,
-		proxyUrl,
-		installUrl,
-		computeContainerNum,
-		frontendContainerNum,
-		driveContainerNum,
-	)
-	if err != nil {
-		return " ", err
+	awsDeploymentParams := deploy.AWSDeploymentParams{
+		Ctx:                          ctx,
+		UsernameId:                   usernameId,
+		PasswordId:                   passwordId,
+		TokenId:                      tokenId,
+		Prefix:                       prefix,
+		ClusterName:                  clusterName,
+		StateTable:                   stateTable,
+		StateTableHashKey:            stateTableHashKey,
+		InstanceName:                 vm.Name,
+		NicsNumStr:                   nicsNumStr,
+		ComputeMemory:                computeMemory,
+		ProxyUrl:                     proxyUrl,
+		InstallUrl:                   installUrl,
+		ComputeContainerNum:          computeContainerNum,
+		FrontendContainerNum:         frontendContainerNum,
+		DriveContainerNum:            driveContainerNum,
+		NFSInterfaceGroupName:        nfsInterfaceGroupName,
+		NFSSecondaryIpsNum:           nfsSecondaryIpsNum,
+		NFSProtocolGatewayFeCoresNum: nfsProtocolGatewayFeCoresNum,
+		AlbArnSuffix:                 albArnSuffix,
 	}
-	return bashScript, nil
+
+	if vm.Protocol == protocol.NFS {
+		return deploy.GetNfsDeployScript(awsDeploymentParams)
+	}
+	return deploy.GetDeployScript(awsDeploymentParams)
 }
 
 func reportHandler(ctx context.Context, currentReport protocol.Report) (string, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+	stateKey := os.Getenv("STATE_KEY")
 
-	err := report.Report(currentReport, stateTable, stateTableHashKey)
+	err := report.Report(currentReport, stateTable, stateTableHashKey, stateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return "Failed adding report to state table", err
@@ -163,17 +250,14 @@ func reportHandler(ctx context.Context, currentReport protocol.Report) (string, 
 func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) {
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
-	//clusterName := os.Getenv("CLUSTER_NAME")
-	//usernameId := os.Getenv("USERNAME_ID")
-	//passwordId := os.Getenv("PASSWORD_ID")
+	stateKey := os.Getenv("STATE_KEY")
 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
-		// clusterStatus, err = status.GetClusterStatus(ctx, bucket, clusterName, usernameId, passwordId)
-		clusterStatus = "Not implemented yet"
+		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
 	} else if req.Type == "progress" {
-		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey)
+		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey, stateKey)
 	} else {
 		clusterStatus = "Invalid status type"
 	}
@@ -185,18 +269,24 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	return clusterStatus, nil
 }
 
-func fetchHandler() (protocol.HostGroupInfoResponse, error) {
+func fetchHandler(request protocol.FetchRequest) (protocol.HostGroupInfoResponse, error) {
 	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err
 	}
+	fetchWekaCredentials := !useSecretManagerEndpoint || request.FetchWekaCredentials
+	downBackendsRemovalTimeout, _ := time.ParseDuration(os.Getenv("DOWN_BACKENDS_REMOVAL_TIMEOUT"))
+
+	log.Info().Msgf("fetching data, request: %+v", request)
 	result, err := lambdas.GetFetchDataParams(
 		os.Getenv("CLUSTER_NAME"),
 		os.Getenv("ASG_NAME"),
+		os.Getenv("NFS_ASG_NAME"),
 		os.Getenv("USERNAME_ID"),
 		os.Getenv("PASSWORD_ID"),
 		os.Getenv("ROLE"),
-		useSecretManagerEndpoint,
+		downBackendsRemovalTimeout,
+		fetchWekaCredentials,
 	)
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err
@@ -223,6 +313,7 @@ func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) 
 		info.Username = creds.Username
 		info.Password = creds.Password
 	}
+
 	return scale_down.ScaleDown(ctx, info)
 }
 
@@ -234,6 +325,8 @@ func main() {
 		lambda.Start(clusterizeHandler)
 	case "clusterizeFinalization":
 		lambda.Start(clusterizeFinalizationHandler)
+	case "joinNfsFinalization":
+		lambda.Start(joinNfsFinalizationHandler)
 	case "report":
 		lambda.Start(reportHandler)
 	case "status":
