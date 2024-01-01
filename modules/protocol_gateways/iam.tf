@@ -16,6 +16,7 @@ resource "aws_iam_policy" "ec2" {
           "ec2:DeleteNetworkInterface",
           "ec2:DescribeInstances",
           "ec2:DescribeTags",
+          "ec2:AssignPrivateIpAddresses",
         ]
         Resource = "*"
       },

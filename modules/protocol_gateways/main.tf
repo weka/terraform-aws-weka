@@ -24,14 +24,15 @@ locals {
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
 
   init_script = templatefile("${path.module}/init.sh", {
-    nics_num            = var.frontend_container_cores_num + 1
-    subnet_id           = var.subnet_id
-    region              = local.region
-    groups              = join(" ", var.sg_ids)
-    weka_log_group_name = "/wekaio/${var.gateways_name}"
-    weka_token_id       = var.weka_token_id
-    proxy_url           = var.proxy_url
-    install_weka_url    = var.install_weka_url
+    nics_num              = var.frontend_container_cores_num + 1
+    subnet_id             = var.subnet_id
+    region                = local.region
+    groups                = join(" ", var.sg_ids)
+    weka_log_group_name   = "/wekaio/${var.gateways_name}"
+    weka_token_id         = var.weka_token_id
+    proxy_url             = var.proxy_url
+    install_weka_url      = var.install_weka_url
+    secondary_ips_per_nic = var.secondary_ips_per_nic
   })
 
   deploy_script = templatefile("${path.module}/deploy_protocol_gateways.sh", {
