@@ -63,9 +63,10 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_placement_group" "placement_group" {
-  count    = var.placement_group_name == null ? 1 : 0
-  name     = "${var.prefix}-${var.cluster_name}-placement-group"
-  strategy = "cluster"
+  count      = var.placement_group_name == null ? 1 : 0
+  name       = "${var.prefix}-${var.cluster_name}-placement-group"
+  strategy   = "cluster"
+  depends_on = [module.network]
 }
 
 resource "aws_launch_template" "launch_template" {
