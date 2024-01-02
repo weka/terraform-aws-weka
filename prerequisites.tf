@@ -52,7 +52,7 @@ module "vpc_endpoint" {
 }
 
 locals {
-  subnet_ids                    = length(var.subnet_ids) == 0 ? module.network[0].subnet_ids : var.subnet_ids
+  subnet_ids                    = length(var.subnet_ids) == 0 && length(module.network) > 0 ? module.network[0].subnet_ids : var.subnet_ids
   additional_subnet_id          = var.create_alb ? var.alb_additional_subnet_id == "" ? module.network[0].additional_subnet_id : var.alb_additional_subnet_id : ""
   vpc_id                        = length(var.subnet_ids) == 0 ? module.network[0].vpc_id : var.vpc_id
   sg_ids                        = length(var.sg_ids) == 0 && length(module.security_group) > 0 ? module.security_group[0].sg_ids : var.sg_ids
