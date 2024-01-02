@@ -6,10 +6,12 @@ locals {
   public_subnets          = var.additional_subnet && !var.subnet_autocreate_as_private ? concat(var.public_subnets_cidr, [var.alb_additional_subnet_cidr_block]) : var.public_subnets_cidr
   private_subnets         = var.additional_subnet && var.subnet_autocreate_as_private ? concat(var.private_subnets_cidr, [var.alb_additional_subnet_cidr_block]) : var.private_subnets_cidr
   availability_zones_list = var.additional_subnet ? distinct(flatten([var.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
+  vpc_id                  = var.vpc_id == "" ? aws_vpc.vpc[0].id : var.vpc_id
 }
 
 # VPC
 resource "aws_vpc" "vpc" {
+  count = var.vpc_id == "" ? 1 : 0
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
@@ -23,7 +25,8 @@ resource "aws_vpc" "vpc" {
 # Subnets
 # Internet Gateway (required for Public Subnet and NAT)
 resource "aws_internet_gateway" "ig" {
-  vpc_id = aws_vpc.vpc.id
+  count = var.vpc_id == "" ? 1 : 0
+  vpc_id = local.vpc_id
   tags = {
     Name        = "${var.prefix}-igw"
     Environment = var.prefix
@@ -38,10 +41,11 @@ resource "aws_eip" "nat_eip" {
 }
 
 resource "aws_route_table" "ig_route_table" {
-  vpc_id = aws_vpc.vpc.id
+  count = var.vpc_id == "" ? 1 : 0
+  vpc_id = local.vpc_id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.ig.id
+    gateway_id = aws_internet_gateway.ig[0].id
   }
 
   tags = {
@@ -64,7 +68,7 @@ resource "aws_nat_gateway" "nat" {
 
 resource "aws_route_table" "nat_route_table" {
   count  = var.subnet_autocreate_as_private ? 1 : 0
-  vpc_id = aws_vpc.vpc.id
+  vpc_id = local.vpc_id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.nat[0].id
@@ -80,7 +84,7 @@ resource "aws_route_table" "nat_route_table" {
 # Public subnet
 resource "aws_subnet" "public_subnet" {
   count                   = length(local.public_subnets)
-  vpc_id                  = aws_vpc.vpc.id
+  vpc_id                  = local.vpc_id
   cidr_block              = local.public_subnets[count.index]
   availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = true
@@ -96,14 +100,14 @@ resource "aws_subnet" "public_subnet" {
 resource "aws_route_table_association" "public_rt_associate" {
   count          = length(var.public_subnets_cidr)
   subnet_id      = aws_subnet.public_subnet[count.index].id
-  route_table_id = aws_route_table.ig_route_table.id
+  route_table_id = aws_route_table.ig_route_table[0].id
   depends_on     = [aws_subnet.public_subnet, aws_route_table.ig_route_table]
 }
 
 # Private subnet
 resource "aws_subnet" "private_subnet" {
   count                   = var.subnet_autocreate_as_private ? length(local.private_subnets) : 0
-  vpc_id                  = aws_vpc.vpc.id
+  vpc_id                  = local.vpc_id
   cidr_block              = local.private_subnets[count.index]
   availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = false

@@ -26,6 +26,6 @@ output "additional_subnet_id" {
 }
 
 output "vpc_id" {
-  value       = aws_vpc.vpc.id
+  value       = local.vpc_id
   description = "Vpc id"
 }
