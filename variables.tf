@@ -486,7 +486,7 @@ variable "nfs_protocol_gateway_secondary_ips_per_nic" {
 variable "nfs_protocol_gateway_instance_type" {
   type        = string
   description = "The protocol gateways' virtual machine type (sku) to deploy."
-  default     = "c5.2xlarge"
+  default     = "c5n.2xlarge"
 }
 
 variable "nfs_protocol_gateway_fe_cores_num" {
@@ -529,7 +529,7 @@ variable "smb_protocol_gateway_secondary_ips_per_nic" {
 variable "smb_protocol_gateway_instance_type" {
   type        = string
   description = "The protocol gateways' virtual machine type (sku) to deploy."
-  default     = "c5.2xlarge"
+  default     = "c5n.2xlarge"
 }
 
 variable "smb_protocol_gateway_fe_cores_num" {
