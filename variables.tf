@@ -138,7 +138,7 @@ variable "cluster_name" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
-  default     = "4.2.6.90"
+  default     = "4.2.7"
 }
 
 variable "get_weka_io_token" {
@@ -292,7 +292,7 @@ variable "lambdas_version" {
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "dev"
+  default     = "release"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
