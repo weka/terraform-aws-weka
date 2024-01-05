@@ -35,6 +35,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_create_vpc_endpoint_ec2"></a> [create\_vpc\_endpoint\_ec2](#input\_create\_vpc\_endpoint\_ec2) | Create ec2 vpc endpoint | `bool` | n/a | yes |
+| <a name="input_create_vpc_endpoint_lambda"></a> [create\_vpc\_endpoint\_lambda](#input\_create\_vpc\_endpoint\_lambda) | Create lambda vpc endpoint | `bool` | n/a | yes |
 | <a name="input_create_vpc_endpoint_proxy"></a> [create\_vpc\_endpoint\_proxy](#input\_create\_vpc\_endpoint\_proxy) | Creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy\_url variable | `bool` | n/a | yes |
 | <a name="input_create_vpc_endpoint_s3_gateway"></a> [create\_vpc\_endpoint\_s3\_gateway](#input\_create\_vpc\_endpoint\_s3\_gateway) | Create s3 gateway vpc endpoint | `bool` | n/a | yes |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | n/a | yes |

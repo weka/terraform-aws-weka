@@ -696,6 +696,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | [aws_cloudwatch_log_group.cloudwatch_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_cloudwatch_log_group.sfn_log_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_log_group) | resource |
 | [aws_dynamodb_table.weka_deployment](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table) | resource |
+| [aws_dynamodb_table_item.weka_deployment_nfs_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item) | resource |
 | [aws_dynamodb_table_item.weka_deployment_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item) | resource |
 | [aws_key_pair.generated_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair) | resource |
 | [aws_lambda_function.clusterize_finalization_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
@@ -775,9 +776,11 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_instance_type"></a> [instance\_type](#input\_instance\_type) | The virtual machine type (sku) to deploy. | `string` | `"i3en.2xlarge"` | no |
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
-| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"release"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"28e6ea7a283aa8e692dfbf2656cc471a"` | no |
+| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"ea5c9901302a07b5d2d4c535e284d0bb"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
+| <a name="input_nfs_client_group_name"></a> [nfs\_client\_group\_name](#input\_nfs\_client\_group\_name) | Client access group name. | `string` | `"weka-cg"` | no |
+| <a name="input_nfs_interface_group_name"></a> [nfs\_interface\_group\_name](#input\_nfs\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
 | <a name="input_nfs_protocol_gateway_fe_cores_num"></a> [nfs\_protocol\_gateway\_fe\_cores\_num](#input\_nfs\_protocol\_gateway\_fe\_cores\_num) | The protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_nfs_protocol_gateway_instance_iam_profile_arn"></a> [nfs\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_nfs\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_nfs_protocol_gateway_instance_type"></a> [nfs\_protocol\_gateway\_instance\_type](#input\_nfs\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5.2xlarge"` | no |
@@ -816,6 +819,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_tiering_obs_name"></a> [tiering\_obs\_name](#input\_tiering\_obs\_name) | Name of existing obs storage account | `string` | `""` | no |
 | <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection | `string` | `"ec2-user"` | no |
 | <a name="input_vpc_endpoint_ec2_create"></a> [vpc\_endpoint\_ec2\_create](#input\_vpc\_endpoint\_ec2\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
+| <a name="input_vpc_endpoint_lambda_create"></a> [vpc\_endpoint\_lambda\_create](#input\_vpc\_endpoint\_lambda\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_proxy_create"></a> [vpc\_endpoint\_proxy\_create](#input\_vpc\_endpoint\_proxy\_create) | creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy\_url variable | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_s3_gateway_create"></a> [vpc\_endpoint\_s3\_gateway\_create](#input\_vpc\_endpoint\_s3\_gateway\_create) | Create S3 gateway VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID, required only for security group creation | `string` | `""` | no |
@@ -835,6 +839,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Ips of clients |
 | <a name="output_cluster_helper_commands"></a> [cluster\_helper\_commands](#output\_cluster\_helper\_commands) | n/a |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The cluster name |
+| <a name="output_deploy_lambda_name"></a> [deploy\_lambda\_name](#output\_deploy\_lambda\_name) | n/a |
 | <a name="output_ips_type"></a> [ips\_type](#output\_ips\_type) | If 'assign\_public\_ip' is set to true, it will output the public ips, If no it will output the private ips |
 | <a name="output_lambda_status_name"></a> [lambda\_status\_name](#output\_lambda\_status\_name) | Name of lambda status |
 | <a name="output_local_ssh_private_key"></a> [local\_ssh\_private\_key](#output\_local\_ssh\_private\_key) | If 'ssh\_public\_key' is set to null and no key\_pair\_name provided, it will output the private ssh key location. |
