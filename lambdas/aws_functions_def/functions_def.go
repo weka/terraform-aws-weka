@@ -22,6 +22,8 @@ func NewFuncDef() functions_def.FunctionDef {
 		functions_def.Report:                  os.Getenv("REPORT_LAMBDA_NAME"),
 		functions_def.Join:                    os.Getenv("JOIN_LAMBDA_NAME"),
 		functions_def.JoinFinalization:        os.Getenv("JOIN_FINALIZATION_LAMBDA_NAME"),
+		functions_def.Fetch:                   os.Getenv("FETCH_LAMBDA_NAME"),
+		functions_def.Status:                  os.Getenv("STATUS_LAMBDA_NAME"),
 	}
 	return &AWSFuncDef{lambdaNamesMapping: mapping, region: region}
 }

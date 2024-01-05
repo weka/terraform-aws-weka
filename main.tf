@@ -10,7 +10,7 @@ locals {
     subnet_id           = local.subnet_ids[0]
     groups              = join(" ", local.sg_ids)
     nics_num            = local.nics
-    deploy_func_name    = aws_lambda_function.deploy_lambda.function_name
+    deploy_lambda_name  = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
   })
   backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name

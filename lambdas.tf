@@ -49,7 +49,11 @@ resource "aws_lambda_function" "deploy_lambda" {
       NICS_NUM                     = var.containers_config_map[var.instance_type].nics
       CLUSTERIZE_LAMBDA_NAME       = aws_lambda_function.clusterize_lambda.function_name
       REPORT_LAMBDA_NAME           = aws_lambda_function.report_lambda.function_name
+      FETCH_LAMBDA_NAME            = aws_lambda_function.fetch_lambda.function_name
+      STATUS_LAMBDA_NAME           = aws_lambda_function.status_lambda.function_name
       PROXY_URL                    = var.proxy_url
+      NFS_INTERFACE_GROUP_NAME     = var.nfs_interface_group_name
+      NFS_CLIENT_GROUP_NAME        = var.nfs_client_group_name
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
