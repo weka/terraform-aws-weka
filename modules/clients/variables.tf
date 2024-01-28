@@ -116,3 +116,7 @@ variable "use_autoscaling_group" {
   description = "Use autoscaling group"
   default     = false
 }
+
+variable "arch" {
+  type = string
+}
