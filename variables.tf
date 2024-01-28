@@ -464,6 +464,16 @@ variable "clients_custom_data" {
   default     = ""
 }
 
+variable "client_arch" {
+  type        = string
+  default     = "x86_64"
+  description = "Use arch for ami id, value can be arm64/x86_64, the default value is x86_64."
+  validation {
+    condition     = var.client_arch == "arm64" || var.client_arch == "x86_64"
+    error_message = "Allowed client_arch values: [\"arm64\", \"x86_64\"]."
+  }
+}
+
 ############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string
