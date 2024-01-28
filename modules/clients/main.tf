@@ -13,7 +13,7 @@ data "aws_ami" "selected" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-5.*-x86_64-gp2"]
+    values = ["amzn2-ami-kernel-5.*-${var.arch}-gp2"]
   }
 }
 

@@ -393,6 +393,7 @@ This will automatically create 2 clients.
 client_instance_type   = "c5.2xlarge"
 client_nics_num        = DESIRED_NUM
 client_instance_ami_id = AMI_ID
+client_arch            = "x86_64"
 ```
 
 <br>In order to use exising iam profile ARN you need to provide the following variable:
