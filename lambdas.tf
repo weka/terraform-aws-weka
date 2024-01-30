@@ -225,12 +225,13 @@ resource "aws_lambda_function" "scale_down_lambda" {
   }
   environment {
     variables = {
-      LAMBDA       = "scaleDown"
-      REGION       = local.region
-      PREFIX       = var.prefix
-      CLUSTER_NAME = var.cluster_name
-      USERNAME_ID  = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID  = aws_secretsmanager_secret.weka_password.id
+      LAMBDA                        = "scaleDown"
+      REGION                        = local.region
+      PREFIX                        = var.prefix
+      CLUSTER_NAME                  = var.cluster_name
+      USERNAME_ID                   = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID                   = aws_secretsmanager_secret.weka_password.id
+      DOWN_BACKENDS_REMOVAL_TIMEOUT = var.debug_down_backends_removal_timeout
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]

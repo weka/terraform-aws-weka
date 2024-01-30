@@ -286,7 +286,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "1a4dd3c437cb42ec193697b4ff4a5846"
+  default     = "622d609ea5b7969a6c819a4e1d83be82"
 }
 
 variable "lambdas_dist" {
@@ -641,4 +641,10 @@ variable "metadata_http_tokens" {
   type        = string
   default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+}
+
+variable "debug_down_backends_removal_timeout" {
+  type       = string
+  default     = "3h"
+  description = "Don't change this value without consulting weka support team. Timeout for removing down backends. Valid time units are ns, us (or µs), ms, s, m, h."
 }
