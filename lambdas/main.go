@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
@@ -248,12 +249,14 @@ func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) 
 	if info.Password == "" {
 		usernameId := os.Getenv("USERNAME_ID")
 		passwordId := os.Getenv("PASSWORD_ID")
+		downBackendsRemovalTimeout := os.Getenv("DOWN_BACKENDS_REMOVAL_TIMEOUT")
 		creds, err := common.GetUsernameAndPassword(usernameId, passwordId)
 		if err != nil {
 			return protocol.ScaleResponse{}, err
 		}
 		info.Username = creds.Username
 		info.Password = creds.Password
+		info.DownBackendsRemovalTimeout, _ = time.ParseDuration(downBackendsRemovalTimeout)
 	}
 	return scale_down.ScaleDown(ctx, info)
 }

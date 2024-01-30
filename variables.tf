@@ -286,7 +286,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "c60a0e064809aa8821a0f22c5487175f"
+  default     = "cd1f9caff69d7b1bf9b4cb5097dbd56b"
 }
 
 variable "lambdas_dist" {
@@ -641,4 +641,10 @@ variable "metadata_http_tokens" {
   type        = string
   default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+}
+
+variable "debug_down_backends_removal_timeout" {
+    type        = string
+    default     = ""
+    description = "Override default timeout for down backends removal. Should be use only for debugging purposes. Be careful with this option. Valid time units are “ns”, “us” (or “µs”), “ms”, “s”, “m”, “h”. Example: 3h20m40s"
 }
