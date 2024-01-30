@@ -214,11 +214,13 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	return clusterStatus, nil
 }
 
-func fetchHandler() (protocol.HostGroupInfoResponse, error) {
+func fetchHandler(request protocol.FetchRequest) (protocol.HostGroupInfoResponse, error) {
 	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err
 	}
+	fetchWekaCredentials := !useSecretManagerEndpoint || request.FetchWekaCredentials
+	log.Info().Msgf("fetching data, request: %+v", request)
 	result, err := lambdas.GetFetchDataParams(
 		os.Getenv("CLUSTER_NAME"),
 		os.Getenv("ASG_NAME"),
@@ -226,7 +228,7 @@ func fetchHandler() (protocol.HostGroupInfoResponse, error) {
 		os.Getenv("USERNAME_ID"),
 		os.Getenv("PASSWORD_ID"),
 		os.Getenv("ROLE"),
-		useSecretManagerEndpoint,
+		fetchWekaCredentials,
 	)
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err

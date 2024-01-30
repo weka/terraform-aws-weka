@@ -15,7 +15,7 @@ type asgInfo struct {
 	desiredCapacity int
 }
 
-func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId, passwordId, role string, useSecretManagerEndpoint bool) (fd protocol.HostGroupInfoResponse, err error) {
+func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId, passwordId, role string, fetchWekaCredentials bool) (fd protocol.HostGroupInfoResponse, err error) {
 	svc := connectors.GetAWSSession().ASG
 	asgNames := []string{wekaBackendsAsgName}
 	if nfsAsgName != "" {
@@ -56,7 +56,7 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 	}
 
 	var creds protocol.ClusterCreds
-	if !useSecretManagerEndpoint {
+	if fetchWekaCredentials {
 		creds, err = common.GetUsernameAndPassword(usernameId, passwordId)
 		if err != nil {
 			return
