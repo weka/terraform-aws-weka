@@ -3,31 +3,51 @@ package lambdas
 import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
+	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/protocol"
 )
 
-func getAutoScalingGroupDesiredCapacity(asgOutput *autoscaling.DescribeAutoScalingGroupsOutput) int {
-	if len(asgOutput.AutoScalingGroups) == 0 {
-		return -1
-	}
-
-	return int(*asgOutput.AutoScalingGroups[0].DesiredCapacity)
+type asgInfo struct {
+	instances       []protocol.HgInstance
+	desiredCapacity int
 }
 
-func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role string, useSecretManagerEndpoint bool) (fd protocol.HostGroupInfoResponse, err error) {
+func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId, passwordId, role string, fetchWekaCredentials bool) (fd protocol.HostGroupInfoResponse, err error) {
 	svc := connectors.GetAWSSession().ASG
-	input := &autoscaling.DescribeAutoScalingGroupsInput{AutoScalingGroupNames: []*string{&asgName}}
+	asgNames := []string{wekaBackendsAsgName}
+	if nfsAsgName != "" {
+		asgNames = append(asgNames, nfsAsgName)
+	}
+
+	input := &autoscaling.DescribeAutoScalingGroupsInput{AutoScalingGroupNames: strings.ListToRefList(asgNames)}
 	asgOutput, err := svc.DescribeAutoScalingGroups(input)
 	if err != nil {
 		return
 	}
 
-	instanceIds := common.UnpackASGInstanceIds(asgOutput.AutoScalingGroups[0].Instances)
-	instances, err := common.GetInstances(instanceIds)
+	asgInstances, err := common.GetASGInstances(asgNames)
 	if err != nil {
 		return
+	}
+
+	asgsInfo := make(map[string]asgInfo)
+
+	for _, asg := range asgOutput.AutoScalingGroups {
+		asgName := *asg.AutoScalingGroupName
+		instanceIds := common.UnpackASGInstanceIds(asgInstances[asgName])
+		log.Info().Msgf("Found %d instances on %s ASG", len(instanceIds), asgName)
+		instances, err1 := common.GetInstances(instanceIds)
+		if err1 != nil {
+			err = err1
+			return
+		}
+		asgsInfo[*asg.AutoScalingGroupName] = asgInfo{
+			desiredCapacity: int(*asg.DesiredCapacity),
+			instances:       getHostGroupInfoInstances(instances),
+		}
 	}
 
 	backendIps, err := common.GetBackendsPrivateIps(clusterName)
@@ -36,7 +56,7 @@ func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role strin
 	}
 
 	var creds protocol.ClusterCreds
-	if !useSecretManagerEndpoint {
+	if fetchWekaCredentials {
 		creds, err = common.GetUsernameAndPassword(usernameId, passwordId)
 		if err != nil {
 			return
@@ -44,13 +64,15 @@ func GetFetchDataParams(clusterName, asgName, usernameId, passwordId, role strin
 	}
 
 	return protocol.HostGroupInfoResponse{
-		Username:        creds.Username,
-		Password:        creds.Password,
-		DesiredCapacity: getAutoScalingGroupDesiredCapacity(asgOutput),
-		Instances:       getHostGroupInfoInstances(instances),
-		BackendIps:      backendIps,
-		Role:            role,
-		Version:         protocol.Version,
+		Username:                    creds.Username,
+		Password:                    creds.Password,
+		WekaBackendsDesiredCapacity: asgsInfo[wekaBackendsAsgName].desiredCapacity,
+		WekaBackendInstances:        asgsInfo[wekaBackendsAsgName].instances,
+		NFSBackendsDesiredCapacity:  asgsInfo[nfsAsgName].desiredCapacity,
+		NfsBackendInstances:         asgsInfo[nfsAsgName].instances,
+		BackendIps:                  backendIps,
+		Role:                        role,
+		Version:                     protocol.Version,
 	}, nil
 }
 

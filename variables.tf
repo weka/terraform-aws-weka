@@ -286,13 +286,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "28e6ea7a283aa8e692dfbf2656cc471a"
+  default     = "cd1f9caff69d7b1bf9b4cb5097dbd56b"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
@@ -517,6 +517,23 @@ variable "nfs_setup_protocol" {
   default     = false
 }
 
+variable "nfs_client_group_name" {
+  type        = string
+  description = "Client access group name."
+  default     = "weka-cg"
+}
+
+variable "nfs_interface_group_name" {
+  type        = string
+  description = "Interface group name."
+  default     = "weka-ig"
+
+  validation {
+    condition     = length(var.nfs_interface_group_name) <= 11
+    error_message = "The interface group name should be up to 11 characters long."
+  }
+}
+
 ############################################### SMB protocol gateways variables ###################################################
 variable "smb_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -614,8 +631,20 @@ variable "vpc_endpoint_proxy_create" {
   description = "creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy_url variable"
 }
 
+variable "vpc_endpoint_lambda_create" {
+  type        = bool
+  default     = false
+  description = "Create Ec2 VPC endpoint"
+}
+
 variable "metadata_http_tokens" {
   type        = string
   default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
+}
+
+variable "debug_down_backends_removal_timeout" {
+    type        = string
+    default     = ""
+    description = "Override default timeout for down backends removal. Should be use only for debugging purposes. Be careful with this option. Valid time units are “ns”, “us” (or “µs”), “ms”, “s”, “m”, “h”. Example: 3h20m40s"
 }
