@@ -178,9 +178,3 @@ variable "smb_domain_name" {
   description = "The domain to join the SMB cluster to."
   default     = ""
 }
-
-variable "smb_share_name" {
-  type        = string
-  description = "The name of the SMB share"
-  default     = ""
-}

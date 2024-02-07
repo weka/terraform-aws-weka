@@ -57,7 +57,6 @@ locals {
     gateways_number              = var.gateways_number
     gateways_name                = var.gateways_name
     frontend_container_cores_num = var.frontend_container_cores_num
-    share_name                   = var.smb_share_name
     region                       = local.region
 
   })
