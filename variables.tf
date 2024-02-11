@@ -383,7 +383,7 @@ variable "alb_route53_zone_id" {
 variable "tiering_obs_name" {
   type        = string
   default     = ""
-  description = "Name of existing obs storage account"
+  description = "Name of an existing S3 bucket"
 }
 
 variable "tiering_enable_obs_integration" {
