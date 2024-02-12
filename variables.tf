@@ -18,6 +18,16 @@ variable "subnet_ids" {
   }
 }
 
+variable "subnets_cidrs" {
+  type        = list(string)
+  description = "CIDR block for subnet creation, required only if not specifying subnet_ids, this block will be used to create subnet that will be used by weka. Currently limited to single"
+  default     = ["10.0.1.0/24"]
+  validation {
+    condition     = length(var.subnets_cidrs) <= 1
+    error_message = "Multiple subnets are not supported. Please provide only one subnet cidr."
+  }
+}
+
 variable "prefix" {
   type        = string
   description = "Prefix for all resources"
