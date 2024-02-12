@@ -11,6 +11,8 @@ module "network" {
   availability_zones               = var.availability_zones
   subnet_autocreate_as_private     = var.subnet_autocreate_as_private
   additional_subnet                = var.create_alb
+  public_subnets_cidr              = var.subnets_cidrs
+  private_subnets_cidr             = var.subnets_cidrs
   alb_additional_subnet_cidr_block = var.alb_additional_subnet_cidr_block
 }
 
