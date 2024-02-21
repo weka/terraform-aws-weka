@@ -275,9 +275,9 @@ To create private vpc with NAT, you must provide the following variables:
 subnet_autocreate_as_private = true
 private_subnets_cidr         = PRIVATE_CIDR_RANGE
 ```
-#### To avoid public ip assignment:
+#### To enable public ip assignment:
 ```hcl
-assign_public_ip   = false
+assign_public_ip   = true
 ```
 
 ## Ssh keys

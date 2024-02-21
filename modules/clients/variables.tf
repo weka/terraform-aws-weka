@@ -61,7 +61,7 @@ variable "clients_use_dpdk" {
 
 variable "assign_public_ip" {
   type        = bool
-  default     = true
+  default     = false
   description = "Determines whether to assign public ip."
 }
 
