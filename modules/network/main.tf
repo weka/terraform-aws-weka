@@ -38,6 +38,7 @@ resource "aws_eip" "nat_eip" {
 }
 
 resource "aws_route_table" "ig_route_table" {
+  count  = var.subnet_autocreate_as_private ? 0 : 1
   vpc_id = aws_vpc.vpc.id
   route {
     cidr_block = "0.0.0.0/0"
@@ -94,9 +95,9 @@ resource "aws_subnet" "public_subnet" {
 
 # associate route table to public subnet
 resource "aws_route_table_association" "public_rt_associate" {
-  count          = length(var.public_subnets_cidr)
+  count          = var.subnet_autocreate_as_private ? 0 : length(var.public_subnets_cidr)
   subnet_id      = aws_subnet.public_subnet[count.index].id
-  route_table_id = aws_route_table.ig_route_table.id
+  route_table_id = aws_route_table.ig_route_table[0].id
   depends_on     = [aws_subnet.public_subnet, aws_route_table.ig_route_table]
 }
 
