@@ -4,9 +4,9 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "public_subnets_cidr" {
+variable "subnets_cidrs" {
   type        = list(string)
-  description = "CIDR block for public subnet"
+  description = "CIDR block for subnet"
   default     = ["10.0.1.0/24"]
 }
 
@@ -16,10 +16,10 @@ variable "alb_additional_subnet_cidr_block" {
   default     = "10.0.3.0/24"
 }
 
-variable "private_subnets_cidr" {
-  type        = list(string)
-  description = "CIDR block for private subnet"
-  default     = ["10.0.2.0/24"]
+variable "nat_public_subnet_cidr" {
+  type        = string
+  description = "CIDR block for public subnet"
+  default     = "10.0.2.0/24"
 }
 
 variable "availability_zones" {
@@ -43,4 +43,10 @@ variable "additional_subnet" {
   type        = bool
   default     = true
   description = "Add additional subnet"
+}
+
+variable "create_nat_gateway" {
+  type        = bool
+  default     = false
+  description = "NAT needs to be created when no public ip is assigned to the backend, to allow internet access"
 }
