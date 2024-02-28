@@ -18,6 +18,18 @@ variable "subnet_ids" {
   }
 }
 
+variable "nat_public_subnet_cidr" {
+  type        = string
+  description = "CIDR block for public subnet"
+  default     = "10.0.2.0/24"
+}
+
+variable "create_nat_gateway" {
+  type        = bool
+  default     = false
+  description = "NAT needs to be created when no public ip is assigned to the backend, to allow internet access"
+}
+
 variable "subnets_cidrs" {
   type        = list(string)
   description = "CIDR block for subnet creation, required only if not specifying subnet_ids, this block will be used to create subnet that will be used by weka. Currently limited to single"
