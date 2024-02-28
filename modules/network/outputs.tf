@@ -1,18 +1,8 @@
 locals {
   public_subnet_ids  = aws_subnet.public_subnet[*].id
-  private_subnet_ids = var.subnet_autocreate_as_private ? aws_subnet.private_subnet[*].id : []
-  subnets_ids        = var.subnet_autocreate_as_private ? local.private_subnet_ids : local.public_subnet_ids
+  private_subnet_ids = var.subnet_autocreate_as_private || var.create_nat_gateway ? aws_subnet.private_subnet[*].id : []
+  subnets_ids        = var.subnet_autocreate_as_private || var.create_nat_gateway ? local.private_subnet_ids : local.public_subnet_ids
   subnet_ids_count   = length(local.subnets_ids)
-}
-
-output "private_subnets" {
-  value       = local.private_subnet_ids
-  description = "Private subnet ids"
-}
-
-output "public_subnets" {
-  value       = local.public_subnet_ids
-  description = "Public subnet ids"
 }
 
 output "subnet_ids" {
