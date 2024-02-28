@@ -268,13 +268,20 @@ We provide iam, network and security_group modules to help you create the prereq
 - When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
 - var `availability_zones` need to provide only when we create network module, Currently limited to single subnet. for example `eu-west-1c`
 
-### Private network deployment:
+### NAT network deployment:
 we provide module for creating private network with NAT
 To create private vpc with NAT, you must provide the following variables:
 ```hcl
-subnet_autocreate_as_private = true
-private_subnets_cidr         = PRIVATE_CIDR_RANGE
+create_nat_gateway      = true
+nat_public_subnet_cidr = PUBLIC_CIDR_RANGE
 ```
+### Private network deployment:
+we provide module for creating private network with NO internet access
+To create private vpc, you must provide the following variables:
+```hcl
+subnet_autocreate_as_private = true
+```
+
 #### To avoid public ip assignment:
 ```hcl
 assign_public_ip   = false
