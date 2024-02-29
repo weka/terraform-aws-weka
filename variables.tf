@@ -53,9 +53,13 @@ variable "subnet_autocreate_as_private" {
 }
 
 variable "assign_public_ip" {
-  type        = bool
-  default     = true
+  type        = string
+  default     = "auto"
   description = "Determines whether to assign public IP to all instances deployed by TF module. Includes backends, clients and protocol gateways"
+  validation {
+    condition     = var.assign_public_ip == "true" || var.assign_public_ip == "false" || var.assign_public_ip == "auto"
+    error_message = "Allowed assign_public_ip values: [\"true\", \"false\", \"auto\"]."
+  }
 }
 
 variable "instance_type" {

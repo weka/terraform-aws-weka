@@ -1,5 +1,5 @@
 locals {
-  ips_type = var.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
+  ips_type = local.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
   asg_name = aws_autoscaling_group.autoscaling_group.name
 }
 

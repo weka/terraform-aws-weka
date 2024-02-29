@@ -66,6 +66,7 @@ locals {
   sfn_iam_role_arn              = var.sfn_iam_role_arn == "" ? module.iam[0].sfn_iam_role_arn : var.sfn_iam_role_arn
   event_iam_role_arn            = var.event_iam_role_arn == "" ? module.iam[0].event_iam_role_arn : var.event_iam_role_arn
   secretmanager_endpoint_sg_ids = length(var.secretmanager_sg_ids) > 1 ? var.secretmanager_sg_ids : local.sg_ids
+  assign_public_ip              = var.assign_public_ip != "auto" ? var.assign_public_ip : length(var.subnet_ids) == 0
 }
 
 # endpoint to secret manager
