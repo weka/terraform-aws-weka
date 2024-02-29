@@ -108,7 +108,7 @@ resource "aws_launch_template" "launch_template" {
   }
 
   network_interfaces {
-    associate_public_ip_address = var.assign_public_ip
+    associate_public_ip_address = local.assign_public_ip
     delete_on_termination       = true
     device_index                = 0
     security_groups             = local.sg_ids

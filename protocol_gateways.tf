@@ -12,7 +12,7 @@ module "smb_protocol_gateways" {
   backends_asg_name            = aws_autoscaling_group.autoscaling_group.name
   instance_type                = var.smb_protocol_gateway_instance_type
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
-  assign_public_ip             = var.assign_public_ip
+  assign_public_ip             = local.assign_public_ip
   placement_group_name         = local.backends_placement_group_name
   weka_volume_size             = var.smb_protocol_gateway_weka_volume_size
   ami_id                       = var.ami_id
@@ -45,7 +45,7 @@ module "nfs_protocol_gateways" {
   backends_asg_name            = aws_autoscaling_group.autoscaling_group.name
   instance_type                = var.nfs_protocol_gateway_instance_type
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
-  assign_public_ip             = var.assign_public_ip
+  assign_public_ip             = local.assign_public_ip
   placement_group_name         = local.backends_placement_group_name
   weka_volume_size             = var.nfs_protocol_gateway_weka_volume_size
   ami_id                       = var.ami_id
