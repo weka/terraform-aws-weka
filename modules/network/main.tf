@@ -3,9 +3,7 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
-  additional_subnet       = var.additional_subnet ? [var.alb_additional_subnet_cidr_block] : []
-  subnets_cidrs           = concat(var.subnets_cidrs, local.additional_subnet)
-  nat_public_subnet_cidr  = var.create_nat_gateway ? [var.nat_public_subnet_cidr] : []
+  subnets_cidrs           = var.additional_subnet ? concat(var.subnets_cidrs, [var.alb_additional_subnet_cidr_block]) : var.subnets_cidrs
   availability_zones_list = var.additional_subnet || var.create_nat_gateway ? distinct(flatten([var.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
 }
 
@@ -82,9 +80,9 @@ resource "aws_route_table" "nat_route_table" {
 
 # Public subnet
 resource "aws_subnet" "public_subnet" {
-  count                   = !var.subnet_autocreate_as_private ? var.create_nat_gateway ? length(local.nat_public_subnet_cidr) : length(local.subnets_cidrs) : 0
+  count                   = !var.subnet_autocreate_as_private ? var.create_nat_gateway ? 1 : length(local.subnets_cidrs) : 0
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.create_nat_gateway ? local.nat_public_subnet_cidr[count.index] : local.subnets_cidrs[count.index]
+  cidr_block              = var.create_nat_gateway ? var.nat_public_subnet_cidr : local.subnets_cidrs[count.index]
   availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = true
 
