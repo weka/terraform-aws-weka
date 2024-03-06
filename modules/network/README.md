@@ -39,10 +39,11 @@ No modules.
 | <a name="input_additional_subnet"></a> [additional\_subnet](#input\_additional\_subnet) | Add additional subnet | `bool` | `true` | no |
 | <a name="input_alb_additional_subnet_cidr_block"></a> [alb\_additional\_subnet\_cidr\_block](#input\_alb\_additional\_subnet\_cidr\_block) | Additional CIDR block for public subnet | `string` | `"10.0.3.0/24"` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | AZ in which all the resources will be deployed | `list(string)` | n/a | yes |
+| <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway) | NAT needs to be created when no public ip is assigned to the backend, to allow internet access | `bool` | `false` | no |
+| <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
-| <a name="input_private_subnets_cidr"></a> [private\_subnets\_cidr](#input\_private\_subnets\_cidr) | CIDR block for private subnet | `list(string)` | <pre>[<br>  "10.0.2.0/24"<br>]</pre> | no |
-| <a name="input_public_subnets_cidr"></a> [public\_subnets\_cidr](#input\_public\_subnets\_cidr) | CIDR block for public subnet | `list(string)` | <pre>[<br>  "10.0.1.0/24"<br>]</pre> | no |
 | <a name="input_subnet_autocreate_as_private"></a> [subnet\_autocreate\_as\_private](#input\_subnet\_autocreate\_as\_private) | Determines whether to enable a private or public network. The default is public network. | `bool` | `false` | no |
+| <a name="input_subnets_cidrs"></a> [subnets\_cidrs](#input\_subnets\_cidrs) | CIDR block for subnet | `list(string)` | <pre>[<br>  "10.0.1.0/24"<br>]</pre> | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the vpc | `string` | `"10.0.0.0/16"` | no |
 
 ## Outputs
@@ -50,8 +51,6 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_additional_subnet_id"></a> [additional\_subnet\_id](#output\_additional\_subnet\_id) | Additional subnet id |
-| <a name="output_private_subnets"></a> [private\_subnets](#output\_private\_subnets) | Private subnet ids |
-| <a name="output_public_subnets"></a> [public\_subnets](#output\_public\_subnets) | Public subnet ids |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | List of subnet ids without the `additional subnet` |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | Vpc id |
 <!-- END_TF_DOCS -->
