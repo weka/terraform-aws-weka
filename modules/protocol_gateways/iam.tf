@@ -121,12 +121,10 @@ resource "aws_iam_policy_attachment" "autoscaling" {
   roles      = [aws_iam_role.this[0].name]
 }
 
-resource "aws_iam_policy_attachment" "ec2_ssm_attachment" {
-  count = var.instance_iam_profile_arn == "" ? 1 : 0
-
-  name       = "ec2-ssm-attachment"
+resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
+  count      = var.instance_iam_profile_arn == "" ? 1 : 0
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-  roles      = [aws_iam_role.this[0].name]
+  role       = aws_iam_role.this[0].name
 }
 
 # Create an IAM instance profile
