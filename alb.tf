@@ -1,6 +1,6 @@
 resource "aws_lb" "alb" {
   count                            = var.create_alb ? 1 : 0
-  name                             = "${var.prefix}-${var.cluster_name}-lb"
+  name                             = substr("${var.prefix}-${var.cluster_name}-lb", 0, 32)
   internal                         = true
   load_balancer_type               = "application"
   security_groups                  = local.alb_sg_ids
@@ -15,7 +15,7 @@ resource "aws_lb" "alb" {
 
 resource "aws_lb_target_group" "alb_target_group" {
   count    = var.create_alb ? 1 : 0
-  name     = "${var.prefix}-${var.cluster_name}-lb-target-group"
+  name     = substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32)
   vpc_id   = local.vpc_id
   port     = 14000
   protocol = "HTTP"
