@@ -103,7 +103,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
 }
 
 resource "aws_lambda_function" "clusterize_finalization_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-clusterize-finalization-lambda"
+  function_name = substr("${var.prefix}-${var.cluster_name}-clusterize-finalization-lambda", 0, 64)
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
