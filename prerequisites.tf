@@ -14,6 +14,7 @@ module "network" {
   public_subnets_cidr              = var.subnets_cidrs
   private_subnets_cidr             = var.subnets_cidrs
   alb_additional_subnet_cidr_block = var.alb_additional_subnet_cidr_block
+  vpc_cidr                         = var.vpc_cidr
 }
 
 module "security_group" {

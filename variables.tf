@@ -257,6 +257,12 @@ variable "vpc_id" {
   default     = ""
 }
 
+variable "vpc_cidr" {
+  type        = string
+  description = "CIDR block of the vpc"
+  default     = "10.0.0.0/16"
+}
+
 variable "allow_ssh_cidrs" {
   type        = list(string)
   description = "Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG"
