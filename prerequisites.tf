@@ -15,6 +15,7 @@ module "network" {
   nat_public_subnet_cidr           = var.nat_public_subnet_cidr
   alb_additional_subnet_cidr_block = var.alb_additional_subnet_cidr_block
   create_nat_gateway               = var.create_nat_gateway
+  vpc_cidr                         = var.vpc_cidr
 }
 
 module "security_group" {
