@@ -147,10 +147,9 @@ resource "aws_iam_policy_attachment" "invoke_lambda_function_attachment" {
   roles      = [aws_iam_role.iam_role.name]
 }
 
-resource "aws_iam_policy_attachment" "ec2_ssm_attachment" {
-  name       = "ec2-ssm-attachment"
+resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
 # Create an IAM instance profile
