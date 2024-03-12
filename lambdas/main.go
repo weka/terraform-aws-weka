@@ -44,7 +44,7 @@ func clusterizeFinalizationHandler() (string, error) {
 }
 
 func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
-	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
+	//	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
@@ -81,7 +81,7 @@ func clusterizeHandler(ctx context.Context, vm Vm) (string, error) {
 		StateTableHashKey: stateTableHashKey,
 		VmName:            vm.Vm,
 		Cluster: clusterizeCommon.ClusterParams{
-			HostsNum:    hostsNum,
+			//HostsNum:    hostsNum,
 			ClusterName: clusterName,
 			Prefix:      prefix,
 			NvmesNum:    nvmesNum,

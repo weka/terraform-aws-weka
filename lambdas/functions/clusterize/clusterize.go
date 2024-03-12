@@ -46,7 +46,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		return
 	}
 
-	initialSize := p.Cluster.HostsNum
+	initialSize := 6
 	msg := fmt.Sprintf("This (%s) is instance %d/%d that is ready for clusterization", p.VmName, len(instancesNames), initialSize)
 	log.Info().Msgf(msg)
 	if len(instancesNames) != initialSize {
@@ -91,7 +91,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames
 	clusterParams.IPs = ips
-	clusterParams.DebugOverrideCmds = "echo 'nothing here'"
+	//clusterParams.DebugOverrideCmds = "echo 'nothing here'"
 	clusterParams.WekaPassword = creds.Password
 	clusterParams.WekaUsername = creds.Username
 	clusterParams.InstallDpdk = true
