@@ -1,7 +1,7 @@
 # Create an IAM policy
 
 locals {
-  obs_name = var.tiering_enable_obs_integration != "" ? var.tiering_obs_name : "${var.prefix}-${var.cluster_name}-obs"
+  obs_name = var.tiering_obs_name == "" ? "${var.prefix}-${var.cluster_name}-obs" : var.tiering_obs_name
 }
 
 resource "aws_iam_policy" "backend_eni_iam_policy" {
