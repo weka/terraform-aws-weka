@@ -5,7 +5,7 @@ locals {
 
 output "vm_username" {
   value       = var.vm_username
-  description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
+  description = "For display purposes only while using custom AMI. This variable will not change or create a user with the specified name. This is only to ensure the outputs are correct if your AMI has a different user configured. If you are not using a custom AMI the user will be ec2-user"
 }
 
 output "local_ssh_private_key" {
