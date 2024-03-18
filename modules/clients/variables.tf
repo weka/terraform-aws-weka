@@ -118,5 +118,6 @@ variable "use_autoscaling_group" {
 }
 
 variable "arch" {
-  type = string
+  type    = string
+  default = null
 }
