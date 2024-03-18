@@ -3,11 +3,6 @@ locals {
   asg_name = aws_autoscaling_group.autoscaling_group.name
 }
 
-output "vm_username" {
-  value       = var.vm_username
-  description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
-}
-
 output "local_ssh_private_key" {
   value       = var.ssh_public_key == null && var.key_pair_name == null ? "${local.ssh_path}-private-key.pem" : null
   description = "If 'ssh_public_key' is set to null and no key_pair_name provided, it will output the private ssh key location."

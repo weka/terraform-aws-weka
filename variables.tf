@@ -58,12 +58,6 @@ variable "assign_public_ip" {
   description = "Determines whether to assign public IP to all instances deployed by TF module. Includes backends, clients and protocol gateways"
 }
 
-variable "vm_username" {
-  type        = string
-  description = "Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection"
-  default     = "ec2-user"
-}
-
 variable "instance_type" {
   type        = string
   description = "The virtual machine type (sku) to deploy."
