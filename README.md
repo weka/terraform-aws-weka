@@ -289,6 +289,7 @@ assign_public_ip   = false
 
 ## Ssh keys
 The username for ssh into vms is `ec2-user`.
+If `ami_id` is provided by the user, the default ssh username will be accordingly.
 <br />
 
 We allow passing existing key pair name:
