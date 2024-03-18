@@ -20,6 +20,8 @@ jobs:
     environment: default
     name: AWS lambdas code distribution
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       DIST: ${{ github.event_name == 'release' && 'release' || 'dev' }}
     defaults:
