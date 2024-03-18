@@ -824,7 +824,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_tiering_enable_obs_integration"></a> [tiering\_enable\_obs\_integration](#input\_tiering\_enable\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_tiering_enable_ssd_percent"></a> [tiering\_enable\_ssd\_percent](#input\_tiering\_enable\_ssd\_percent) | When set\_obs\_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering\_ssd\_percent is set to 20, the total available capacity is 100GB. | `number` | `20` | no |
 | <a name="input_tiering_obs_name"></a> [tiering\_obs\_name](#input\_tiering\_obs\_name) | Name of an existing S3 bucket | `string` | `""` | no |
-| <a name="input_vm_username"></a> [vm\_username](#input\_vm\_username) | Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection | `string` | `"ec2-user"` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the vpc | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_vpc_endpoint_ec2_create"></a> [vpc\_endpoint\_ec2\_create](#input\_vpc\_endpoint\_ec2\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_proxy_create"></a> [vpc\_endpoint\_proxy\_create](#input\_vpc\_endpoint\_proxy\_create) | creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy\_url variable | `bool` | `false` | no |
@@ -854,6 +853,5 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security group ids of backends |
 | <a name="output_smb_protocol_gateways_ips"></a> [smb\_protocol\_gateways\_ips](#output\_smb\_protocol\_gateways\_ips) | Ips of SMB protocol gateways |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
-| <a name="output_vm_username"></a> [vm\_username](#output\_vm\_username) | Provided as part of output for automated use of terraform, in case of custom AMI and automated use of outputs replace this with user that should be used for ssh connection |
 | <a name="output_weka_cluster_password_secret_id"></a> [weka\_cluster\_password\_secret\_id](#output\_weka\_cluster\_password\_secret\_id) | Secret id of weka\_password |
 <!-- END_TF_DOCS -->
