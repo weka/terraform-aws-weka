@@ -62,12 +62,6 @@ resource "aws_lambda_function" "deploy_lambda" {
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 
-  lifecycle {
-    precondition {
-      condition     = var.lambdas_dist == "release" || var.lambdas_version == local.lambdas_hash
-      error_message = "Please update lambdas version."
-    }
-  }
 }
 
 resource "aws_lambda_function" "clusterize_lambda" {
