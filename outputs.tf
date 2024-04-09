@@ -48,6 +48,11 @@ output "placement_group_name" {
   description = "Name of placement group"
 }
 
+output "vpc_id" {
+  value       = local.vpc_id
+  description = "VPC id"
+}
+
 output "subnet_ids" {
   value       = local.subnet_ids
   description = "Subnet ids of backends"
