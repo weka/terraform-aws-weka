@@ -853,5 +853,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security group ids of backends |
 | <a name="output_smb_protocol_gateways_ips"></a> [smb\_protocol\_gateways\_ips](#output\_smb\_protocol\_gateways\_ips) | Ips of SMB protocol gateways |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC id |
 | <a name="output_weka_cluster_password_secret_id"></a> [weka\_cluster\_password\_secret\_id](#output\_weka\_cluster\_password\_secret\_id) | Secret id of weka\_password |
 <!-- END_TF_DOCS -->
