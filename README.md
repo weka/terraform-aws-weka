@@ -830,7 +830,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_vpc_endpoint_s3_gateway_create"></a> [vpc\_endpoint\_s3\_gateway\_create](#input\_vpc\_endpoint\_s3\_gateway\_create) | Create S3 gateway VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | VPC ID, required only for security group creation | `string` | `""` | no |
 | <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
-| <a name="input_weka_username"></a> [weka\_username](#input\_weka\_username) | Weka cluster username | `string` | `"admin"` | no |
 | <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `"4.2.9.28"` | no |
 
 ## Outputs
