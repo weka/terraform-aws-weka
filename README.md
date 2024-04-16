@@ -26,201 +26,199 @@ AWS terraform weka deployment module.
 - **SecretManager** (stores the weka user name, password and get.weka.io token)
 - **IAM Roles (and policies)**:
 
-## Weke deployment prerequisites:
+## Weka deployment prerequisites:
 - vpc (with secret manager endpoint)
 - subnet (optional: additional_alb_subnet for ALB)
 - security group (with self reference rule)
 - iam roles
-<details>
-<summary>Ec2 iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+    <details>
+    <summary>Ec2 iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
 
-```json
-{
-    "Statement": [
+    ```json
     {
-        "Action": [
-            "ec2:DescribeNetworkInterfaces",
-            "ec2:AttachNetworkInterface",
-            "ec2:CreateNetworkInterface",
-            "ec2:ModifyNetworkInterfaceAttribute",
-            "ec2:DeleteNetworkInterface"
+        "Statement": [
+        {
+            "Action": [
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:AttachNetworkInterface",
+                "ec2:CreateNetworkInterface",
+                "ec2:ModifyNetworkInterfaceAttribute",
+                "ec2:DeleteNetworkInterface"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "lambda:InvokeFunction"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:lambda:*:*:function:prefix-cluster_name*"
+            ]
+        },
+        {
+            "Action": [
+                "s3:DeleteObject",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::prefix-cluster_name-obs/*"
+            ]
+        },
+        {
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents",
+                "logs:DescribeLogStreams",
+                "logs:PutRetentionPolicy"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:*:*:log-group:/wekaio/prefix-cluster_name*"
+            ]
+        }
         ],
-        "Effect": "Allow",
-        "Resource": "*"
-    },
+        "Version": "2012-10-17"
+    }
+    ```
+    </details>
+    <details>
+    <summary>Lambda iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+    ```json
     {
-        "Action": [
+        "Statement": [
+        {
+            "Action": [
+              "s3:CreateBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:s3:::prefix-cluster_name-obs"
+            ]
+        },
+        {
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:logs:*:*:log-group:/aws/lambda/prefix-cluster_name*:*"
+            ]
+        },
+        {
+            "Action": [
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface",
+                "ec2:ModifyInstanceAttribute",
+                "ec2:TerminateInstances",
+                "ec2:DescribeInstances"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "*"
+            ]
+        },
+        {
+            "Action": [
+                "dynamodb:GetItem",
+                "dynamodb:UpdateItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:dynamodb:*:*:table/prefix-cluster_name-weka-deployment"
+            ]
+        },
+        {
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
+            ]
+        },
+        {
+            "Action": [
+                "autoscaling:DetachInstances",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:SetInstanceProtection"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "*"
+            ]
+        }
+        ],
+        "Version": "2012-10-17"
+        }
+    ```
+    </details>
+    <details>
+    <summary>State Machine iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+    ```json
+    {
+      "Statement": [
+        {
+          "Action": [
             "lambda:InvokeFunction"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-            "arn:aws:lambda:*:*:function:prefix-cluster_name*"
-        ]
-    },
-    {
-        "Action": [
-            "s3:DeleteObject",
-            "s3:GetObject",
-            "s3:ListBucket",
-            "s3:PutObject"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-            "arn:aws:s3:::prefix-cluster_name-obs/*"
-        ]
-    },
-    {
-        "Action": [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "arn:aws:lambda:*:*:function:prefix-cluster_name-*-lambda"
+          ]
+        },
+        {
+          "Action": [
+            "logs:CreateLogDelivery",
+            "logs:GetLogDelivery",
+            "logs:UpdateLogDelivery",
+            "logs:DeleteLogDelivery",
+            "logs:ListLogDeliveries",
             "logs:PutLogEvents",
-            "logs:DescribeLogStreams",
-            "logs:PutRetentionPolicy"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-            "arn:aws:logs:*:*:log-group:/wekaio/prefix-cluster_name*"
-        ]
-    },
-    ],
-    "Version": "2012-10-17"
-}
-```
-</details>
-<details>
-<summary>Lambda iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
-
-```json
-{
-    "Statement": [
-    {
-        "Action": [
-          "s3:CreateBucket"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "arn:aws:s3:::prefix-cluster_name-obs"
-        ]
-    },
-    {
-        "Action": [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "arn:aws:logs:*:*:log-group:/aws/lambda/prefix-cluster_name*:*"
-        ]
-    },
-    {
-        "Action": [
-            "ec2:CreateNetworkInterface",
-            "ec2:DescribeNetworkInterfaces",
-            "ec2:DeleteNetworkInterface",
-            "ec2:ModifyInstanceAttribute",
-            "ec2:TerminateInstances",
-            "ec2:DescribeInstances"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "*"
-        ]
-    },
-    {
-        "Action": [
-            "dynamodb:GetItem",
-            "dynamodb:UpdateItem"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "arn:aws:dynamodb:*:*:table/prefix-cluster_name-weka-deployment"
-        ]
-    },
-    {
-        "Action": [
-          "secretsmanager:GetSecretValue"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
-        ]
-    },
-    {
-        "Action": [
-            "autoscaling:DetachInstances",
-            "autoscaling:DescribeAutoScalingGroups",
-            "autoscaling:SetInstanceProtection"
-        ],
-        "Effect": "Allow",
-        "Resource": [
-          "*"
-        ]
-    }
-    ],
-    "Version": "2012-10-17"
-    }
-```
-</details>
-
-<details>
-<summary>State Machine iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
-
-```json
-{
-  "Statement": [
-    {
-      "Action": [
-        "lambda:InvokeFunction"
+            "logs:PutResourcePolicy",
+            "logs:DescribeResourcePolicies",
+            "logs:DescribeLogGroups"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "*"
+          ]
+        }
       ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:lambda:*:*:function:prefix-cluster_name-*-lambda"
-      ]
-    },
-    {
-      "Action": [
-        "logs:CreateLogDelivery",
-        "logs:GetLogDelivery",
-        "logs:UpdateLogDelivery",
-        "logs:DeleteLogDelivery",
-        "logs:ListLogDeliveries",
-        "logs:PutLogEvents",
-        "logs:PutResourcePolicy",
-        "logs:DescribeResourcePolicies",
-        "logs:DescribeLogGroups"
-      ],
-      "Effect": "Allow",
-      "Resource": [
-        "*"
-      ]
+      "Version": "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-```
-</details>
-<details>
-<summary>Cloud Watch iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+    ```
+    </details>
+    <details>
+    <summary>Cloud Watch Events iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
 
-```json
-{
-  "Statement": [
+    ```json
     {
-      "Action": [
-        "states:StartExecution"
+      "Statement": [
+        {
+          "Action": [
+            "states:StartExecution"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "arn:aws:states:*:*:stateMachine:prefix-cluster_name-scale-down-state-machine"
+          ]
+        }
       ],
-      "Effect": "Allow",
-      "Resource": [
-        "arn:aws:states:*:*:stateMachine:prefix-cluster_name-scale-down-state-machine"
-      ]
+      "Version": "2012-10-17"
     }
-  ],
-  "Version": "2012-10-17"
-}
-```
-</details>
-
+    ```
+    </details>
 ## Usage example:
 This example will automatically create a vpc, subnets, security group and iam roles.
 ```hcl
@@ -435,7 +433,7 @@ nfs_setup_protocol = true
 ### prerequisites:
 - protocol_gateway_instance_iam_profile_arn
 <details>
-<summary>Protocol gateway iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+<summary>Protocol gateway iam policy (replace *prefix*, *cluster_name* and *gateways_name* with relevant values)</summary>
 
 ```json
 {
@@ -461,7 +459,7 @@ nfs_setup_protocol = true
     ]
     "Resource":
     [
-      "arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"
+      "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
     ]
     },
     {
@@ -476,7 +474,7 @@ nfs_setup_protocol = true
     ]
     "Resource":
     [
-      "arn:aws:logs:*:*:log-group:/wekaio/clients/${var.gateways_name}*"
+      "arn:aws:logs:*:*:log-group:/wekaio/clients/gateways_name*"
     ]
     },
     {
@@ -537,7 +535,7 @@ To join an SMB cluster in Active Directory, need to run manually command:
 ### prerequisites:
 - protocol_gateway_instance_iam_profile_arn
 <details>
-<summary>Protocol gateway iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+<summary>Protocol gateway iam policy (replace *prefix*, *cluster_name* and *gateways_name* with relevant values)</summary>
 
 ```json
 {
@@ -563,7 +561,7 @@ To join an SMB cluster in Active Directory, need to run manually command:
     ]
     "Resource":
     [
-      "arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"
+      "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
     ]
     },
     {
@@ -578,7 +576,7 @@ To join an SMB cluster in Active Directory, need to run manually command:
     ]
     "Resource":
     [
-      "arn:aws:logs:*:*:log-group:/wekaio/clients/${var.gateways_name}*"
+      "arn:aws:logs:*:*:log-group:/wekaio/clients/gateways_name*"
     ]
     },
     {
