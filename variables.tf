@@ -207,12 +207,6 @@ variable "set_dedicated_fe_container" {
   description = "Create cluster with FE containers"
 }
 
-variable "weka_username" {
-  type        = string
-  description = "Weka cluster username"
-  default     = "admin"
-}
-
 variable "protection_level" {
   type        = number
   default     = 2
