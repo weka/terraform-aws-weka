@@ -28,7 +28,7 @@ resource "aws_secretsmanager_secret" "weka_username" {
 
 resource "aws_secretsmanager_secret_version" "weka_username" {
   secret_id     = aws_secretsmanager_secret.weka_username.id
-  secret_string = var.weka_username
+  secret_string = "admin"
 }
 
 resource "random_password" "password" {
