@@ -37,6 +37,7 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 
 	asgsInfo := make(map[string]asgInfo)
 	var nfsInterfaceGroupInstanceIps map[string]types.Nilt
+	terminatedHgsIps := make(map[string]types.Nilt)
 
 	for _, asg := range asgOutput.AutoScalingGroups {
 		asgName := *asg.AutoScalingGroupName
@@ -55,9 +56,19 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 		if asgName == nfsAsgName {
 			nfsInterfaceGroupInstanceIps = getInterfaceGroupInstanceIps(instances)
 		}
+
+		for _, instance := range instances {
+			if instance.State != nil && *instance.State.Name == "terminated" {
+				if instance.PrivateIpAddress != nil {
+					terminatedHgsIps[*instance.PrivateIpAddress] = types.Nilt{}
+				} else {
+					log.Info().Msgf("Instance %s is terminated and has no private IP", *instance.InstanceId)
+				}
+			}
+		}
 	}
 
-	backendIps, err := common.GetBackendsPrivateIps(clusterName)
+	backendIps, err := common.GetBackendsPrivateIps(clusterName, "backend")
 	if err != nil {
 		return
 	}
@@ -81,6 +92,7 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 		BackendIps:                   backendIps,
 		Role:                         role,
 		DownBackendsRemovalTimeout:   downBackendsRemovalTimeout,
+		TerminatedHgsIps:             terminatedHgsIps,
 		Version:                      protocol.Version,
 	}, nil
 }

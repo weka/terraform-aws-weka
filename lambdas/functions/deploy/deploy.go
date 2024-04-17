@@ -171,7 +171,7 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 			err = err1
 			return
 		}
-		ips, err2 := common.GetBackendsPrivateIps(awsDeploymentParams.ClusterName)
+		ips, err2 := common.GetBackendsPrivateIps(awsDeploymentParams.ClusterName, "backend")
 
 		if err2 != nil {
 			log.Error().Err(err2).Send()

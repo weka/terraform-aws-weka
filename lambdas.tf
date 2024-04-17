@@ -172,6 +172,7 @@ resource "aws_lambda_function" "report_lambda" {
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
       STATE_KEY            = local.state_key
+      NFS_STATE_KEY        = local.nfs_state_key
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
@@ -193,6 +194,8 @@ resource "aws_lambda_function" "status_lambda" {
       STATE_TABLE          = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
       STATE_KEY            = local.state_key
+      NFS_STATE_KEY        = local.nfs_state_key
+      CLUSTER_NAME         = var.cluster_name
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
