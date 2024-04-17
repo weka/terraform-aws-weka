@@ -5,6 +5,7 @@ module "smb_protocol_gateways" {
   setup_protocol                      = var.smb_setup_protocol
   gateways_number                     = var.smb_protocol_gateways_number
   gateways_name                       = "${var.prefix}-${var.cluster_name}-smb-protocol-gateway"
+  cluster_name                        = var.cluster_name
   protocol                            = "SMB"
   frontend_container_cores_num        = var.smb_protocol_gateway_fe_cores_num
   secondary_ips_per_nic               = var.smb_protocol_gateway_secondary_ips_per_nic
@@ -41,6 +42,7 @@ module "nfs_protocol_gateways" {
   setup_protocol                      = var.nfs_setup_protocol
   gateways_number                     = var.nfs_protocol_gateways_number
   gateways_name                       = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
+  cluster_name                        = var.cluster_name
   protocol                            = "NFS"
   frontend_container_cores_num        = var.nfs_protocol_gateway_fe_cores_num
   secondary_ips_per_nic               = var.nfs_protocol_gateway_secondary_ips_per_nic

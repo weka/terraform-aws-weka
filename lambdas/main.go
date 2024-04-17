@@ -29,7 +29,8 @@ import (
 )
 
 type StatusRequest struct {
-	Type string `json:"type"`
+	Type     string              `json:"type"`
+	Protocol protocol.ProtocolGW `json:"protocol"`
 }
 
 type Protocol struct {
@@ -236,6 +237,9 @@ func reportHandler(ctx context.Context, currentReport protocol.Report) (string, 
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	stateKey := os.Getenv("STATE_KEY")
+	if currentReport.Protocol == protocol.NFS {
+		stateKey = os.Getenv("NFS_STATE_KEY")
+	}
 
 	err := report.Report(currentReport, stateTable, stateTableHashKey, stateKey)
 	if err != nil {
@@ -251,13 +255,19 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	stateKey := os.Getenv("STATE_KEY")
+	hostGroup := "backend"
+	if req.Protocol == protocol.NFS {
+		stateKey = os.Getenv("NFS_STATE_KEY")
+		hostGroup = "gateways-protocol"
+	}
+	clusterName := os.Getenv("CLUSTER_NAME")
 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
 		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
 	} else if req.Type == "progress" {
-		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey, stateKey)
+		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey, stateKey, clusterName, hostGroup)
 	} else {
 		clusterStatus = "Invalid status type"
 	}

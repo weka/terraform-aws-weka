@@ -29,6 +29,7 @@ resource "aws_dynamodb_table_item" "weka_deployment_state" {
   "Value": {"M": {
     "initial_size": {"N": "${var.cluster_size}"},
     "desired_size": {"N": "${var.cluster_size}"},
+    "clusterization_target": {"N": "${var.cluster_size}"},
     "instances": {"L": []},
     "clusterized": {"BOOL": false}
   }}
@@ -52,6 +53,7 @@ resource "aws_dynamodb_table_item" "weka_deployment_nfs_state" {
   "Value": {"M": {
     "initial_size": {"N": "${var.nfs_protocol_gateways_number}"},
     "desired_size": {"N": "${var.nfs_protocol_gateways_number}"},
+    "clusterization_target": {"N": "${var.nfs_protocol_gateways_number}"},
     "instances": {"L": []},
     "clusterized": {"BOOL": false}
   }}

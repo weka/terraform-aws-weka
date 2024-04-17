@@ -57,7 +57,7 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 		}
 	}
 
-	backendIps, err := common.GetBackendsPrivateIps(clusterName)
+	backendIps, err := common.GetBackendsPrivateIps(clusterName, "backend")
 	if err != nil {
 		return
 	}

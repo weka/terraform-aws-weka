@@ -36,6 +36,11 @@ variable "gateways_number" {
   description = "The number of virtual machines to deploy as protocol gateways."
 }
 
+variable "cluster_name" {
+  type        = string
+  description = "The cluster name."
+}
+
 variable "gateways_name" {
   type        = string
   description = "The protocol group name."
