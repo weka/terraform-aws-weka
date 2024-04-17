@@ -200,9 +200,9 @@ func GetWekaIoToken(tokenId string) (token string, err error) {
 	return GetSecret(tokenId)
 }
 
-func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
+func GetBackendsPrivateIps(clusterName, hostGroup string) (ips []string, err error) {
 	svc := connectors.GetAWSSession().EC2
-	log.Debug().Msgf("Fetching backends ips...")
+	log.Debug().Msgf("Fetching running backends ips...")
 	describeResponse, err := svc.DescribeInstances(&ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -214,18 +214,17 @@ func GetBackendsPrivateIps(clusterName string) (ips []string, err error) {
 			{
 				Name: aws.String("tag:weka_cluster_name"),
 				Values: []*string{
-					&clusterName,
+					aws.String(clusterName),
 				},
 			},
 			{
 				Name: aws.String("tag:weka_hostgroup_type"),
 				Values: []*string{
-					aws.String("backend"),
+					aws.String(hostGroup),
 				},
 			},
 		},
 	})
-
 	if err != nil {
 		return
 	}

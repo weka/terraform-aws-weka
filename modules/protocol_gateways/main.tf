@@ -119,6 +119,7 @@ resource "aws_launch_template" "this" {
       resource_type = tag_specifications.value
       tags = merge(var.tags_map, {
         Name                = var.gateways_name
+        weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "gateways-protocol"
         user                = data.aws_caller_identity.current.user_id
         protocol            = var.protocol
