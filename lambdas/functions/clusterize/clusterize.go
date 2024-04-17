@@ -50,7 +50,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	}
 
 	if err != nil {
-		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction)
+		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction, p.Vm.Protocol)
 	}
 	return
 }
@@ -66,7 +66,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	msg := fmt.Sprintf("This (%s) is instance %d/%d that is ready for clusterization", p.Vm.Name, len(state.Instances), state.DesiredSize)
 	log.Info().Msgf(msg)
 	if len(state.Instances) != p.Cluster.ClusterizationTarget {
-		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report))
+		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report), "")
 		return
 	}
 
@@ -127,7 +127,7 @@ func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) 
 	msg := fmt.Sprintf("This (%s) is nfs instance %d/%d that is ready for joining the interface group", p.Vm.Name, len(state.Instances), initialSize)
 	log.Info().Msgf(msg)
 	if len(state.Instances) != initialSize {
-		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report))
+		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report), protocol.NFS)
 		return
 	}
 

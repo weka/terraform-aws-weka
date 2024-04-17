@@ -66,6 +66,7 @@ output "sg_ids" {
 output "cluster_helper_commands" {
   value = <<EOT
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${local.asg_name} --query "AutoScalingGroups[].Instances[].InstanceId" --output text) --query 'Reservations[].Instances[].${local.ips_type}' --output json
+# for nfs use: --payload '{"type": "progress", "protocl": "nfs"}'
 aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --cli-binary-format raw-in-base64-out /dev/stdout
 aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka_password.id} --query SecretString --output text
 EOT
