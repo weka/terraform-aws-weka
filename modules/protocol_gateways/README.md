@@ -46,6 +46,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ami id | `string` | n/a | yes |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | n/a | yes |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | n/a | yes |
 | <a name="input_clusterize_finalization_lambda_name"></a> [clusterize\_finalization\_lambda\_name](#input\_clusterize\_finalization\_lambda\_name) | The name of the clusterize finalization function | `string` | n/a | yes |
 | <a name="input_clusterize_lambda_name"></a> [clusterize\_lambda\_name](#input\_clusterize\_lambda\_name) | The name of the clusterize function | `string` | n/a | yes |
 | <a name="input_deploy_lambda_name"></a> [deploy\_lambda\_name](#input\_deploy\_lambda\_name) | The name of the deploy function | `string` | n/a | yes |
