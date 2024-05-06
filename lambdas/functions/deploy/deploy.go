@@ -28,6 +28,7 @@ type AWSDeploymentParams struct {
 	ComputeMemory                string
 	ProxyUrl                     string
 	InstallUrl                   string
+	InstallDpdk                  bool
 	ComputeContainerNum          int
 	FrontendContainerNum         int
 	DriveContainerNum            int
@@ -81,7 +82,7 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 		WekaInstallUrl:               awsDeploymentParams.InstallUrl,
 		WekaToken:                    token,
 		NicsNum:                      awsDeploymentParams.NicsNumStr,
-		InstallDpdk:                  true,
+		InstallDpdk:                  awsDeploymentParams.InstallDpdk,
 		ProxyUrl:                     awsDeploymentParams.ProxyUrl,
 		Protocol:                     protocol.NFS,
 		WekaUsername:                 creds.Username,
@@ -155,7 +156,7 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 			WekaInstallUrl: awsDeploymentParams.InstallUrl,
 			WekaToken:      token,
 			NicsNum:        awsDeploymentParams.NicsNumStr,
-			InstallDpdk:    true,
+			InstallDpdk:    awsDeploymentParams.InstallDpdk,
 			ProxyUrl:       awsDeploymentParams.ProxyUrl,
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
@@ -182,7 +183,7 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 			WekaUsername:   creds.Username,
 			WekaPassword:   creds.Password,
 			IPs:            ips,
-			InstallDpdk:    true,
+			InstallDpdk:    awsDeploymentParams.InstallDpdk,
 			InstanceParams: instanceParams,
 			ProxyUrl:       awsDeploymentParams.ProxyUrl,
 		}

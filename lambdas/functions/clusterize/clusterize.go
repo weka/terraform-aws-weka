@@ -23,6 +23,7 @@ type ClusterizationParams struct {
 	PasswordId        string
 	StateTable        string
 	StateTableHashKey string
+	InstallDpdk       bool
 	Vm                protocol.Vm
 	Cluster           clusterize.ClusterParams
 	NFSParams         protocol.NFSParams
@@ -101,7 +102,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames
 	clusterParams.IPs = ips
-	clusterParams.InstallDpdk = true
+	clusterParams.InstallDpdk = p.InstallDpdk
 	clusterParams.FindDrivesScript = common.FindDrivesScript
 	clusterParams.ObsScript = GetObsScript(p.Obs)
 

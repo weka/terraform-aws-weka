@@ -48,6 +48,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       FRONTEND_CONTAINER_CORES_NUM      = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].frontend : 0
       DRIVE_CONTAINER_CORES_NUM         = var.containers_config_map[var.instance_type].drive
       INSTALL_URL                       = local.install_weka_url
+      INSTALL_DPDK                      = var.install_cluster_dpdk
       NICS_NUM                          = var.containers_config_map[var.instance_type].nics
       CLUSTERIZE_LAMBDA_NAME            = aws_lambda_function.clusterize_lambda.function_name
       REPORT_LAMBDA_NAME                = aws_lambda_function.report_lambda.function_name
@@ -103,6 +104,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       PROXY_URL                    = var.proxy_url
       SMBW_ENABLED                 = var.smbw_enabled
       WEKA_HOME_URL                = var.weka_home_url
+      INSTALL_DPDK                 = var.install_cluster_dpdk
       # pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name
