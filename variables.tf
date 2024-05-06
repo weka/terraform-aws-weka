@@ -312,13 +312,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "3c94d9bac4ceea668245d9b4e1f9c141"
+  default     = "49aeb50b7a5ba33a8d893c18a8b61a93"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
@@ -667,4 +667,10 @@ variable "custom_data" {
   type        = string
   default     = ""
   description = "Custom data to pass to instances."
+}
+
+variable "install_cluster_dpdk" {
+  type        = bool
+  default     = true
+  description = "Install weka cluster with DPDK"
 }

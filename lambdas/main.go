@@ -134,6 +134,7 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	interfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
 	nfsProtocolgwsNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAYS_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
+	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
 
 	addFrontend := false
 	if addFrontendNum > 0 {
@@ -157,7 +158,7 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 			Prefix:               prefix,
 			NvmesNum:             nvmesNum,
 			SetObs:               setObs,
-			InstallDpdk:          true,
+			InstallDpdk:          installDpdk,
 			SmbwEnabled:          smbwEnabled,
 			DataProtection: clusterizeCommon.DataProtectionParams{
 				StripeWidth:     stripeWidth,
@@ -201,6 +202,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	nfsProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 	prefix := os.Getenv("PREFIX")
+	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Name)
 
@@ -218,6 +220,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		ComputeMemory:                computeMemory,
 		ProxyUrl:                     proxyUrl,
 		InstallUrl:                   installUrl,
+		InstallDpdk:                  installDpdk,
 		ComputeContainerNum:          computeContainerNum,
 		FrontendContainerNum:         frontendContainerNum,
 		DriveContainerNum:            driveContainerNum,

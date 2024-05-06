@@ -1,6 +1,6 @@
 locals {
   ssh_path         = "/tmp/${var.prefix}-${var.cluster_name}"
-  nics             = var.containers_config_map[var.instance_type].nics
+  nics             = var.install_cluster_dpdk ? var.containers_config_map[var.instance_type].nics : 1
   public_ssh_key   = var.enable_key_pair && var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   tags_dest        = ["instance", "network-interface", "volume"]
   weka_volume_size = var.backends_weka_volume_size + 10 * (local.nics - 1)
