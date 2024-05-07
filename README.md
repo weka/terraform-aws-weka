@@ -305,6 +305,11 @@ Names will be:
 /tmp/${prefix}-${cluster_name}-private-key.pem
 ```
 
+To disable using key pair need to set:
+```hcl
+enable_key_pair = false
+```
+
 ## Create ALB
 We support ALB creation for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends.
 mandatory variables you must provide are:

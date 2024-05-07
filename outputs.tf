@@ -4,7 +4,7 @@ locals {
 }
 
 output "local_ssh_private_key" {
-  value       = var.ssh_public_key == null && var.key_pair_name == null ? "${local.ssh_path}-private-key.pem" : null
+  value       = var.enable_key_pair ? var.ssh_public_key == null && var.key_pair_name == null ? "${local.ssh_path}-private-key.pem" : null : null
   description = "If 'ssh_public_key' is set to null and no key_pair_name provided, it will output the private ssh key location."
 }
 
