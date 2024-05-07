@@ -1,7 +1,7 @@
 locals {
   ssh_path         = "/tmp/${var.prefix}-${var.cluster_name}"
   nics             = var.containers_config_map[var.instance_type].nics
-  public_ssh_key   = var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
+  public_ssh_key   = var.enable_key_pair && var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   tags_dest        = ["instance", "network-interface", "volume"]
   weka_volume_size = var.backends_weka_volume_size + 10 * (local.nics - 1)
   user_data = templatefile("${path.module}/user_data.sh", {
@@ -37,26 +37,26 @@ data "aws_ami" "amzn_ami" {
 
 # =============== ssh key ===================
 resource "tls_private_key" "key" {
-  count     = var.ssh_public_key == null ? 1 : 0
+  count     = var.enable_key_pair && var.ssh_public_key == null ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "generated_key" {
-  count      = var.key_pair_name == null ? 1 : 0
+  count      = var.enable_key_pair && var.key_pair_name == null ? 1 : 0
   key_name   = "${var.prefix}-${var.cluster_name}-ssh-key"
   public_key = local.public_ssh_key
 }
 
 resource "local_file" "public_key" {
-  count           = var.ssh_public_key == null ? 1 : 0
+  count           = var.enable_key_pair && var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].public_key_openssh
   filename        = "${local.ssh_path}-public-key.pub"
   file_permission = "0600"
 }
 
 resource "local_file" "private_key" {
-  count           = var.ssh_public_key == null ? 1 : 0
+  count           = var.enable_key_pair && var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].private_key_pem
   filename        = "${local.ssh_path}-private-key.pem"
   file_permission = "0600"
@@ -77,7 +77,7 @@ resource "aws_launch_template" "launch_template" {
   image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.amzn_ami[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
-  key_name                             = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
+  key_name                             = var.enable_key_pair ? var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name : null
 
   block_device_mappings {
     device_name = "/dev/sdp"
