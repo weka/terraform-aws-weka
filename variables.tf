@@ -179,6 +179,12 @@ variable "key_pair_name" {
   default     = null
 }
 
+variable "enable_key_pair" {
+  type        = bool
+  default     = true
+  description = "create / use key pair for instance template"
+}
+
 variable "placement_group_name" {
   type    = string
   default = null
