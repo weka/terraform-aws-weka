@@ -312,13 +312,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "3c94d9bac4ceea668245d9b4e1f9c141"
+  default     = "76dab1b5cd2e85c25a4a94feb76c9a8c"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
