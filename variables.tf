@@ -108,8 +108,8 @@ variable "containers_config_map" {
       memory   = ["62GB", "61.7GB"]
     },
     "i3en.6xlarge" = {
-      compute  = 5
-      drive    = 1
+      compute  = 4
+      drive    = 2
       frontend = 1
       nvme     = 2
       nics     = 8
