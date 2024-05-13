@@ -12,6 +12,7 @@ locals {
     nics_num            = local.nics
     deploy_lambda_name  = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
+    custom_data         = var.custom_data
   })
   backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
 }
