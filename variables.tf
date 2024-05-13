@@ -662,3 +662,9 @@ variable "debug_down_backends_removal_timeout" {
   default     = "3h"
   description = "Don't change this value without consulting weka support team. Timeout for removing down backends. Valid time units are ns, us (or µs), ms, s, m, h."
 }
+
+variable "custom_data" {
+  type        = string
+  default     = ""
+  description = "Custom data to pass to instances."
+}

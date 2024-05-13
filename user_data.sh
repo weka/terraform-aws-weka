@@ -57,6 +57,8 @@ setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
 yum install -y jq
 
+${custom_data}
+
 region=${region}
 subnet_id=${subnet_id}
 nics_num=${nics_num}

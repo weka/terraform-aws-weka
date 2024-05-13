@@ -310,6 +310,11 @@ To disable using key pair need to set:
 enable_key_pair = false
 ```
 
+To pass any custom data to init script, for example to install SSM need to set:
+```hcl
+custom_data = "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm\n sudo systemctl start amazon-ssm-agent"
+```
+
 ## Create ALB
 We support ALB creation for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends.
 mandatory variables you must provide are:
