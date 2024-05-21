@@ -32,6 +32,7 @@ locals {
     proxy_url             = var.proxy_url
     deploy_lambda_name    = var.deploy_lambda_name
     secondary_ips_per_nic = var.secondary_ips_per_nic
+    protocol              = lower(var.protocol)
   })
 
   setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {

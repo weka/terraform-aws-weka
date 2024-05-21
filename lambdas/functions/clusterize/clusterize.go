@@ -38,6 +38,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
 	if err != nil {
 		log.Error().Err(err).Send()
+		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction, p.Vm.Protocol)
 		return
 	}
 	log.Info().Msgf("Fetched weka cluster creds successfully")
@@ -46,12 +47,11 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 
 	if p.Vm.Protocol == protocol.NFS {
 		clusterizeScript, err = doNFSClusterize(p, funcDef)
+	} else if p.Vm.Protocol == protocol.SMB {
+		msg := fmt.Sprintf("SMB protocol gw: %s setup is done", p.Vm.Name)
+		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report), "")
 	} else {
 		clusterizeScript, err = doClusterize(p, funcDef)
-	}
-
-	if err != nil {
-		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction, p.Vm.Protocol)
 	}
 	return
 }
