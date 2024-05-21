@@ -312,13 +312,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "3c94d9bac4ceea668245d9b4e1f9c141"
+  default     = "262f0089afede89327dd855aaf58467e"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
@@ -403,6 +403,12 @@ variable "alb_route53_zone_id" {
   type        = string
   default     = ""
   description = "Route53 zone id"
+}
+
+variable "alb_acm_domain_name" {
+  type        = string
+  default     = ""
+  description = "ALB somain name for which the certificate should be issued"
 }
 
 ################################################## obs variables ###################################################

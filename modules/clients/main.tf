@@ -38,6 +38,7 @@ locals {
     clients_use_dpdk             = var.clients_use_dpdk
     region                       = local.region
     alb_dns_name                 = var.alb_dns_name != null ? var.alb_dns_name : ""
+    use_https                    = var.alb_use_https
   })
 
   custom_data_parts = [local.preparation_script, local.mount_wekafs_script, "${var.custom_data}\n"]

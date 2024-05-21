@@ -34,6 +34,7 @@ else
 fi
 
 backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
+port=""
 # install weka using random backend ip from ips list
 function retry_weka_install {
   retry_max=60
@@ -41,7 +42,12 @@ function retry_weka_install {
   count=$retry_max
 
   while [ $count -gt 0 ]; do
-      curl --fail -o install_script.sh $backend_ip:14000/dist/v1/install && break
+      if [[ ${use_https} == true ]]; then
+          curl --fail -o install_script.sh "https://$backend_ip/dist/v1/install" && break
+          port=":443"
+      else
+         curl --fail -o install_script.sh http://$backend_ip:14000/dist/v1/install && break
+      fi
       count=$(($count - 1))
       backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
       echo "Retrying weka install from $backend_ip in $retry_sleep seconds..."
@@ -100,10 +106,10 @@ function retry {
 }
 
 echo "$(date -u): Retry mount client"
-mount_command="mount -t wekafs -o net=udp $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
+mount_command="mount -t wekafs -o net=udp $backend_ip$port/$FILESYSTEM_NAME $MOUNT_POINT"
 if [[ ${clients_use_dpdk} == true ]]; then
     getNetStrForDpdk 1 $(($NICS_NUM))
-    mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
+    mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$eth0 $backend_ip$port/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
 retry 60 45 $mount_command

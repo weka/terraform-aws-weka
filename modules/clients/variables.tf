@@ -121,3 +121,14 @@ variable "arch" {
   type    = string
   default = null
 }
+
+variable "alb_record_name" {
+  type = string
+  default = ""
+
+}
+
+variable "alb_use_https" {
+  type = bool
+  default = false
+}
