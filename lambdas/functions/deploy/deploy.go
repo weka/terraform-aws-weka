@@ -36,6 +36,7 @@ type AWSDeploymentParams struct {
 	NFSClientGroupName           string
 	NFSSecondaryIpsNum           int
 	NFSProtocolGatewayFeCoresNum int
+	SMBProtocolGatewayFeCoresNum int
 	AlbArnSuffix                 string
 }
 
@@ -77,21 +78,21 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 	}
 
 	deploymentParams := deploy.DeploymentParams{
-		VMName:                       awsDeploymentParams.InstanceName,
-		InstanceParams:               instanceParams,
-		WekaInstallUrl:               awsDeploymentParams.InstallUrl,
-		WekaToken:                    token,
-		NicsNum:                      awsDeploymentParams.NicsNumStr,
-		InstallDpdk:                  awsDeploymentParams.InstallDpdk,
-		ProxyUrl:                     awsDeploymentParams.ProxyUrl,
-		Protocol:                     protocol.NFS,
-		WekaUsername:                 creds.Username,
-		WekaPassword:                 creds.Password,
-		NFSInterfaceGroupName:        awsDeploymentParams.NFSInterfaceGroupName,
-		NFSClientGroupName:           awsDeploymentParams.NFSClientGroupName,
-		NFSSecondaryIpsNum:           awsDeploymentParams.NFSSecondaryIpsNum,
-		NFSProtocolGatewayFeCoresNum: awsDeploymentParams.NFSProtocolGatewayFeCoresNum,
-		LoadBalancerIP:               albIp,
+		VMName:                    awsDeploymentParams.InstanceName,
+		InstanceParams:            instanceParams,
+		WekaInstallUrl:            awsDeploymentParams.InstallUrl,
+		WekaToken:                 token,
+		NicsNum:                   awsDeploymentParams.NicsNumStr,
+		InstallDpdk:               awsDeploymentParams.InstallDpdk,
+		ProxyUrl:                  awsDeploymentParams.ProxyUrl,
+		Protocol:                  protocol.NFS,
+		WekaUsername:              creds.Username,
+		WekaPassword:              creds.Password,
+		NFSInterfaceGroupName:     awsDeploymentParams.NFSInterfaceGroupName,
+		NFSClientGroupName:        awsDeploymentParams.NFSClientGroupName,
+		NFSSecondaryIpsNum:        awsDeploymentParams.NFSSecondaryIpsNum,
+		ProtocolGatewayFeCoresNum: awsDeploymentParams.NFSProtocolGatewayFeCoresNum,
+		LoadBalancerIP:            albIp,
 	}
 
 	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
@@ -117,6 +118,56 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 		}
 		bashScript = joinScriptGenerator.GetJoinNFSHostScript()
 	}
+
+	return
+}
+
+func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string, err error) {
+	log.Info().Msg("Getting SMB deploy script")
+	funcDef := aws_functions_def.NewFuncDef()
+	instanceParams := protocol.BackendCoreCount{
+		Compute:       awsDeploymentParams.ComputeContainerNum,
+		Frontend:      awsDeploymentParams.FrontendContainerNum,
+		Drive:         awsDeploymentParams.DriveContainerNum,
+		ComputeMemory: awsDeploymentParams.ComputeMemory,
+	}
+
+	albIp, err := common.GetALBIp(awsDeploymentParams.AlbArnSuffix)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	var token string
+	token, err = common.GetWekaIoToken(awsDeploymentParams.TokenId)
+	if err != nil {
+		return
+	}
+
+	deploymentParams := deploy.DeploymentParams{
+		VMName:                    awsDeploymentParams.InstanceName,
+		InstanceParams:            instanceParams,
+		WekaInstallUrl:            awsDeploymentParams.InstallUrl,
+		WekaToken:                 token,
+		NicsNum:                   awsDeploymentParams.NicsNumStr,
+		InstallDpdk:               awsDeploymentParams.InstallDpdk,
+		ProxyUrl:                  awsDeploymentParams.ProxyUrl,
+		Protocol:                  protocol.SMB,
+		ProtocolGatewayFeCoresNum: awsDeploymentParams.SMBProtocolGatewayFeCoresNum,
+		LoadBalancerIP:            albIp,
+	}
+
+	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "", err
+	}
+
+	deployScriptGenerator := deploy.DeployScriptGenerator{
+		FuncDef:       funcDef,
+		Params:        deploymentParams,
+		DeviceNameCmd: GetDeviceName(ebsVolumeId),
+	}
+	bashScript = deployScriptGenerator.GetDeployScript()
 
 	return
 }
