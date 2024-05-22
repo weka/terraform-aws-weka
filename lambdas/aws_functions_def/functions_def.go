@@ -53,7 +53,7 @@ func (d *AWSFuncDef) GetFunctionCmdDefinition(name functions_def.FunctionName) s
 		funcDefTemplate := `
 		function %s {
 			local json_data=$1
-			res=$(aws lambda invoke --region %s --function-name %s --payload "$json_data" output)
+			res=$(aws lambda invoke --region %s --function-name %s --cli-binary-format raw-in-base64-out --payload "$json_data" output)
 			printf "%%b" "$(cat output | sed 's/^"//' | sed 's/"$//' | sed 's/\\\"/"/g')"
 		}
 		`

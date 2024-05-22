@@ -56,6 +56,7 @@ function setup_aws_logs_agent() {
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
 yum install -y jq
+yum -y install kernel-devel
 
 region=${region}
 subnet_id=${subnet_id}
@@ -73,7 +74,7 @@ do
   aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
 done
 
-aws lambda invoke --region "$region" --function-name "${deploy_lambda_name}" --payload "{\"name\": \"$instance_id\", \"protocol\": \"nfs\"}" output
+aws lambda invoke --region "$region" --function-name "${deploy_lambda_name}" --cli-binary-format raw-in-base64-out --payload "{\"name\": \"$instance_id\", \"protocol\": \"nfs\"}" output
 printf "%b" "$(cat output | sed 's/^"//' | sed 's/"$//' | sed 's/\\\"/"/g')" > /tmp/deploy.sh
 chmod +x /tmp/deploy.sh
 /tmp/deploy.sh 2>&1 | tee /tmp/weka_deploy.log
