@@ -35,6 +35,13 @@ locals {
     protocol              = lower(var.protocol)
   })
 
+  setup_init_protocol_script = templatefile("${path.module}/protocol_setup.sh", {
+    gateways_number = var.gateways_number
+    gateways_name   = var.gateways_name
+    region          = local.region
+    protocol        = lower(var.protocol)
+  })
+
   setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {
     cluster_name                 = var.smb_cluster_name
     domain_name                  = var.smb_domain_name
@@ -43,16 +50,18 @@ locals {
     gateways_name                = var.gateways_name
     frontend_container_cores_num = var.frontend_container_cores_num
     region                       = local.region
-
   })
 
-  protocol_script = var.protocol == "NFS" ? "" : local.setup_smb_protocol_script
+  setup_s3_protocol_script = file("${path.module}/setup_s3.sh")
 
-  setup_protocol_script = var.setup_protocol ? local.protocol_script : ""
+  smb_protocol_script = var.protocol == "SMB" ? local.setup_smb_protocol_script : ""
 
-  custom_data_parts = [
-    local.init_script, local.setup_protocol_script
-  ]
+  s3_protocol_script = var.protocol == "S3" ? local.setup_s3_protocol_script : ""
+
+  setup_protocol_script = var.setup_protocol ? compact([local.setup_init_protocol_script, local.smb_protocol_script, local.s3_protocol_script]) : []
+
+  custom_data_parts = concat([local.init_script], local.setup_protocol_script)
+
   custom_data = join("\n", local.custom_data_parts)
 }
 
@@ -133,7 +142,7 @@ resource "aws_launch_template" "this" {
 }
 
 resource "aws_instance" "this" {
-  count = var.protocol == "SMB" ? var.gateways_number : 0
+  count = var.protocol == "SMB" || var.protocol == "S3" ? var.gateways_number : 0
   launch_template {
     id = aws_launch_template.this.id
   }
@@ -141,7 +150,7 @@ resource "aws_instance" "this" {
   lifecycle {
     ignore_changes = [tags, launch_template, user_data]
     precondition {
-      condition     = var.protocol == "NFS" ? var.gateways_number >= 1 : var.gateways_number >= 3 && var.gateways_number <= 8
+      condition     = var.protocol == "NFS" || var.protocol == "S3" ? var.gateways_number >= 1 : var.gateways_number >= 3 && var.gateways_number <= 8
       error_message = "The amount of protocol gateways should be at least 1 for NFS and at least 3 and at most 8 for SMB."
     }
     precondition {

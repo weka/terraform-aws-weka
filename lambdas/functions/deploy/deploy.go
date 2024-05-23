@@ -37,6 +37,7 @@ type AWSDeploymentParams struct {
 	NFSSecondaryIpsNum           int
 	NFSProtocolGatewayFeCoresNum int
 	SMBProtocolGatewayFeCoresNum int
+	S3ProtocolGatewayFeCoresNum  int
 	AlbArnSuffix                 string
 }
 
@@ -122,15 +123,9 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 	return
 }
 
-func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string, err error) {
-	log.Info().Msg("Getting SMB deploy script")
+func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw protocol.ProtocolGW) (bashScript string, err error) {
+	log.Info().Msgf("Getting %s deploy script", protocolGw)
 	funcDef := aws_functions_def.NewFuncDef()
-	instanceParams := protocol.BackendCoreCount{
-		Compute:       awsDeploymentParams.ComputeContainerNum,
-		Frontend:      awsDeploymentParams.FrontendContainerNum,
-		Drive:         awsDeploymentParams.DriveContainerNum,
-		ComputeMemory: awsDeploymentParams.ComputeMemory,
-	}
 
 	albIp, err := common.GetALBIp(awsDeploymentParams.AlbArnSuffix)
 	if err != nil {
@@ -142,17 +137,22 @@ func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 	if err != nil {
 		return
 	}
+	var protocolGatewayFeCoresNum int
+	if protocolGw == protocol.SMB || protocolGw == protocol.SMBW {
+		protocolGatewayFeCoresNum = awsDeploymentParams.SMBProtocolGatewayFeCoresNum
+	} else if protocolGw == protocol.S3 {
+		protocolGatewayFeCoresNum = awsDeploymentParams.S3ProtocolGatewayFeCoresNum
+	}
 
 	deploymentParams := deploy.DeploymentParams{
 		VMName:                    awsDeploymentParams.InstanceName,
-		InstanceParams:            instanceParams,
 		WekaInstallUrl:            awsDeploymentParams.InstallUrl,
 		WekaToken:                 token,
 		NicsNum:                   awsDeploymentParams.NicsNumStr,
 		InstallDpdk:               awsDeploymentParams.InstallDpdk,
 		ProxyUrl:                  awsDeploymentParams.ProxyUrl,
-		Protocol:                  protocol.SMB,
-		ProtocolGatewayFeCoresNum: awsDeploymentParams.SMBProtocolGatewayFeCoresNum,
+		Protocol:                  protocolGw,
+		ProtocolGatewayFeCoresNum: protocolGatewayFeCoresNum,
 		LoadBalancerIP:            albIp,
 	}
 
