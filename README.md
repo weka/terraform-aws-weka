@@ -431,7 +431,7 @@ nfs_protocol_gateway_secondary_ips_per_nic    = 3
 nfs_protocol_gateway_instance_type            = "c5.2xlarge"
 nfs_protocol_gateway_nics_num                 = 2
 nfs_protocol_gateway_disk_size                = 48
-nfs_protocol_gateway_frontend_cores_num       = 1
+nfs_protocol_gateway_fe_cores_num             = 1
 nfs_protocol_gateway_instance_iam_profile_arn = ""
 ```
 
@@ -521,7 +521,7 @@ smb_protocol_gateway_secondary_ips_per_nic    = 3
 smb_protocol_gateway_instance_type            = "c5.2xlarge"
 smb_protocol_gateway_nics_num                 = 2
 smb_protocol_gateway_disk_size                = 48
-smb_protocol_gateway_frontend_cores_num       = 1
+smb_protocol_gateway_fe_cores_num             = 1
 smb_protocol_gateway_instance_iam_profile_arn = ""
 smb_cluster_name                              = ""
 smb_domain_name                               = ""
