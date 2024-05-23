@@ -312,7 +312,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "6a698934659d6a3e7e7369e2847e2acb"
+  default     = "67361132d8c1f0c2aef7ec69082958b8"
 }
 
 variable "lambdas_dist" {
@@ -618,6 +618,43 @@ variable "smb_domain_name" {
   type        = string
   description = "The domain to join the SMB cluster to."
   default     = ""
+}
+
+############################################### S3 protocol gateways variables ###################################################
+variable "s3_protocol_gateway_fe_cores_num" {
+  type        = number
+  description = "S3 protocol gateways' NICs number."
+  default     = 1
+}
+
+variable "s3_protocol_gateway_instance_iam_profile_arn" {
+  type        = string
+  description = "The protocol gateway instance IAM profile ARN"
+  default     = ""
+}
+
+variable "s3_protocol_gateways_number" {
+  type        = number
+  description = "The number of protocol gateway virtual machines to deploy."
+  default     = 0
+}
+
+variable "s3_protocol_gateway_instance_type" {
+  type        = string
+  description = "The protocol gateways' virtual machine type (sku) to deploy."
+  default     = "c5n.2xlarge"
+}
+
+variable "s3_protocol_gateway_weka_volume_size" {
+  type        = number
+  default     = 48
+  description = "The protocol gateways' default disk size."
+}
+
+variable "s3_setup_protocol" {
+  type        = bool
+  description = "Config protocol, default if false"
+  default     = false
 }
 
 variable "weka_home_url" {
