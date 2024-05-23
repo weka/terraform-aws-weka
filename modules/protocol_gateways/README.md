@@ -82,4 +82,5 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_gateways_name"></a> [gateways\_name](#output\_gateways\_name) | Protocol gateway name |
+| <a name="output_instance_ids"></a> [instance\_ids](#output\_instance\_ids) | Protocol gateway instance ids. |
 <!-- END_TF_DOCS -->
