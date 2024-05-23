@@ -866,6 +866,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_local_ssh_private_key"></a> [local\_ssh\_private\_key](#output\_local\_ssh\_private\_key) | If 'ssh\_public\_key' is set to null and no key\_pair\_name provided, it will output the private ssh key location. |
 | <a name="output_nfs_protocol_gateways_ips"></a> [nfs\_protocol\_gateways\_ips](#output\_nfs\_protocol\_gateways\_ips) | Ips of NFS protocol gateways |
 | <a name="output_placement_group_name"></a> [placement\_group\_name](#output\_placement\_group\_name) | Name of placement group |
+| <a name="output_pre_terraform_destroy_command"></a> [pre\_terraform\_destroy\_command](#output\_pre\_terraform\_destroy\_command) | Mandatory pre-destroy step only when SMB protocol gateways are crated. Terraform doesn't handle protection removal. |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security group ids of backends |
 | <a name="output_smb_protocol_gateways_ips"></a> [smb\_protocol\_gateways\_ips](#output\_smb\_protocol\_gateways\_ips) | Ips of SMB protocol gateways |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
