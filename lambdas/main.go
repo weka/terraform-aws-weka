@@ -201,6 +201,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	nfsSecondaryIpsNum, _ := strconv.Atoi(os.Getenv("NFS_SECONDARY_IPS_NUM"))
 	nfsProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	smbProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("SMB_PROTOCOL_GATEWAY_FE_CORES_NUM"))
+	s3ProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("S3_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 	prefix := os.Getenv("PREFIX")
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
@@ -229,13 +230,14 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		NFSSecondaryIpsNum:           nfsSecondaryIpsNum,
 		NFSProtocolGatewayFeCoresNum: nfsProtocolGatewayFeCoresNum,
 		SMBProtocolGatewayFeCoresNum: smbProtocolGatewayFeCoresNum,
+		S3ProtocolGatewayFeCoresNum:  s3ProtocolGatewayFeCoresNum,
 		AlbArnSuffix:                 albArnSuffix,
 	}
 
 	if vm.Protocol == protocol.NFS {
 		return deploy.GetNfsDeployScript(awsDeploymentParams)
-	} else if vm.Protocol == protocol.SMB || vm.Protocol == protocol.SMBW {
-		return deploy.GetSmbDeployScript(awsDeploymentParams)
+	} else if vm.Protocol == protocol.SMB || vm.Protocol == protocol.SMBW || vm.Protocol == protocol.S3 {
+		return deploy.GetSmbDeployScript(awsDeploymentParams, vm.Protocol)
 	}
 	return deploy.GetDeployScript(awsDeploymentParams)
 }
