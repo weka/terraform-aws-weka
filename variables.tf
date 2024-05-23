@@ -312,7 +312,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "6a698934659d6a3e7e7369e2847e2acb"
+  default     = "67361132d8c1f0c2aef7ec69082958b8"
 }
 
 variable "lambdas_dist" {
@@ -618,6 +618,13 @@ variable "smb_domain_name" {
   type        = string
   description = "The domain to join the SMB cluster to."
   default     = ""
+}
+
+############################################### S3 protocol gateways variables ###################################################
+variable "s3_protocol_gateway_fe_cores_num" {
+  type        = number
+  description = "S3 protocol gateways' NICs number."
+  default     = 1
 }
 
 variable "weka_home_url" {
