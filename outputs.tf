@@ -99,6 +99,20 @@ EOT
   description = "Mandatory pre-destroy step only when SMB protocol gateways are crated. Terraform doesn't handle protection removal."
 }
 
+output "s3_protocol_gateways_ips" {
+  value       = var.s3_protocol_gateways_number == 0 ? null : <<EOT
+ echo $(aws ec2 describe-instances --region ${local.region} --filters "Name=tag:Name,Values=${module.s3_protocol_gateways[0].gateways_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
+EOT
+  description = "Ips of S3 protocol gateways"
+}
+
+output "s3_pre_terraform_destroy_command" {
+  value       = var.s3_protocol_gateways_number == 0 ? null : <<EOT
+ echo ${join(" ", module.s3_protocol_gateways[0].instance_ids)} | xargs -n 1 aws ec2 modify-instance-attribute --region ${local.region} --no-disable-api-stop --instance-id
+EOT
+  description = "Mandatory pre-destroy step only when S3 protocol gateways are created. Terraform doesn't handle protection removal."
+}
+
 output "nfs_protocol_gateways_ips" {
   value       = var.nfs_protocol_gateways_number == 0 ? null : <<EOT
  echo $(aws ec2 describe-instances --region ${local.region} --filters "Name=tag:Name,Values=${module.nfs_protocol_gateways[0].gateways_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
