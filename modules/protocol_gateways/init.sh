@@ -62,7 +62,9 @@ subnet_id=${subnet_id}
 nics_num=${nics_num}
 
 network_interface_id=$(aws ec2 describe-network-interfaces --region "$region" --filters "Name=attachment.instance-id,Values=$instance_id" --query "NetworkInterfaces[0].NetworkInterfaceId" --output text)
-aws ec2 assign-private-ip-addresses --region "$region" --network-interface-id "$network_interface_id" --secondary-private-ip-address-count "${secondary_ips_per_nic}"
+if [ "${secondary_ips_per_nic}" -gt 0 ]; then
+  aws ec2 assign-private-ip-addresses --region "$region" --network-interface-id "$network_interface_id" --secondary-private-ip-address-count "${secondary_ips_per_nic}"
+fi
 
 for (( i=1; i<nics_num; i++ ))
 do
