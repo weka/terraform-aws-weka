@@ -9,7 +9,8 @@ module "clients" {
   frontend_container_cores_num = var.clients_use_dpdk ? var.client_frontend_cores : 1
   instance_type                = var.client_instance_type
   backends_asg_name            = aws_autoscaling_group.autoscaling_group.name
-  alb_dns_name                 = var.create_alb ? aws_lb.alb[0].dns_name : null
+  alb_dns_name                 = var.create_alb ? var.alb_alias_name != "" ? var.alb_alias_name : aws_lb.alb[0].dns_name : null
+  alb_listener_protocol        = var.alb_cert_arn == null ? "http" : "https"
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip             = local.assign_public_ip
   placement_group_name         = var.client_placement_group_name != null ? var.client_placement_group_name : local.backends_placement_group_name
