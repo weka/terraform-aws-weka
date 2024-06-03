@@ -18,14 +18,14 @@ resource "aws_lb_target_group" "alb_target_group" {
   name     = substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32)
   vpc_id   = local.vpc_id
   port     = 14000
-  protocol = "HTTP"
+  protocol = "HTTPS"
 
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
     interval            = 30
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     port                = "14000"
     path                = "/api/v2/healthcheck/"
   }
@@ -35,26 +35,12 @@ resource "aws_lb_target_group" "alb_target_group" {
   }
 }
 
-resource "aws_lb_listener" "lb_http_listener" {
+resource "aws_lb_listener" "lb_weka_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
   port              = 14000
-
-  default_action {
-    target_group_arn = aws_lb_target_group.alb_target_group[0].id
-    type             = "forward"
-  }
-  tags = {
-    Name = "${var.prefix}-${var.cluster_name}-lb-listener"
-  }
-}
-
-resource "aws_lb_listener" "lb_https_listener" {
-  count             = var.create_alb && var.alb_cert_arn != null ? 1 : 0
-  load_balancer_arn = aws_lb.alb[0].id
-  port              = 443
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
+  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = var.alb_cert_arn
 
   default_action {
@@ -62,7 +48,24 @@ resource "aws_lb_listener" "lb_https_listener" {
     type             = "forward"
   }
   tags = {
-    Name = "${var.prefix}-${var.cluster_name}-lb-https-listener"
+    Name = "${var.prefix}-${var.cluster_name}-lb-weka-listener"
+  }
+}
+
+resource "aws_lb_listener" "lb_listener" {
+  count             = var.create_alb ? 1 : 0
+  load_balancer_arn = aws_lb.alb[0].id
+  port              = var.alb_cert_arn == null ? 80 : 443
+  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
+  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = var.alb_cert_arn
+
+  default_action {
+    target_group_arn = aws_lb_target_group.alb_target_group[0].id
+    type             = "forward"
+  }
+  tags = {
+    Name = "${var.prefix}-${var.cluster_name}-lb-listener"
   }
 }
 

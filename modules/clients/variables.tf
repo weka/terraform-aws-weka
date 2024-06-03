@@ -122,7 +122,6 @@ variable "arch" {
   default = null
 }
 
-
 variable "ebs_kms_key_id" {
   type        = string
   default     = ""
@@ -133,4 +132,13 @@ variable "ebs_encrypted" {
   type        = bool
   default     = false
   description = "Enables EBS encryption on the volume"
+}
+
+variable "alb_listener_protocol" {
+  type        = string
+  description = "ALB listener protocol can be HTTP / HTTPS"
+  validation {
+    condition     = var.alb_listener_protocol == "https" || var.alb_listener_protocol == "http"
+    error_message = "Allowed ALB protocol values: [\"http\", \"https\"]."
+  }
 }
