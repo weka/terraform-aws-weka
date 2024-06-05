@@ -21,6 +21,41 @@ function wait_for_weka_fs(){
   fi
 }
 
+function create_config_fs(){
+  config_filesystem_name=".config_fs"
+  size="10GB"
+
+  if [ "$(weka fs | grep -c $config_filesystem_name)" -ge 1 ]; then
+    echo "$(date -u): weka filesystem $config_filesystem_name exists"
+    return 0
+  fi
+
+  echo "$(date -u): trying to create filesystem $config_filesystem_name"
+  output=$(weka fs create $config_filesystem_name default $size 2>&1)
+  # possiible outputs:
+  # FSId: 1 (means success)
+  # error: The given filesystem ".config_fs" already exists.
+  # error: Not enough available drive capacity for filesystem. requested "10.00 GB", but only "0 B" are free
+  if [ $? -eq 0 ]; then
+    echo "$(date -u): weka filesystem $config_filesystem_name is created"
+    return 0
+  fi
+
+  if [[ $output == *"already exists"* ]]; then
+    echo "$(date -u): weka filesystem $config_filesystem_name already exists"
+    break
+  elif [[ $output == *"Not enough available drive capacity for filesystem"* ]]; then
+    err_msg="Not enough available drive capacity for filesystem $config_filesystem_name for size $size"
+    echo "$(date -u): $err_msg"
+    report "{\"hostname\": \"$HOSTNAME\", \"type\": \"error\", \"message\": \"$err_msg\"}"
+    return 1
+  else
+    echo "$(date -u): output: $output"
+    report "{\"hostname\": \"$HOSTNAME\", \"type\": \"error\", \"message\": \"cannot create weka filesystem $config_filesystem_name\"}"
+    return 1
+  fi
+}
+
 # make sure weka cluster is already up
 max_retries=60
 for (( i=0; i < max_retries; i++ )); do
@@ -93,4 +128,11 @@ if (( retry > max_retries )); then
     exit 1
 fi
 
+if [[ ${smbw_enabled} == true || ${protocol} == "s3" ]]; then
+    wait_for_weka_fs || exit 1
+    create_config_fs || exit 1
+fi
+
 sleep 30s
+
+echo "$(date -u): Done running validation"

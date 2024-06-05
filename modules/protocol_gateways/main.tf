@@ -40,6 +40,7 @@ locals {
     gateways_name   = var.gateways_name
     region          = local.region
     protocol        = lower(var.protocol)
+    smbw_enabled    = var.smbw_enabled
   })
 
   setup_smb_protocol_script = templatefile("${path.module}/setup_smb.sh", {
