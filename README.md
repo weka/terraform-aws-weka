@@ -713,6 +713,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_nfs_protocol_gateways"></a> [nfs\_protocol\_gateways](#module\_nfs\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
+| <a name="module_s3_protocol_gateways"></a> [s3\_protocol\_gateways](#module\_s3\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | ./modules/security_group | n/a |
 | <a name="module_smb_protocol_gateways"></a> [smb\_protocol\_gateways](#module\_smb\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 | <a name="module_vpc_endpoint"></a> [vpc\_endpoint](#module\_vpc\_endpoint) | ./modules/endpoint | n/a |
@@ -816,7 +817,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"52ba2ad616ced07b49284d76f94efd7e"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"67361132d8c1f0c2aef7ec69082958b8"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_interface_group_name"></a> [nfs\_interface\_group\_name](#input\_nfs\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
@@ -832,6 +833,11 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
 | <a name="input_s3_protocol_gateway_fe_cores_num"></a> [s3\_protocol\_gateway\_fe\_cores\_num](#input\_s3\_protocol\_gateway\_fe\_cores\_num) | S3 protocol gateways' NICs number. | `number` | `1` | no |
+| <a name="input_s3_protocol_gateway_instance_iam_profile_arn"></a> [s3\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_s3\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
+| <a name="input_s3_protocol_gateway_instance_type"></a> [s3\_protocol\_gateway\_instance\_type](#input\_s3\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
+| <a name="input_s3_protocol_gateway_weka_volume_size"></a> [s3\_protocol\_gateway\_weka\_volume\_size](#input\_s3\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
+| <a name="input_s3_protocol_gateways_number"></a> [s3\_protocol\_gateways\_number](#input\_s3\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
+| <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
 | <a name="input_secretmanager_create_vpc_endpoint"></a> [secretmanager\_create\_vpc\_endpoint](#input\_secretmanager\_create\_vpc\_endpoint) | Enable secret manager VPC endpoint | `bool` | `true` | no |
 | <a name="input_secretmanager_sg_ids"></a> [secretmanager\_sg\_ids](#input\_secretmanager\_sg\_ids) | Secret manager endpoint security groups ids | `list(string)` | `[]` | no |
 | <a name="input_secretmanager_use_vpc_endpoint"></a> [secretmanager\_use\_vpc\_endpoint](#input\_secretmanager\_use\_vpc\_endpoint) | Use of secret manager is optional, if not used secrets will be passed between lambdas over step function. If secret manager is used, all lambdas will fetch secret directly when needed. | `bool` | `true` | no |
@@ -843,7 +849,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_smb_protocol_gateway_fe_cores_num"></a> [smb\_protocol\_gateway\_fe\_cores\_num](#input\_smb\_protocol\_gateway\_fe\_cores\_num) | The protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_smb_protocol_gateway_instance_iam_profile_arn"></a> [smb\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_smb\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_smb_protocol_gateway_instance_type"></a> [smb\_protocol\_gateway\_instance\_type](#input\_smb\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
-| <a name="input_smb_protocol_gateway_secondary_ips_per_nic"></a> [smb\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_smb\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `3` | no |
+| <a name="input_smb_protocol_gateway_secondary_ips_per_nic"></a> [smb\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_smb\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `0` | no |
 | <a name="input_smb_protocol_gateway_weka_volume_size"></a> [smb\_protocol\_gateway\_weka\_volume\_size](#input\_smb\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_smb_protocol_gateways_number"></a> [smb\_protocol\_gateways\_number](#input\_smb\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_smb_setup_protocol"></a> [smb\_setup\_protocol](#input\_smb\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
@@ -885,6 +891,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_nfs_protocol_gateways_ips"></a> [nfs\_protocol\_gateways\_ips](#output\_nfs\_protocol\_gateways\_ips) | Ips of NFS protocol gateways |
 | <a name="output_placement_group_name"></a> [placement\_group\_name](#output\_placement\_group\_name) | Name of placement group |
 | <a name="output_pre_terraform_destroy_command"></a> [pre\_terraform\_destroy\_command](#output\_pre\_terraform\_destroy\_command) | Mandatory pre-destroy step only when SMB protocol gateways are crated. Terraform doesn't handle protection removal. |
+| <a name="output_s3_pre_terraform_destroy_command"></a> [s3\_pre\_terraform\_destroy\_command](#output\_s3\_pre\_terraform\_destroy\_command) | Mandatory pre-destroy step only when S3 protocol gateways are created. Terraform doesn't handle protection removal. |
+| <a name="output_s3_protocol_gateways_ips"></a> [s3\_protocol\_gateways\_ips](#output\_s3\_protocol\_gateways\_ips) | Ips of S3 protocol gateways |
 | <a name="output_sg_ids"></a> [sg\_ids](#output\_sg\_ids) | Security group ids of backends |
 | <a name="output_smb_protocol_gateways_ips"></a> [smb\_protocol\_gateways\_ips](#output\_smb\_protocol\_gateways\_ips) | Ips of SMB protocol gateways |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
