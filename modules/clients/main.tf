@@ -69,6 +69,8 @@ resource "aws_launch_template" "this" {
       volume_size           = var.weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
+      encrypted             = var.ebs_encrypted
+      kms_key_id            = var.ebs_kms_key_id
     }
   }
 
