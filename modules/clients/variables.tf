@@ -121,3 +121,16 @@ variable "arch" {
   type    = string
   default = null
 }
+
+
+variable "ebs_kms_key_id" {
+  type        = string
+  default     = ""
+  description = "The ARN of the AWS Key Management Service"
+}
+
+variable "ebs_encrypted" {
+  type        = bool
+  default     = false
+  description = "Enables EBS encryption on the volume"
+}

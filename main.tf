@@ -15,6 +15,7 @@ locals {
     custom_data         = var.custom_data
   })
   backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
+  create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null ? true : false
 }
 
 data "aws_caller_identity" "current" {}
@@ -70,6 +71,76 @@ resource "aws_placement_group" "placement_group" {
   depends_on = [module.network]
 }
 
+resource "aws_kms_key" "kms_key" {
+  count                   = local.create_kms_key ? 1 : 0
+  enable_key_rotation     = true
+  deletion_window_in_days = 20
+  is_enabled              = true
+  tags = {
+    Name = "${var.prefix}-${var.cluster_name}"
+  }
+}
+
+resource "aws_kms_alias" "kms_alias" {
+  count         = local.create_kms_key ? 1 : 0
+  name          = "alias/${var.prefix}-${var.cluster_name}"
+  target_key_id = aws_kms_key.kms_key[0].key_id
+  depends_on    = [aws_kms_key.kms_key]
+}
+
+resource "aws_kms_key_policy" "kms_key_policy" {
+  count  = local.create_kms_key ? 1 : 0
+  key_id = aws_kms_key.kms_key[0].id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "key-default-1"
+    Statement = [
+      {
+        "Sid" : "Enable IAM User Permissions",
+        "Effect" : "Allow",
+        "Principal" : {
+          "AWS" : "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
+        },
+        "Action" : "kms:*",
+        "Resource" : "*"
+      },
+      {
+        Sid    = "Allow service-linked role use of the customer managed key",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+        },
+        Action = [
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey*",
+          "kms:DescribeKey"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "Allow service-linked role use of the customer managed key",
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+
+        },
+        Action = [
+          "kms:CreateGrant"
+        ],
+        Resource = "*"
+        Condition = {
+          Bool = {
+            "kms:GrantIsForAWSResource" : true
+          }
+        }
+      }
+    ]
+  })
+  depends_on = [aws_kms_key.kms_key]
+}
+
 resource "aws_launch_template" "launch_template" {
   name_prefix                          = "${var.prefix}-${var.cluster_name}-backend"
   disable_api_termination              = true
@@ -86,6 +157,18 @@ resource "aws_launch_template" "launch_template" {
       volume_size           = local.weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
+      kms_key_id            = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+      encrypted             = var.ebs_encrypted
+    }
+  }
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size           = 8
+      volume_type           = "gp3"
+      delete_on_termination = true
+      encrypted             = var.ebs_encrypted
+      kms_key_id            = var.ebs_kms_key_id
     }
   }
 
@@ -134,7 +217,7 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   user_data  = base64encode(local.user_data)
-  depends_on = [aws_placement_group.placement_group]
+  depends_on = [aws_placement_group.placement_group, aws_kms_key.kms_key]
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {

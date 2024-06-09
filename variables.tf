@@ -711,3 +711,15 @@ variable "install_cluster_dpdk" {
   default     = true
   description = "Install weka cluster with DPDK"
 }
+
+variable "ebs_kms_key_id" {
+  type        = string
+  default     = null
+  description = "The ARN of the AWS Key Management Service"
+}
+
+variable "ebs_encrypted" {
+  type        = bool
+  default     = false
+  description = "Enables EBS encryption on the volume"
+}
