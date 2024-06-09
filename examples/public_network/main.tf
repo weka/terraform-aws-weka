@@ -9,6 +9,7 @@ terraform {
 }
 
 provider "aws" {
+  profile = "cloud-dev"
 }
 
 module "weka_deployment" {
