@@ -89,6 +89,19 @@ resource "aws_launch_template" "this" {
       volume_size           = var.weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
+      encrypted             = var.ebs_encrypted
+      kms_key_id            = var.ebs_kms_key_id
+    }
+  }
+
+  block_device_mappings {
+    device_name = "/dev/xvda"
+    ebs {
+      volume_size           = var.weka_volume_size
+      volume_type           = "gp3"
+      delete_on_termination = true
+      encrypted             = var.ebs_encrypted
+      kms_key_id            = var.ebs_kms_key_id
     }
   }
 
@@ -146,6 +159,11 @@ resource "aws_instance" "this" {
   count = var.protocol == "SMB" || var.protocol == "S3" ? var.gateways_number : 0
   launch_template {
     id = aws_launch_template.this.id
+  }
+  ebs_block_device {
+    device_name = "/dev/sdp"
+    encrypted   = var.ebs_encrypted
+    kms_key_id  = var.ebs_kms_key_id
   }
 
   lifecycle {
