@@ -50,6 +50,8 @@ No modules.
 | <a name="input_clusterize_finalization_lambda_name"></a> [clusterize\_finalization\_lambda\_name](#input\_clusterize\_finalization\_lambda\_name) | The name of the clusterize finalization function | `string` | n/a | yes |
 | <a name="input_clusterize_lambda_name"></a> [clusterize\_lambda\_name](#input\_clusterize\_lambda\_name) | The name of the clusterize function | `string` | n/a | yes |
 | <a name="input_deploy_lambda_name"></a> [deploy\_lambda\_name](#input\_deploy\_lambda\_name) | The name of the deploy function | `string` | n/a | yes |
+| <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | Enables EBS encryption on the volume | `bool` | `false` | no |
+| <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service | `string` | `""` | no |
 | <a name="input_fetch_lambda_name"></a> [fetch\_lambda\_name](#input\_fetch\_lambda\_name) | The name of the fetch function | `string` | n/a | yes |
 | <a name="input_frontend_container_cores_num"></a> [frontend\_container\_cores\_num](#input\_frontend\_container\_cores\_num) | Number of frontend cores to use on instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC | `number` | `1` | no |
 | <a name="input_gateways_name"></a> [gateways\_name](#input\_gateways\_name) | The protocol group name. | `string` | n/a | yes |
