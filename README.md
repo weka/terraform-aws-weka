@@ -732,6 +732,9 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | [aws_dynamodb_table_item.weka_deployment_nfs_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item) | resource |
 | [aws_dynamodb_table_item.weka_deployment_state](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/dynamodb_table_item) | resource |
 | [aws_key_pair.generated_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/key_pair) | resource |
+| [aws_kms_alias.kms_alias](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_alias) | resource |
+| [aws_kms_key.kms_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key) | resource |
+| [aws_kms_key_policy.kms_key_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key_policy) | resource |
 | [aws_lambda_function.clusterize_finalization_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.clusterize_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.deploy_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
@@ -806,6 +809,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_debug_down_backends_removal_timeout"></a> [debug\_down\_backends\_removal\_timeout](#input\_debug\_down\_backends\_removal\_timeout) | Don't change this value without consulting weka support team. Timeout for removing down backends. Valid time units are ns, us (or µs), ms, s, m, h. | `string` | `"3h"` | no |
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default). This key will be used if dynamodb table will be created automatically, by not setting `dynamodb_table_name` param. In case `dynamodb_table_name` parameter is set, `dynamodb_hash_key_name` should match the key that should be used by us within pre-created table | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
+| <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | Enables EBS encryption on the volume | `bool` | `false` | no |
+| <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service | `string` | `null` | no |
 | <a name="input_enable_key_pair"></a> [enable\_key\_pair](#input\_enable\_key\_pair) | create / use key pair for instance template | `bool` | `true` | no |
 | <a name="input_event_iam_role_arn"></a> [event\_iam\_role\_arn](#input\_event\_iam\_role\_arn) | IAM Role that will be used by cloudwatch rule(event), if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
 | <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
