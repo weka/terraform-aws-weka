@@ -18,14 +18,14 @@ resource "aws_lb_target_group" "alb_target_group" {
   name     = substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32)
   vpc_id   = local.vpc_id
   port     = 14000
-  protocol = "HTTP"
+  protocol = "HTTPS"
 
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 2
     timeout             = 3
     interval            = 30
-    protocol            = "HTTP"
+    protocol            = "HTTPS"
     port                = "14000"
     path                = "/api/v2/healthcheck/"
   }
