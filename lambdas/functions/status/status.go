@@ -27,7 +27,7 @@ func GetReports(ctx context.Context, stateTable, hashKey, stateKey, clusterName,
 	reports.Errors = state.Errors
 
 	clusterizationInstance := ""
-	if len(state.Instances) >= state.ClusterizationTarget {
+	if state.ClusterizationTarget > 0 && len(state.Instances) >= state.ClusterizationTarget {
 		clusterizationInstance = state.Instances[state.ClusterizationTarget-1].Name
 	}
 
