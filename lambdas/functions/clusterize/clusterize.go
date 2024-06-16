@@ -47,8 +47,8 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string) {
 
 	if p.Vm.Protocol == protocol.NFS {
 		clusterizeScript, err = doNFSClusterize(p, funcDef)
-	} else if p.Vm.Protocol == protocol.SMB {
-		msg := fmt.Sprintf("SMB protocol gw: %s setup is done", p.Vm.Name)
+	} else if p.Vm.Protocol == protocol.SMB || p.Vm.Protocol == protocol.S3 {
+		msg := fmt.Sprintf("%s protocol gw: %s setup is done", strings.ToUpper(string(p.Vm.Protocol)), p.Vm.Name)
 		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report), "")
 	} else {
 		clusterizeScript, err = doClusterize(p, funcDef)
