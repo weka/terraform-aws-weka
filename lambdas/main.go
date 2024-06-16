@@ -268,7 +268,10 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	if req.Protocol == protocol.NFS {
 		stateKey = os.Getenv("NFS_STATE_KEY")
 		hostGroup = "gateways-protocol"
+	} else if req.Protocol != "" {
+		return "", fmt.Errorf("unsupported protocol: %s", req.Protocol)
 	}
+
 	clusterName := os.Getenv("CLUSTER_NAME")
 
 	var clusterStatus interface{}
