@@ -115,7 +115,6 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
-	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 	usernameId := os.Getenv("USERNAME_ID")
 	passwordId := os.Getenv("PASSWORD_ID")
 	stateTable := os.Getenv("STATE_TABLE")
@@ -129,7 +128,7 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("FRONTEND_CONTAINER_CORES_NUM"))
 	proxyUrl := os.Getenv("PROXY_URL")
-	smbwEnabled, _ := strconv.ParseBool(os.Getenv("SMBW_ENABLED"))
+	createConfigFs, _ := strconv.ParseBool(os.Getenv("CREATE_CONFIG_FS"))
 	wekaHomeUrl := os.Getenv("WEKA_HOME_URL")
 	interfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
 	nfsProtocolgwsNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAYS_NUM"))
@@ -156,10 +155,9 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 			ClusterizationTarget: hostsNum,
 			ClusterName:          clusterName,
 			Prefix:               prefix,
-			NvmesNum:             nvmesNum,
 			SetObs:               setObs,
 			InstallDpdk:          installDpdk,
-			SmbwEnabled:          smbwEnabled,
+			CreateConfigFs:       createConfigFs,
 			DataProtection: clusterizeCommon.DataProtectionParams{
 				StripeWidth:     stripeWidth,
 				ProtectionLevel: protectionLevel,
@@ -205,6 +203,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 	prefix := os.Getenv("PREFIX")
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
+	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 
 	log.Info().Msgf("generating deploy script for vm: %s", vm.Name)
 
@@ -232,6 +231,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		SMBProtocolGatewayFeCoresNum: smbProtocolGatewayFeCoresNum,
 		S3ProtocolGatewayFeCoresNum:  s3ProtocolGatewayFeCoresNum,
 		AlbArnSuffix:                 albArnSuffix,
+		NvmesNum:                     nvmesNum,
 	}
 
 	if vm.Protocol == protocol.NFS {

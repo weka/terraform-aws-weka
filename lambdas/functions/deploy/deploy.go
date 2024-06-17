@@ -39,6 +39,7 @@ type AWSDeploymentParams struct {
 	SMBProtocolGatewayFeCoresNum int
 	S3ProtocolGatewayFeCoresNum  int
 	AlbArnSuffix                 string
+	NvmesNum                     int
 }
 
 func getAWSInstanceNameCmd() string {
@@ -202,13 +203,15 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 			return
 		}
 		deploymentParams := deploy.DeploymentParams{
-			VMName:         awsDeploymentParams.InstanceName,
-			InstanceParams: instanceParams,
-			WekaInstallUrl: awsDeploymentParams.InstallUrl,
-			WekaToken:      token,
-			NicsNum:        awsDeploymentParams.NicsNumStr,
-			InstallDpdk:    awsDeploymentParams.InstallDpdk,
-			ProxyUrl:       awsDeploymentParams.ProxyUrl,
+			VMName:           awsDeploymentParams.InstanceName,
+			InstanceParams:   instanceParams,
+			WekaInstallUrl:   awsDeploymentParams.InstallUrl,
+			WekaToken:        token,
+			NicsNum:          awsDeploymentParams.NicsNumStr,
+			InstallDpdk:      awsDeploymentParams.InstallDpdk,
+			ProxyUrl:         awsDeploymentParams.ProxyUrl,
+			NvmesNum:         awsDeploymentParams.NvmesNum,
+			FindDrivesScript: dedent.Dedent(common.FindDrivesScript),
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
 			FuncDef:       funcDef,
@@ -244,11 +247,10 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 		set -ex
 		`
 
-		findDrivesScript := common.FindDrivesScript
 		joinScriptGenerator := join.JoinScriptGenerator{
 			DeviceNameCmd:      GetDeviceName(ebsVolumeId),
 			GetInstanceNameCmd: getAWSInstanceNameCmd(),
-			FindDrivesScript:   dedent.Dedent(findDrivesScript),
+			FindDrivesScript:   dedent.Dedent(common.FindDrivesScript),
 			ScriptBase:         dedent.Dedent(scriptBase),
 			Params:             joinParams,
 			FuncDef:            funcDef,
