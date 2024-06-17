@@ -104,7 +104,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       OBS_TIERING_SSD_PERCENT      = var.tiering_enable_ssd_percent
       FRONTEND_CONTAINER_CORES_NUM = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].frontend : 0
       PROXY_URL                    = var.proxy_url
-      SMBW_ENABLED                 = var.smbw_enabled
+      CREATE_CONFIG_FS             = (var.smbw_enabled && var.smb_setup_protocol) || var.s3_setup_protocol
       WEKA_HOME_URL                = var.weka_home_url
       INSTALL_DPDK                 = var.install_cluster_dpdk
       # pass lambda function names
