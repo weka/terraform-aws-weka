@@ -136,9 +136,10 @@ variable "ebs_encrypted" {
 
 variable "alb_listener_protocol" {
   type        = string
-  description = "ALB listener protocol can be HTTP / HTTPS"
+  description = "ALB listener protocol can be HTTP / HTTPS or empty if no ALB is used"
+  default     = ""
   validation {
-    condition     = var.alb_listener_protocol == "https" || var.alb_listener_protocol == "http"
+    condition     = var.alb_listener_protocol == "https" || var.alb_listener_protocol == "http" || var.alb_listener_protocol == ""
     error_message = "Allowed ALB protocol values: [\"http\", \"https\"]."
   }
 }
