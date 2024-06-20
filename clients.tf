@@ -19,7 +19,7 @@ module "clients" {
   sg_ids                       = local.sg_ids
   tags_map                     = var.tags_map
   ebs_encrypted                = var.ebs_encrypted
-  ebs_kms_key_id               = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  ebs_kms_key_id               = local.kms_key_id
   instance_iam_profile_arn     = var.client_instance_iam_profile_arn
   use_autoscaling_group        = var.clients_use_autoscaling_group
   custom_data                  = var.clients_custom_data

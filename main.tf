@@ -16,6 +16,7 @@ locals {
   })
   backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
   create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null
+  kms_key_id                    = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
 }
 
 data "aws_caller_identity" "current" {}
@@ -157,7 +158,7 @@ resource "aws_launch_template" "launch_template" {
       volume_size           = local.weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
-      kms_key_id            = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+      kms_key_id            = local.kms_key_id
       encrypted             = var.ebs_encrypted
     }
   }
@@ -165,7 +166,7 @@ resource "aws_launch_template" "launch_template" {
     device_name = "/dev/xvda"
     ebs {
       encrypted  = var.ebs_encrypted
-      kms_key_id = var.ebs_kms_key_id
+      kms_key_id = local.kms_key_id
     }
   }
 
