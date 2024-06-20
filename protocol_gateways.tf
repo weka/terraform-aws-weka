@@ -25,7 +25,7 @@ module "smb_protocol_gateways" {
   smb_domain_name                     = var.smb_domain_name
   smbw_enabled                        = var.smbw_enabled
   ebs_encrypted                       = var.ebs_encrypted
-  ebs_kms_key_id                      = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  ebs_kms_key_id                      = local.kms_key_id
   deploy_lambda_name                  = aws_lambda_function.deploy_lambda.function_name
   report_lambda_name                  = aws_lambda_function.report_lambda.function_name
   fetch_lambda_name                   = aws_lambda_function.fetch_lambda.function_name
@@ -61,7 +61,7 @@ module "s3_protocol_gateways" {
   proxy_url                           = var.proxy_url
   secret_prefix                       = local.secret_prefix
   ebs_encrypted                       = var.ebs_encrypted
-  ebs_kms_key_id                      = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  ebs_kms_key_id                      = local.kms_key_id
   deploy_lambda_name                  = aws_lambda_function.deploy_lambda.function_name
   report_lambda_name                  = aws_lambda_function.report_lambda.function_name
   fetch_lambda_name                   = aws_lambda_function.fetch_lambda.function_name
@@ -97,7 +97,7 @@ module "nfs_protocol_gateways" {
   proxy_url                           = var.proxy_url
   secret_prefix                       = local.secret_prefix
   ebs_encrypted                       = var.ebs_encrypted
-  ebs_kms_key_id                      = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  ebs_kms_key_id                      = local.kms_key_id
   deploy_lambda_name                  = aws_lambda_function.deploy_lambda.function_name
   report_lambda_name                  = aws_lambda_function.report_lambda.function_name
   fetch_lambda_name                   = aws_lambda_function.fetch_lambda.function_name
