@@ -263,7 +263,7 @@ We provide iam, network and security_group modules to help you create the prereq
 <br>Check our [example](examples/public_network/main.tf) that uses these modules.
 - When sg_ids isn't provided we automatically create a security group using our module.
 - When subnet_ids isn't provided we automatically create a subnet using our module.
-- When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
+- When instance_iam_profile_arn isn't provided we automatically create an iam instance profile using our module.
 - var `availability_zones` need to provide only when we create network module, Currently limited to single subnet. for example `eu-west-1c`
 
 ### NAT network deployment:
@@ -412,7 +412,7 @@ client_instance_ami_id = AMI_ID
 client_arch            = "x86_64"
 ```
 
-<br>In order to use exising iam profile ARN you need to provide the following variable:
+<br>In order to use exising iam instance profile ARN you need to provide the following variable:
 ```
 client_instance_iam_profile_arn = CLIENT_ARN
 ```
@@ -771,7 +771,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_arch"></a> [client\_arch](#input\_client\_arch) | Use arch for ami id, value can be arm64/x86\_64. | `string` | `null` | no |
 | <a name="input_client_frontend_cores"></a> [client\_frontend\_cores](#input\_client\_frontend\_cores) | Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC | `number` | `1` | no |
 | <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module | `string` | `null` | no |
-| <a name="input_client_instance_iam_profile_arn"></a> [client\_instance\_iam\_profile\_arn](#input\_client\_instance\_iam\_profile\_arn) | ARN of IAM Profile to use by client instance. If not specified Instance Profile will be automatically created | `string` | `""` | no |
+| <a name="input_client_instance_iam_profile_arn"></a> [client\_instance\_iam\_profile\_arn](#input\_client\_instance\_iam\_profile\_arn) | ARN of IAM Instance Profile to use by client instance. If not specified Instance Profile will be automatically created | `string` | `""` | no |
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client instance type (sku) to deploy | `string` | `"c5.2xlarge"` | no |
 | <a name="input_client_placement_group_name"></a> [client\_placement\_group\_name](#input\_client\_placement\_group\_name) | The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically | `string` | `null` | no |
 | <a name="input_client_weka_volume_size"></a> [client\_weka\_volume\_size](#input\_client\_weka\_volume\_size) | The client volume size in GB | `number` | `48` | no |
