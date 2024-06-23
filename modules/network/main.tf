@@ -91,6 +91,9 @@ resource "aws_subnet" "public_subnet" {
     Environment = var.prefix
     Zone        = local.availability_zones_list[count.index]
   }
+ lifecycle {
+   ignore_changes = [tags, availability_zone]
+ }
 }
 
 # associate route table to public subnet
@@ -99,6 +102,7 @@ resource "aws_route_table_association" "public_rt_associate" {
   subnet_id      = aws_subnet.public_subnet[count.index].id
   route_table_id = aws_route_table.ig_route_table[0].id
   depends_on     = [aws_subnet.public_subnet, aws_route_table.ig_route_table]
+
 }
 
 # Private subnet
