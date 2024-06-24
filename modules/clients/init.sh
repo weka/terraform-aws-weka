@@ -48,7 +48,7 @@ function setup_aws_logs_agent() {
     echo " Setting up AWS logs agent "
     echo "---------------------------"
 
-    no_proxy=".amazonaws.com" https_proxy="${proxy}" yum install -y amazon-cloudwatch-agent || return 1
+    no_proxy=".amazonaws.com" https_proxy="${proxy}" yum install -y amazon-cloudwatch-agent || no_proxy=".amazonaws.com" https_proxy="${proxy}" apt install -y amazon-cloudwatch-agent || return 1
     configure_aws_logs_agent || return 1
     service amazon-cloudwatch-agent restart || return 1
 }
@@ -67,3 +67,5 @@ do
   attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
   aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
 done
+
+apt update && apt install -y net-tools || true
