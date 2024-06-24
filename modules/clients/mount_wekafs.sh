@@ -68,7 +68,10 @@ weka local stop && weka local rm -f --all
 
 FRONTEND_CONTAINER_CORES_NUM="${frontend_container_cores_num}"
 NICS_NUM=$((FRONTEND_CONTAINER_CORES_NUM+1))
-eth0=$(ifconfig | grep eth0 -C2 | grep 'inet ' | awk '{print $2}')
+first_interface=$(ip -o link show | awk -F ': ' '!/docker0/ && !/^lo/ {print $2}' | sort | head -n 1)
+interface_str=$(echo $first_interface | awk '{gsub(/[0-9]/,"",$1); print $1}')
+first_interface_number=$(echo $first_interface | awk '{gsub(/[^0-9]/,"",$1); print $1}')
+first_interface_ip=$(ip addr show $first_interface | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
 function getNetStrForDpdk() {
 	i=$1
@@ -76,7 +79,7 @@ function getNetStrForDpdk() {
 
 	net=""
 	for ((i; i<$j; i++)); do
-		net="$net -o net=eth$i"
+		net="$net -o net=$interface_str$i"
 	done
 }
 
@@ -102,8 +105,8 @@ function retry {
 echo "$(date -u): Retry mount client"
 mount_command="mount -t wekafs -o net=udp $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 if [[ ${clients_use_dpdk} == true ]]; then
-    getNetStrForDpdk 1 $(($NICS_NUM))
-    mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$eth0 $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
+    getNetStrForDpdk $(($first_interface_number+1)) $(($NICS_NUM+$first_interface_number))
+    mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$first_interface_ip $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
 retry 60 45 $mount_command
