@@ -263,7 +263,7 @@ We provide iam, network and security_group modules to help you create the prereq
 <br>Check our [example](examples/public_network/main.tf) that uses these modules.
 - When sg_ids isn't provided we automatically create a security group using our module.
 - When subnet_ids isn't provided we automatically create a subnet using our module.
-- When instance_iam_profile_arn isn't provided we automatically create an iam profile using our module.
+- When instance_iam_profile_arn isn't provided we automatically create an iam instance profile using our module.
 - var `availability_zones` need to provide only when we create network module, Currently limited to single subnet. for example `eu-west-1c`
 
 ### NAT network deployment:
@@ -412,7 +412,7 @@ client_instance_ami_id = AMI_ID
 client_arch            = "x86_64"
 ```
 
-<br>In order to use exising iam profile ARN you need to provide the following variable:
+<br>In order to use exising iam instance profile ARN you need to provide the following variable:
 ```
 client_instance_iam_profile_arn = CLIENT_ARN
 ```

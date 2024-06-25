@@ -241,7 +241,7 @@ variable "hotspare" {
 
 variable "instance_iam_profile_arn" {
   type        = string
-  description = "IAM Role that will be used by weka backend instances, if not specified will be created automatically. If pre-created should match policy described in readme"
+  description = "ARN of IAM Instance Profile that will be used by weka backend instances, if not specified will be created automatically. If pre-created should match policy described in readme"
   default     = ""
 }
 
@@ -439,7 +439,7 @@ variable "client_instance_type" {
 
 variable "client_instance_iam_profile_arn" {
   type        = string
-  description = "ARN of IAM Profile to use by client instance. If not specified Instance Profile will be automatically created"
+  description = "ARN of IAM Instance Profile to use by client instance. If not specified Instance Profile will be automatically created"
   default     = ""
 }
 
