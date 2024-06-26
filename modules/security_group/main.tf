@@ -1,6 +1,6 @@
 # Default Security Group of VPC
 resource "aws_security_group" "sg" {
-  name        = "${var.prefix}-sg"
+  name        = "${var.prefix}-${var.cluster_name}-sg"
   description = "Default SG to allow traffic from the VPC"
   vpc_id      = var.vpc_id
 
@@ -43,6 +43,6 @@ resource "aws_security_group" "sg" {
 
   tags = {
     Environment = var.prefix
-    Name        = "${var.prefix}-sg"
+    Name        = "${var.prefix}-${var.cluster_name}-sg"
   }
 }
