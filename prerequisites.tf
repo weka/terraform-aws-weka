@@ -22,6 +22,7 @@ module "security_group" {
   count                 = length(var.sg_ids) == 0 ? 1 : 0
   source                = "./modules/security_group"
   prefix                = var.prefix
+  cluster_name          = var.cluster_name
   vpc_id                = local.vpc_id
   allow_ssh_cidrs       = var.allow_ssh_cidrs
   alb_allow_https_cidrs = var.alb_allow_https_cidrs
