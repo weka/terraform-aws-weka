@@ -445,7 +445,7 @@ variable "client_instance_iam_profile_arn" {
 
 variable "client_instance_ami_id" {
   type        = string
-  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
+  description = "The default AMI ID is set to Amazon Linux 2. While other OS distributions that support 'yum' or 'apt' package managers (e.g. Rocky 8.9, Red Hat 9.2) should function correctly and are supported by WEKA, please note that thorough Terraform based WEKA deployment testing has been conducted only with Amazon Linux 2 and Ubuntu 22 for this Terraform module."
   default     = null
 }
 
