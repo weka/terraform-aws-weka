@@ -29,7 +29,7 @@ resource "aws_security_group" "proxy_sg" {
 resource "aws_security_group" "ec2_endpoint_sg" {
   count       = var.create_vpc_endpoint_ec2 ? 1 : 0
   name        = "${var.prefix}-ec2-vpc-endpoint-sg"
-  description = "Wc2 vpc endpoint connection"
+  description = "Ec2 vpc endpoint connection"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -53,11 +53,11 @@ resource "aws_security_group" "ec2_endpoint_sg" {
 }
 # ec2 endpoint
 resource "aws_vpc_endpoint" "ec2_endpoint" {
-  count               = var.create_vpc_endpoint_ec2 ? 1 : 0
+  count               = var.create_vpc_endpoint_ec2 || var.enable_lambda_vpc_config ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ec2"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
+  security_group_ids  = var.enable_lambda_vpc_config ? var.sg_ids : [aws_security_group.ec2_endpoint_sg[0].id]
   subnet_ids          = var.subnet_ids
   private_dns_enabled = true
   tags = {
@@ -107,12 +107,12 @@ resource "aws_vpc_endpoint_security_group_association" "proxy_association_sg" {
 
 resource "aws_vpc_endpoint_security_group_association" "ec2_association_sg" {
   count             = var.create_vpc_endpoint_ec2 ? 1 : 0
-  vpc_endpoint_id   = aws_vpc_endpoint.proxy_endpoint[0].id
+  vpc_endpoint_id   = aws_vpc_endpoint.ec2_endpoint[0].id
   security_group_id = aws_security_group.ec2_endpoint_sg[0].id
 }
 
 resource "aws_vpc_endpoint" "lambda_endpoint" {
-  count               = var.create_vpc_endpoint_lambda ? 1 : 0
+  count               = var.create_vpc_endpoint_lambda || var.enable_lambda_vpc_config ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.lambda"
   vpc_endpoint_type   = "Interface"
@@ -121,6 +121,45 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-lambda-endpoint"
+    Environment = var.prefix
+  }
+}
+
+# endpoint to dynamodb
+data "aws_route_tables" "rt" {
+  vpc_id = var.vpc_id
+
+  filter {
+    name   = "association.main"
+    values = [false]
+  }
+}
+
+resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
+  count             = var.enable_lambda_vpc_config ? 1 : 0
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.region}.dynamodb"
+  vpc_endpoint_type = "Gateway"
+  route_table_ids   = length(data.aws_route_tables.rt.*.id) > 0 ? data.aws_route_tables.rt.ids : [data.aws_vpc.this.main_route_table_id]
+
+  tags = {
+    Name        = "${var.prefix}-dynamodb-gateway-endpoint"
+    Environment = var.prefix
+  }
+  depends_on = [data.aws_route_tables.rt]
+}
+
+
+resource "aws_vpc_endpoint" "autoscaling_endpoint" {
+  count               = var.enable_lambda_vpc_config ? 1 : 0
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${var.region}.autoscaling"
+  vpc_endpoint_type   = "Interface"
+  security_group_ids  = var.sg_ids
+  subnet_ids          = var.subnet_ids
+  private_dns_enabled = true
+  tags = {
+    Name        = "${var.prefix}-autoscaling-endpoint"
     Environment = var.prefix
   }
 }

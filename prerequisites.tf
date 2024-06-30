@@ -43,13 +43,14 @@ module "iam" {
 }
 
 module "vpc_endpoint" {
-  count                          = var.vpc_endpoint_ec2_create || var.vpc_endpoint_proxy_create || var.vpc_endpoint_s3_gateway_create ? 1 : 0
+  count                          = var.enable_lambda_vpc_config || var.vpc_endpoint_ec2_create || var.vpc_endpoint_proxy_create || var.vpc_endpoint_s3_gateway_create ? 1 : 0
   source                         = "./modules/endpoint"
   region                         = data.aws_region.current.name
   create_vpc_endpoint_ec2        = var.vpc_endpoint_ec2_create
   create_vpc_endpoint_s3_gateway = var.vpc_endpoint_s3_gateway_create
   create_vpc_endpoint_proxy      = var.vpc_endpoint_proxy_create
   create_vpc_endpoint_lambda     = var.vpc_endpoint_lambda_create
+  enable_lambda_vpc_config       = var.enable_lambda_vpc_config
   prefix                         = var.prefix
   vpc_id                         = local.vpc_id
   sg_ids                         = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
