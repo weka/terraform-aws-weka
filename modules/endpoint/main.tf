@@ -106,7 +106,7 @@ resource "aws_vpc_endpoint_security_group_association" "proxy_association_sg" {
 }
 
 resource "aws_vpc_endpoint_security_group_association" "ec2_association_sg" {
-  count             = var.create_vpc_endpoint_ec2 ? 1 : 0
+  count             = var.create_vpc_endpoint_ec2 && !var.enable_lambda_vpc_config ? 1 : 0
   vpc_endpoint_id   = aws_vpc_endpoint.ec2_endpoint[0].id
   security_group_id = aws_security_group.ec2_endpoint_sg[0].id
 }
@@ -140,7 +140,7 @@ resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.dynamodb"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = length(data.aws_route_tables.rt.*.id) > 0 ? data.aws_route_tables.rt.ids : [data.aws_vpc.this.main_route_table_id]
+  route_table_ids   = length(data.aws_route_tables.rt[*].id) > 0 ? data.aws_route_tables.rt.ids : [data.aws_vpc.this.main_route_table_id]
 
   tags = {
     Name        = "${var.prefix}-dynamodb-gateway-endpoint"
