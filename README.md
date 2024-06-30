@@ -639,6 +639,15 @@ It is possible to not use the secretmanager endpoint, but not recommended.
 secretmanager_use_vpc_endpoint = false
 secretmanager_create_vpc_endpoint = false
 ```
+
+### Run lambdas inside vpc:
+To enable vpc config for lambdas, set:
+```hcl
+enable_lambda_vpc_config = true
+```
+This mean we will create endpoints for `dynamodb/lambda/autoscaling/ec2`
+
+
 #### Further explanation:
 We use the secret manager to store the weka username, password (and get.weka.io token).
 <br>We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
@@ -812,6 +821,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | Enables EBS encryption on the volume | `bool` | `false` | no |
 | <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service | `string` | `null` | no |
 | <a name="input_enable_key_pair"></a> [enable\_key\_pair](#input\_enable\_key\_pair) | create / use key pair for instance template | `bool` | `true` | no |
+| <a name="input_enable_lambda_vpc_config"></a> [enable\_lambda\_vpc\_config](#input\_enable\_lambda\_vpc\_config) | Config lambda to run inside vpc | `bool` | `false` | no |
 | <a name="input_event_iam_role_arn"></a> [event\_iam\_role\_arn](#input\_event\_iam\_role\_arn) | IAM Role that will be used by cloudwatch rule(event), if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
 | <a name="input_get_weka_io_token"></a> [get\_weka\_io\_token](#input\_get\_weka\_io\_token) | The token to download the Weka release from get.weka.io. | `string` | n/a | yes |
 | <a name="input_hotspare"></a> [hotspare](#input\_hotspare) | Number of hotspares to set on weka cluster. Refer to https://docs.weka.io/overview/ssd-capacity-management#hot-spare | `number` | `1` | no |
