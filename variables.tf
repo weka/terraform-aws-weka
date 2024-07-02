@@ -723,3 +723,9 @@ variable "ebs_encrypted" {
   default     = false
   description = "Enables EBS encryption on the volume"
 }
+
+variable "enable_lambda_vpc_config" {
+  type        = bool
+  default     = false
+  description = "Config lambda to run inside vpc"
+}

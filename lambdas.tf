@@ -7,7 +7,8 @@ locals {
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
     "transient", "join-nfs-finalization"
   ])
-  function_name = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+  enable_lambda_vpc = var.enable_lambda_vpc_config ? 1 : 0
+  function_name     = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
   lambdas_hash = md5(join("", [
     for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")
   ]))
@@ -32,6 +33,13 @@ resource "aws_lambda_function" "deploy_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA                            = "deploy"
@@ -84,6 +92,13 @@ resource "aws_lambda_function" "clusterize_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA                       = "clusterize"
@@ -129,6 +144,13 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA               = "clusterizeFinalization"
@@ -151,6 +173,13 @@ resource "aws_lambda_function" "join_nfs_finalization_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA = "joinNfsFinalization"
@@ -169,6 +198,13 @@ resource "aws_lambda_function" "report_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA               = "report"
@@ -192,6 +228,13 @@ resource "aws_lambda_function" "status_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA               = "status"
@@ -215,6 +258,13 @@ resource "aws_lambda_function" "fetch_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA                        = "fetch"
@@ -271,6 +321,13 @@ resource "aws_lambda_function" "transient_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA       = "transient"
@@ -292,6 +349,13 @@ resource "aws_lambda_function" "terminate_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
   environment {
     variables = {
       LAMBDA       = "terminate"

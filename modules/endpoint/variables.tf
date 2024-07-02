@@ -66,3 +66,8 @@ variable "region" {
   type        = string
   description = "Region name"
 }
+
+variable "enable_lambda_vpc_config" {
+  type        = bool
+  description = "Enable all endpoints to run lambda inside vpc"
+}
