@@ -44,8 +44,6 @@ resource "aws_lambda_function" "deploy_lambda" {
     variables = {
       LAMBDA                            = "deploy"
       REGION                            = local.region
-      USERNAME_ID                       = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID                       = aws_secretsmanager_secret.weka_password.id
       TOKEN_ID                          = var.get_weka_io_token_secret_id != "" ? var.get_weka_io_token_secret_id : aws_secretsmanager_secret.get_weka_io_token[0].id
       STATE_TABLE                       = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY              = local.dynamodb_hash_key_name
@@ -107,8 +105,8 @@ resource "aws_lambda_function" "clusterize_lambda" {
       CLUSTER_NAME                 = var.cluster_name
       PREFIX                       = var.prefix
       NVMES_NUM                    = var.containers_config_map[var.instance_type].nvme
-      USERNAME_ID                  = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID                  = aws_secretsmanager_secret.weka_password.id
+      ADMIN_PASSWORD_ID            = aws_secretsmanager_secret.weka_password.id
+      DEPLOYMENT_PASSWORD_ID       = aws_secretsmanager_secret.weka_deployment_password.id
       STATE_TABLE                  = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY         = local.dynamodb_hash_key_name
       STRIPE_WIDTH                 = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
@@ -279,7 +277,8 @@ resource "aws_lambda_function" "fetch_lambda" {
       ASG_NAME                      = "${var.prefix}-${var.cluster_name}-autoscaling-group"
       NFS_ASG_NAME                  = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
       USERNAME_ID                   = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID                   = aws_secretsmanager_secret.weka_password.id
+      DEPLOYMENT_PASSWORD_ID        = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
       USE_SECRETMANAGER_ENDPOINT    = var.secretmanager_use_vpc_endpoint
     }
   }
@@ -302,12 +301,13 @@ resource "aws_lambda_function" "scale_down_lambda" {
   }
   environment {
     variables = {
-      LAMBDA       = "scaleDown"
-      REGION       = local.region
-      PREFIX       = var.prefix
-      CLUSTER_NAME = var.cluster_name
-      USERNAME_ID  = aws_secretsmanager_secret.weka_username.id
-      PASSWORD_ID  = aws_secretsmanager_secret.weka_password.id
+      LAMBDA                 = "scaleDown"
+      REGION                 = local.region
+      PREFIX                 = var.prefix
+      CLUSTER_NAME           = var.cluster_name
+      USERNAME_ID            = aws_secretsmanager_secret.weka_username.id
+      DEPLOYMENT_PASSWORD_ID = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]

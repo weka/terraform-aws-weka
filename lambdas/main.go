@@ -116,8 +116,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	hostsNum, _ := strconv.Atoi(os.Getenv("HOSTS_NUM"))
 	clusterName := os.Getenv("CLUSTER_NAME")
 	prefix := os.Getenv("PREFIX")
-	usernameId := os.Getenv("USERNAME_ID")
-	passwordId := os.Getenv("PASSWORD_ID")
+	adminPasswordId := os.Getenv("ADMIN_PASSWORD_ID")
+	deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
 	// data protection-related vars
@@ -149,11 +149,11 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	}
 
 	params := clusterize.ClusterizationParams{
-		UsernameId:        usernameId,
-		PasswordId:        passwordId,
-		StateTable:        stateTable,
-		StateTableHashKey: stateTableHashKey,
-		Vm:                vm,
+		AdminPasswordId:      adminPasswordId,
+		DeploymentPasswordId: deploymentPasswordId,
+		StateTable:           stateTable,
+		StateTableHashKey:    stateTableHashKey,
+		Vm:                   vm,
 		Cluster: clusterizeCommon.ClusterParams{
 			ClusterizationTarget: hostsNum,
 			ClusterName:          clusterName,
@@ -183,12 +183,10 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		AlbArnSuffix: albArnSuffix,
 	}
 
-	return clusterize.Clusterize(params), nil
+	return clusterize.Clusterize(params)
 }
 
 func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
-	usernameId := os.Getenv("USERNAME_ID")
-	passwordId := os.Getenv("PASSWORD_ID")
 	tokenId := os.Getenv("TOKEN_ID")
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
@@ -214,8 +212,6 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 
 	awsDeploymentParams := deploy.AWSDeploymentParams{
 		Ctx:                          ctx,
-		UsernameId:                   usernameId,
-		PasswordId:                   passwordId,
 		TokenId:                      tokenId,
 		Prefix:                       prefix,
 		ClusterName:                  clusterName,
@@ -305,16 +301,21 @@ func fetchHandler(request protocol.FetchRequest) (protocol.HostGroupInfoResponse
 	downBackendsRemovalTimeout, _ := time.ParseDuration(os.Getenv("DOWN_BACKENDS_REMOVAL_TIMEOUT"))
 
 	log.Info().Msgf("fetching data, request: %+v", request)
-	result, err := lambdas.GetFetchDataParams(
-		os.Getenv("CLUSTER_NAME"),
-		os.Getenv("ASG_NAME"),
-		os.Getenv("NFS_ASG_NAME"),
-		os.Getenv("USERNAME_ID"),
-		os.Getenv("PASSWORD_ID"),
-		os.Getenv("ROLE"),
-		downBackendsRemovalTimeout,
-		fetchWekaCredentials,
-	)
+
+	input := lambdas.FetchInput{
+		ClusterName:                os.Getenv("CLUSTER_NAME"),
+		WekaBackendsAsgName:        os.Getenv("ASG_NAME"),
+		NfsAsgName:                 os.Getenv("NFS_ASG_NAME"),
+		DeploymentUsernameId:       os.Getenv("USERNAME_ID"),
+		DeploymentPasswordId:       os.Getenv("DEPLOYMENT_PASSWORD_ID"),
+		AdminPasswordId:            os.Getenv("ADMIN_PASSWORD_ID"),
+		Role:                       os.Getenv("ROLE"),
+		DownBackendsRemovalTimeout: downBackendsRemovalTimeout,
+		FetchWekaCredentials:       fetchWekaCredentials,
+		ShowAdminPassword:          request.ShowAdminPassword,
+	}
+
+	result, err := lambdas.FetchHostGroupInfo(input)
 	if err != nil {
 		return protocol.HostGroupInfoResponse{}, err
 	}
@@ -332,8 +333,9 @@ func transientHandler(terminateResponse protocol.TerminatedInstancesResponse) er
 func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) (protocol.ScaleResponse, error) {
 	if info.Password == "" {
 		usernameId := os.Getenv("USERNAME_ID")
-		passwordId := os.Getenv("PASSWORD_ID")
-		creds, err := common.GetUsernameAndPassword(usernameId, passwordId)
+		deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
+		adminPasswordId := os.Getenv("ADMIN_PASSWORD_ID")
+		creds, err := common.GetDeploymentOrAdminUsernameAndPassword(usernameId, deploymentPasswordId, adminPasswordId)
 		if err != nil {
 			return protocol.ScaleResponse{}, err
 		}
