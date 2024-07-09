@@ -51,7 +51,8 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       {
         Effect = "Allow"
         Action = [
-          "secretsmanager:GetSecretValue"
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:PutSecretValue"
         ]
         Resource = ["arn:aws:secretsmanager:*:*:secret:${var.secret_prefix}*"]
       },

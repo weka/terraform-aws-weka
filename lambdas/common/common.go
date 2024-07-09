@@ -28,8 +28,12 @@ var (
 	WaitForLockTimeout = time.Minute * 5
 )
 
-const NfsInterfaceGroupPortKey = "nfs_interface_group_port"
-const NfsInterfaceGroupPortValue = "ready"
+const (
+	NfsInterfaceGroupPortKey   = "nfs_interface_group_port"
+	NfsInterfaceGroupPortValue = "ready"
+
+	AdminUsername = "admin"
+)
 
 type InstancePrivateIpsSet map[string]types.Nilt
 
@@ -480,21 +484,76 @@ func GetSecret(secretId string) (secret string, err error) {
 
 	result, err := svc.GetSecretValue(input)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get secret value")
+		log.Debug().Err(err).Msg("Failed to get secret value")
 		return
 	}
 	secret = *result.SecretString
 	return
 }
 
-func GetUsernameAndPassword(usernameId, passwordId string) (clusterCreds protocol.ClusterCreds, err error) {
+func SetSecret(secretId, secret string) (err error) {
+	svc := connectors.GetAWSSession().SecretsManager
+	input := &secretsmanager.PutSecretValueInput{
+		SecretId:     aws.String(secretId),
+		SecretString: aws.String(secret),
+	}
+
+	_, err = svc.PutSecretValue(input)
+	return
+}
+
+func GetDeploymentOrAdminUsernameAndPassword(usernameId, passwordId, adminPasswordId string) (clusterCreds protocol.ClusterCreds, err error) {
 	log.Info().Msgf("Fetching username %s and password %s", usernameId, passwordId)
+	deploymentPassword, err := GetSecret(passwordId)
+	// if deploymentPassword doesn't exist, try to get adminPassword
+	if err != nil && err.(awserr.Error).Code() == secretsmanager.ErrCodeResourceNotFoundException {
+		adminPassword, err := GetSecret(adminPasswordId)
+		if err != nil {
+			log.Error().Err(err).Send()
+			return clusterCreds, err
+		}
+		clusterCreds.Password = adminPassword
+		clusterCreds.Username = AdminUsername
+		return clusterCreds, nil
+	}
+	if err != nil {
+		log.Error().Err(err).Send()
+		return clusterCreds, err
+	}
+
+	clusterCreds.Password = deploymentPassword
 	clusterCreds.Username, err = GetSecret(usernameId)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return clusterCreds, err
+	}
+
+	return
+}
+
+func GetWekaAdminCredentials(adminPasswordId string) (clusterCreds protocol.ClusterCreds, err error) {
+	log.Info().Msgf("Fetching admin password %s", adminPasswordId)
+	clusterCreds.Password, err = GetSecret(adminPasswordId)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
 	}
+	clusterCreds.Username = AdminUsername
+	return
+}
+
+func GetWekaDeploymentCredentials(usernameId, passwordId string) (clusterCreds protocol.ClusterCreds, err error) {
+	log.Info().Msgf("Fetching weka deployment username %s and password %s", usernameId, passwordId)
 	clusterCreds.Password, err = GetSecret(passwordId)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	clusterCreds.Username, err = GetSecret(usernameId)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
 	return
 }
 
