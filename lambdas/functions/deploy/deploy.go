@@ -16,8 +16,6 @@ import (
 
 type AWSDeploymentParams struct {
 	Ctx                          context.Context
-	UsernameId                   string
-	PasswordId                   string
 	TokenId                      string
 	Prefix                       string
 	ClusterName                  string
@@ -33,7 +31,6 @@ type AWSDeploymentParams struct {
 	FrontendContainerNum         int
 	DriveContainerNum            int
 	NFSInterfaceGroupName        string
-	NFSClientGroupName           string
 	NFSSecondaryIpsNum           int
 	NFSProtocolGatewayFeCoresNum int
 	SMBProtocolGatewayFeCoresNum int
@@ -67,12 +64,6 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 		log.Error().Err(err).Send()
 	}
 
-	creds, err := common.GetUsernameAndPassword(awsDeploymentParams.UsernameId, awsDeploymentParams.PasswordId)
-	if err != nil {
-		log.Error().Msgf("Error while getting weka creds: %v", err)
-		return
-	}
-
 	var token string
 	token, err = common.GetWekaIoToken(awsDeploymentParams.TokenId)
 	if err != nil {
@@ -88,10 +79,7 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 		InstallDpdk:               awsDeploymentParams.InstallDpdk,
 		ProxyUrl:                  awsDeploymentParams.ProxyUrl,
 		Protocol:                  protocol.NFS,
-		WekaUsername:              creds.Username,
-		WekaPassword:              creds.Password,
 		NFSInterfaceGroupName:     awsDeploymentParams.NFSInterfaceGroupName,
-		NFSClientGroupName:        awsDeploymentParams.NFSClientGroupName,
 		NFSSecondaryIpsNum:        awsDeploymentParams.NFSSecondaryIpsNum,
 		ProtocolGatewayFeCoresNum: awsDeploymentParams.NFSProtocolGatewayFeCoresNum,
 		LoadBalancerIP:            albIp,
@@ -173,24 +161,24 @@ func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw prot
 	return
 }
 
-func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string, err error) {
+func GetDeployScript(params AWSDeploymentParams) (bashScript string, err error) {
 	log.Info().Msg("Getting deploy script")
-	stateKey := fmt.Sprintf("%s-%s-state", awsDeploymentParams.Prefix, awsDeploymentParams.ClusterName)
+	stateKey := fmt.Sprintf("%s-%s-state", params.Prefix, params.ClusterName)
 
-	state, err := common.GetClusterState(awsDeploymentParams.StateTable, awsDeploymentParams.StateTableHashKey, stateKey)
+	state, err := common.GetClusterState(params.StateTable, params.StateTableHashKey, stateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
 	}
 	funcDef := aws_functions_def.NewFuncDef()
 	instanceParams := protocol.BackendCoreCount{
-		Compute:       awsDeploymentParams.ComputeContainerNum,
-		Frontend:      awsDeploymentParams.FrontendContainerNum,
-		Drive:         awsDeploymentParams.DriveContainerNum,
-		ComputeMemory: awsDeploymentParams.ComputeMemory,
+		Compute:       params.ComputeContainerNum,
+		Frontend:      params.FrontendContainerNum,
+		Drive:         params.DriveContainerNum,
+		ComputeMemory: params.ComputeMemory,
 	}
 
-	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
+	ebsVolumeId, err := common.GetBackendWekaVolumeId(params.InstanceName)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return "", err
@@ -198,19 +186,19 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 
 	if !state.Clusterized {
 		var token string
-		token, err = common.GetWekaIoToken(awsDeploymentParams.TokenId)
+		token, err = common.GetWekaIoToken(params.TokenId)
 		if err != nil {
 			return
 		}
 		deploymentParams := deploy.DeploymentParams{
-			VMName:           awsDeploymentParams.InstanceName,
+			VMName:           params.InstanceName,
 			InstanceParams:   instanceParams,
-			WekaInstallUrl:   awsDeploymentParams.InstallUrl,
+			WekaInstallUrl:   params.InstallUrl,
 			WekaToken:        token,
-			NicsNum:          awsDeploymentParams.NicsNumStr,
-			InstallDpdk:      awsDeploymentParams.InstallDpdk,
-			ProxyUrl:         awsDeploymentParams.ProxyUrl,
-			NvmesNum:         awsDeploymentParams.NvmesNum,
+			NicsNum:          params.NicsNumStr,
+			InstallDpdk:      params.InstallDpdk,
+			ProxyUrl:         params.ProxyUrl,
+			NvmesNum:         params.NvmesNum,
 			FindDrivesScript: dedent.Dedent(common.FindDrivesScript),
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
@@ -220,26 +208,17 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 		}
 		bashScript = deployScriptGenerator.GetDeployScript()
 	} else {
-		creds, err1 := common.GetUsernameAndPassword(awsDeploymentParams.UsernameId, awsDeploymentParams.PasswordId)
-		if err1 != nil {
-			log.Error().Msgf("Error while getting weka creds: %v", err1)
-			err = err1
-			return
-		}
-		ips, err2 := common.GetBackendsPrivateIps(awsDeploymentParams.ClusterName, "backend")
-
-		if err2 != nil {
-			log.Error().Err(err2).Send()
-			return "", err2
+		ips, err := common.GetBackendsPrivateIps(params.ClusterName, "backend")
+		if err != nil {
+			log.Error().Err(err).Send()
+			return "", err
 		}
 
 		joinParams := join.JoinParams{
-			WekaUsername:   creds.Username,
-			WekaPassword:   creds.Password,
 			IPs:            ips,
-			InstallDpdk:    awsDeploymentParams.InstallDpdk,
+			InstallDpdk:    params.InstallDpdk,
 			InstanceParams: instanceParams,
-			ProxyUrl:       awsDeploymentParams.ProxyUrl,
+			ProxyUrl:       params.ProxyUrl,
 		}
 
 		scriptBase := `
@@ -255,7 +234,7 @@ func GetDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string
 			Params:             joinParams,
 			FuncDef:            funcDef,
 		}
-		bashScript = joinScriptGenerator.GetJoinScript(awsDeploymentParams.Ctx)
+		bashScript = joinScriptGenerator.GetJoinScript(params.Ctx)
 	}
 	bashScript = dedent.Dedent(bashScript)
 	return

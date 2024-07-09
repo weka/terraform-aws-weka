@@ -5,45 +5,35 @@ import (
 	"os"
 	"strings"
 
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
-
 	"github.com/lithammer/dedent"
 	"github.com/rs/zerolog/log"
+
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/aws_functions_def"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/report"
 	"github.com/weka/go-cloud-lib/clusterize"
 	cloudCommon "github.com/weka/go-cloud-lib/common"
 	"github.com/weka/go-cloud-lib/functions_def"
 	cloudStrings "github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/protocol"
+	"github.com/weka/go-cloud-lib/utils"
 )
 
 type ClusterizationParams struct {
-	UsernameId        string
-	PasswordId        string
-	StateTable        string
-	StateTableHashKey string
-	InstallDpdk       bool
-	Vm                protocol.Vm
-	Cluster           clusterize.ClusterParams
-	NFSParams         protocol.NFSParams
-	Obs               protocol.ObsParams
-	AlbArnSuffix      string
+	AdminPasswordId      string
+	DeploymentPasswordId string
+	StateTable           string
+	StateTableHashKey    string
+	InstallDpdk          bool
+	Vm                   protocol.Vm
+	Cluster              clusterize.ClusterParams
+	NFSParams            protocol.NFSParams
+	Obs                  protocol.ObsParams
+	AlbArnSuffix         string
 }
 
-func Clusterize(p ClusterizationParams) (clusterizeScript string) {
+func Clusterize(p ClusterizationParams) (clusterizeScript string, err error) {
 	funcDef := aws_functions_def.NewFuncDef()
-	reportFunction := funcDef.GetFunctionCmdDefinition(functions_def.Report)
-
-	creds, err := common.GetUsernameAndPassword(p.UsernameId, p.PasswordId)
-	if err != nil {
-		log.Error().Err(err).Send()
-		clusterizeScript = cloudCommon.GetErrorScript(err, reportFunction, p.Vm.Protocol)
-		return
-	}
-	log.Info().Msgf("Fetched weka cluster creds successfully")
-	p.Cluster.WekaPassword = creds.Password
-	p.Cluster.WekaUsername = creds.Username
 
 	if p.Vm.Protocol == protocol.NFS {
 		clusterizeScript, err = doNFSClusterize(p, funcDef)
@@ -99,6 +89,22 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		return
 	}
 
+	log.Info().Msg("setting weka admin password in secrets manager")
+	adminPassword := utils.GeneratePassword(16, 1, 1, 1)
+	err = common.SetSecret(p.AdminPasswordId, adminPassword)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
+	log.Info().Msg("setting weka deployment password in secrets manager")
+	wekaDeploymentPassword := utils.GeneratePassword(16, 1, 1, 1)
+	err = common.SetSecret(p.DeploymentPasswordId, wekaDeploymentPassword)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+
 	clusterParams := p.Cluster
 	clusterParams.VMNames = instancesNames
 	clusterParams.IPs = ips
@@ -148,7 +154,6 @@ func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) 
 
 	nfsParams := protocol.NFSParams{
 		InterfaceGroupName: p.NFSParams.InterfaceGroupName,
-		ClientGroupName:    p.NFSParams.ClientGroupName,
 		SecondaryIps:       secondaryIps,
 		ContainersUid:      containersUid,
 		NicNames:           nicNames,
