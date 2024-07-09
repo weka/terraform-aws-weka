@@ -30,25 +30,13 @@ resource "aws_secretsmanager_secret" "weka_username" {
 
 resource "aws_secretsmanager_secret_version" "weka_username" {
   secret_id     = aws_secretsmanager_secret.weka_username.id
-  secret_string = "admin"
-}
-
-resource "random_password" "password" {
-  length      = 16
-  lower       = true
-  min_lower   = 1
-  upper       = true
-  min_upper   = 1
-  numeric     = true
-  min_numeric = 1
-  special     = false
+  secret_string = "weka-deployment"
 }
 
 resource "aws_secretsmanager_secret" "weka_password" {
   name = "${local.secret_prefix}weka-password-${random_password.suffix.result}"
 }
 
-resource "aws_secretsmanager_secret_version" "weka_password" {
-  secret_id     = aws_secretsmanager_secret.weka_password.id
-  secret_string = random_password.password.result
+resource "aws_secretsmanager_secret" "weka_deployment_password" {
+  name = "${local.secret_prefix}weka-deployment-password-${random_password.suffix.result}"
 }

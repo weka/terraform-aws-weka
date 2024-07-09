@@ -1,6 +1,7 @@
 locals {
-  ips_type = local.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
-  asg_name = aws_autoscaling_group.autoscaling_group.name
+  ips_type                      = local.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
+  asg_name                      = aws_autoscaling_group.autoscaling_group.name
+  weka_admin_password_secret_id = aws_secretsmanager_secret.weka_password.id
 }
 
 output "local_ssh_private_key" {
@@ -23,9 +24,9 @@ output "lambda_status_name" {
   description = "Name of lambda status"
 }
 
-output "weka_cluster_password_secret_id" {
-  value       = aws_secretsmanager_secret.weka_password.id
-  description = "Secret id of weka_password"
+output "weka_cluster_admin_password_secret_id" {
+  value       = local.weka_admin_password_secret_id
+  description = "Secret id of weka admin password"
 }
 
 output "alb_dns_name" {
@@ -68,7 +69,7 @@ output "cluster_helper_commands" {
 aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${local.asg_name} --region ${local.region} --query "AutoScalingGroups[].Instances[].InstanceId" --output text) --region ${local.region} --query 'Reservations[].Instances[].${local.ips_type}' --output json
 # for nfs use: --payload '{"type": "progress", "protocl": "nfs"}'
 aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --region ${local.region} --cli-binary-format raw-in-base64-out /dev/stdout
-aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.weka_password.id} --region ${local.region} --query SecretString --output text
+aws secretsmanager get-secret-value --secret-id ${local.weka_admin_password_secret_id} --region ${local.region} --query SecretString --output text
 EOT
 }
 

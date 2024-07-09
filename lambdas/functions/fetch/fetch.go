@@ -1,6 +1,9 @@
 package lambdas
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/rs/zerolog/log"
@@ -9,7 +12,6 @@ import (
 	"github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/lib/types"
 	"github.com/weka/go-cloud-lib/protocol"
-	"time"
 )
 
 type asgInfo struct {
@@ -17,11 +19,24 @@ type asgInfo struct {
 	desiredCapacity int
 }
 
-func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId, passwordId, role string, downBackendsRemovalTimeout time.Duration, fetchWekaCredentials bool) (fd protocol.HostGroupInfoResponse, err error) {
+type FetchInput struct {
+	ClusterName                string
+	WekaBackendsAsgName        string
+	NfsAsgName                 string
+	DeploymentUsernameId       string
+	DeploymentPasswordId       string
+	AdminPasswordId            string
+	Role                       string
+	DownBackendsRemovalTimeout time.Duration
+	FetchWekaCredentials       bool
+	ShowAdminPassword          bool
+}
+
+func FetchHostGroupInfo(params FetchInput) (fd protocol.HostGroupInfoResponse, err error) {
 	svc := connectors.GetAWSSession().ASG
-	asgNames := []string{wekaBackendsAsgName}
-	if nfsAsgName != "" {
-		asgNames = append(asgNames, nfsAsgName)
+	asgNames := []string{params.WekaBackendsAsgName}
+	if params.NfsAsgName != "" {
+		asgNames = append(asgNames, params.NfsAsgName)
 	}
 
 	input := &autoscaling.DescribeAutoScalingGroupsInput{AutoScalingGroupNames: strings.ListToRefList(asgNames)}
@@ -52,35 +67,63 @@ func GetFetchDataParams(clusterName, wekaBackendsAsgName, nfsAsgName, usernameId
 			instances:       getHostGroupInfoInstances(instances),
 		}
 
-		if asgName == nfsAsgName {
+		if asgName == params.NfsAsgName {
 			nfsInterfaceGroupInstanceIps = getInterfaceGroupInstanceIps(instances)
 		}
 	}
 
-	backendIps, err := common.GetBackendsPrivateIps(clusterName, "backend")
+	backendIps, err := common.GetBackendsPrivateIps(params.ClusterName, "backend")
 	if err != nil {
 		return
 	}
 
-	var creds protocol.ClusterCreds
-	if fetchWekaCredentials {
-		creds, err = common.GetUsernameAndPassword(usernameId, passwordId)
-		if err != nil {
-			return
+	var wekaPassword string
+	var adminPassword string
+	var username string
+
+	if params.FetchWekaCredentials {
+		var creds protocol.ClusterCreds
+		if params.ShowAdminPassword {
+			creds, err = common.GetWekaAdminCredentials(params.AdminPasswordId)
+			if err != nil {
+				err = fmt.Errorf("failed to get admin password: %w", err)
+				log.Error().Err(err).Send()
+				return
+			}
+			adminPassword = creds.Password
+
+			creds, err = common.GetWekaDeploymentCredentials(params.DeploymentUsernameId, params.DeploymentPasswordId)
+			if err != nil {
+				err = fmt.Errorf("failed to get deployment credentials: %w", err)
+				log.Error().Err(err).Send()
+				return
+			}
+			wekaPassword = creds.Password
+			username = creds.Username
+		} else {
+			creds, err = common.GetDeploymentOrAdminUsernameAndPassword(params.DeploymentUsernameId, params.DeploymentPasswordId, params.AdminPasswordId)
+			if err != nil {
+				err = fmt.Errorf("failed to get weka credentials: %w", err)
+				log.Error().Err(err).Send()
+				return
+			}
+			wekaPassword = creds.Password
+			username = creds.Username
 		}
 	}
 
 	return protocol.HostGroupInfoResponse{
-		Username:                     creds.Username,
-		Password:                     creds.Password,
-		WekaBackendsDesiredCapacity:  asgsInfo[wekaBackendsAsgName].desiredCapacity,
-		WekaBackendInstances:         asgsInfo[wekaBackendsAsgName].instances,
-		NfsBackendsDesiredCapacity:   asgsInfo[nfsAsgName].desiredCapacity,
-		NfsBackendInstances:          asgsInfo[nfsAsgName].instances,
+		Username:                     username,
+		Password:                     wekaPassword,
+		AdminPassword:                adminPassword,
+		WekaBackendsDesiredCapacity:  asgsInfo[params.WekaBackendsAsgName].desiredCapacity,
+		WekaBackendInstances:         asgsInfo[params.WekaBackendsAsgName].instances,
+		NfsBackendsDesiredCapacity:   asgsInfo[params.NfsAsgName].desiredCapacity,
+		NfsBackendInstances:          asgsInfo[params.NfsAsgName].instances,
 		NfsInterfaceGroupInstanceIps: nfsInterfaceGroupInstanceIps,
 		BackendIps:                   backendIps,
-		Role:                         role,
-		DownBackendsRemovalTimeout:   downBackendsRemovalTimeout,
+		Role:                         params.Role,
+		DownBackendsRemovalTimeout:   params.DownBackendsRemovalTimeout,
 		Version:                      protocol.Version,
 	}, nil
 }
