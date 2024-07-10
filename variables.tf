@@ -729,3 +729,9 @@ variable "enable_lambda_vpc_config" {
   default     = false
   description = "Config lambda to run inside vpc"
 }
+
+variable "route_table_id" {
+  type        = string
+  default     = null
+  description = "Route table id"
+}
