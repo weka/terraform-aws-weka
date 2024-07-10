@@ -847,6 +847,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
+| <a name="input_route_table_id"></a> [route\_table\_id](#input\_route\_table\_id) | Route table id | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_fe_cores_num"></a> [s3\_protocol\_gateway\_fe\_cores\_num](#input\_s3\_protocol\_gateway\_fe\_cores\_num) | S3 protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_s3_protocol_gateway_instance_iam_profile_arn"></a> [s3\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_s3\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_s3_protocol_gateway_instance_type"></a> [s3\_protocol\_gateway\_instance\_type](#input\_s3\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
