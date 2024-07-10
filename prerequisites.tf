@@ -51,6 +51,7 @@ module "vpc_endpoint" {
   create_vpc_endpoint_proxy      = var.vpc_endpoint_proxy_create
   create_vpc_endpoint_lambda     = var.vpc_endpoint_lambda_create
   enable_lambda_vpc_config       = var.enable_lambda_vpc_config
+  route_table_id                 = var.route_table_id == null ? module.network[0].route_table_id : var.route_table_id
   prefix                         = var.prefix
   vpc_id                         = local.vpc_id
   sg_ids                         = length(var.sg_ids) == 0 ? module.security_group[0].sg_ids : var.sg_ids
