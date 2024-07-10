@@ -55,15 +55,22 @@ function setup_aws_logs_agent() {
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
+yum -y install pip
+pip install --upgrade awscli
+
 region=${region}
 subnet_id=${subnet_id}
 nics_num=${nics_num}
 
+instance_type=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+max_network_cards=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.MaximumNetworkCards" --output text)
+
 for (( i=1; i<nics_num; i++ ))
 do
+  network_card_index=$(($i % $max_network_cards))
   eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
   network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
-  attachment=$(aws ec2 attach-network-interface --region "$region" --device-index "$i" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
+  attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$network_card_index" --device-index "$i" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
   attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
   aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
 done
