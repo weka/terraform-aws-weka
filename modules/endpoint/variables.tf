@@ -71,3 +71,8 @@ variable "enable_lambda_vpc_config" {
   type        = bool
   description = "Enable all endpoints to run lambda inside vpc"
 }
+
+variable "route_table_id" {
+  type        = string
+  description = "Route table id"
+}

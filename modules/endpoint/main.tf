@@ -67,17 +67,13 @@ resource "aws_vpc_endpoint" "ec2_endpoint" {
   depends_on = [aws_security_group.ec2_endpoint_sg]
 }
 
-data "aws_vpc" "this" {
-  id = var.vpc_id
-}
-
 # s3 endpoint
 resource "aws_vpc_endpoint" "s3_gateway_endpoint" {
   count             = var.create_vpc_endpoint_s3_gateway ? 1 : 0
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [data.aws_vpc.this.main_route_table_id]
+  route_table_ids   = [var.route_table_id]
   tags = {
     Name        = "${var.prefix}-s3-gateway-endpoint"
     Environment = var.prefix
@@ -125,28 +121,17 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
   }
 }
 
-# endpoint to dynamodb
-data "aws_route_tables" "rt" {
-  vpc_id = var.vpc_id
-
-  filter {
-    name   = "association.main"
-    values = [false]
-  }
-}
-
 resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
   count             = var.enable_lambda_vpc_config ? 1 : 0
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.dynamodb"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = length(data.aws_route_tables.rt[*].id) > 0 ? data.aws_route_tables.rt.ids : [data.aws_vpc.this.main_route_table_id]
+  route_table_ids   = [var.route_table_id]
 
   tags = {
     Name        = "${var.prefix}-dynamodb-gateway-endpoint"
     Environment = var.prefix
   }
-  depends_on = [data.aws_route_tables.rt]
 }
 
 

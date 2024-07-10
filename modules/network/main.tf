@@ -116,10 +116,18 @@ resource "aws_subnet" "private_subnet" {
   }
 }
 
-# associate route table to private subnet
-resource "aws_route_table_association" "private_rt_associate" {
+# associate route table to nat subnet
+resource "aws_route_table_association" "nat_rt_associate" {
   count          = var.create_nat_gateway ? length(aws_subnet.private_subnet) : 0
   subnet_id      = aws_subnet.private_subnet[count.index].id
   route_table_id = aws_route_table.nat_route_table[0].id
   depends_on     = [aws_subnet.private_subnet, aws_route_table.nat_route_table]
+}
+
+# associate route table to private subnet
+resource "aws_route_table_association" "private_rt_associate" {
+  count          = var.subnet_autocreate_as_private ? length(aws_subnet.private_subnet) : 0
+  subnet_id      = aws_subnet.private_subnet[count.index].id
+  route_table_id = aws_vpc.vpc.main_route_table_id
+  depends_on     = [aws_subnet.private_subnet, aws_vpc.vpc]
 }
