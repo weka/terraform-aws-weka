@@ -312,7 +312,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "7c14f3a10c69ebb4f19e15b91d10d087"
+  default     = "375def37c0edee0a8ce87ae9b77d0430"
 }
 
 variable "lambdas_dist" {
@@ -422,6 +422,18 @@ variable "tiering_enable_ssd_percent" {
   type        = number
   default     = 20
   description = "When set_obs_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering_ssd_percent is set to 20, the total available capacity is 100GB."
+}
+
+variable "tiering_obs_target_ssd_retention" {
+  type        = number
+  description = "Target retention period (in seconds) before tiering to OBS (how long data will stay in SSD). Default is 86400 seconds (24 hours)."
+  default     = 86400
+}
+
+variable "tiering_obs_start_demote" {
+  type        = number
+  description = "Target tiering cue (in seconds) before starting upload data to OBS (turning it into read cache). Default is 10 seconds."
+  default     = 10
 }
 
 ################################################## clients variables ###################################################
