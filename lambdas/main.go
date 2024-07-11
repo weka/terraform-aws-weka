@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
@@ -11,10 +16,6 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
 	"github.com/weka/go-cloud-lib/logging"
 	"github.com/weka/go-cloud-lib/scale_down"
-	"os"
-	"strconv"
-	"strings"
-	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/rs/zerolog/log"
@@ -126,6 +127,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	setObs, _ := strconv.ParseBool(os.Getenv("SET_OBS"))
 	obsName := os.Getenv("OBS_NAME")
 	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
+	tieringTargetSsdRetention, _ := strconv.Atoi(os.Getenv("TIERING_TARGET_SSD_RETENTION"))
+	tieringStartDemote, _ := strconv.Atoi(os.Getenv("TIERING_START_DEMOTE"))
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("FRONTEND_CONTAINER_CORES_NUM"))
 	proxyUrl := os.Getenv("PROXY_URL")
 	createConfigFs, _ := strconv.ParseBool(os.Getenv("CREATE_CONFIG_FS"))
@@ -163,9 +166,11 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 				ProtectionLevel: protectionLevel,
 				Hotspare:        hotspare,
 			},
-			AddFrontend: addFrontend,
-			ProxyUrl:    proxyUrl,
-			WekaHomeUrl: wekaHomeUrl,
+			AddFrontend:               addFrontend,
+			ProxyUrl:                  proxyUrl,
+			WekaHomeUrl:               wekaHomeUrl,
+			TieringTargetSSDRetention: tieringTargetSsdRetention,
+			TieringStartDemote:        tieringStartDemote,
 		},
 		Obs: protocol.ObsParams{
 			Name:              obsName,

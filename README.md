@@ -832,7 +832,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_key_pair_name"></a> [key\_pair\_name](#input\_key\_pair\_name) | Ssh key pair name to pass to the instances. | `string` | `null` | no |
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"7c14f3a10c69ebb4f19e15b91d10d087"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"375def37c0edee0a8ce87ae9b77d0430"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_interface_group_name"></a> [nfs\_interface\_group\_name](#input\_nfs\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
@@ -879,6 +879,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_tiering_enable_obs_integration"></a> [tiering\_enable\_obs\_integration](#input\_tiering\_enable\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_tiering_enable_ssd_percent"></a> [tiering\_enable\_ssd\_percent](#input\_tiering\_enable\_ssd\_percent) | When set\_obs\_integration is true, this variable sets the capacity percentage of the filesystem that resides on SSD. For example, for an SSD with a total capacity of 20GB, and the tiering\_ssd\_percent is set to 20, the total available capacity is 100GB. | `number` | `20` | no |
 | <a name="input_tiering_obs_name"></a> [tiering\_obs\_name](#input\_tiering\_obs\_name) | Name of an existing S3 bucket | `string` | `""` | no |
+| <a name="input_tiering_obs_start_demote"></a> [tiering\_obs\_start\_demote](#input\_tiering\_obs\_start\_demote) | Target tiering cue (in seconds) before starting upload data to OBS (turning it into read cache). Default is 10 seconds. | `number` | `10` | no |
+| <a name="input_tiering_obs_target_ssd_retention"></a> [tiering\_obs\_target\_ssd\_retention](#input\_tiering\_obs\_target\_ssd\_retention) | Target retention period (in seconds) before tiering to OBS (how long data will stay in SSD). Default is 86400 seconds (24 hours). | `number` | `86400` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the vpc | `string` | `"10.0.0.0/16"` | no |
 | <a name="input_vpc_endpoint_ec2_create"></a> [vpc\_endpoint\_ec2\_create](#input\_vpc\_endpoint\_ec2\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_lambda_create"></a> [vpc\_endpoint\_lambda\_create](#input\_vpc\_endpoint\_lambda\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
