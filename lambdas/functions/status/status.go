@@ -2,12 +2,19 @@ package status
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/rs/zerolog/log"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	cloudLibCommon "github.com/weka/go-cloud-lib/common"
+	"github.com/weka/go-cloud-lib/connectors"
+	"github.com/weka/go-cloud-lib/lib/jrpc"
 	strgins2 "github.com/weka/go-cloud-lib/lib/strings"
+	"github.com/weka/go-cloud-lib/lib/weka"
 	"github.com/weka/go-cloud-lib/logging"
 	"github.com/weka/go-cloud-lib/protocol"
+	"math/rand"
 	"strings"
+	"time"
 )
 
 func hostnameToIp(hostname string) string {
@@ -77,7 +84,7 @@ func GetReports(ctx context.Context, stateTable, hashKey, stateKey, clusterName,
 	return
 }
 
-func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, stateKey string) (clusterStatus protocol.ClusterStatus, err error) {
+func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, stateKey, clusterName, passwordId string) (clusterStatus protocol.ClusterStatus, err error) {
 	logger := logging.LoggerFromCtx(ctx)
 	logger.Info().Msg("fetching cluster status...")
 
@@ -88,6 +95,50 @@ func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, stateKe
 	clusterStatus.InitialSize = state.InitialSize
 	clusterStatus.DesiredSize = state.DesiredSize
 	clusterStatus.Clusterized = state.Clusterized
+
+	if !state.Clusterized {
+		return
+	}
+
+	creds, err := common.GetWekaAdminCredentials(passwordId)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+	log.Info().Msgf("Fetched weka cluster creds successfully")
+
+	jrpcBuilder := func(ip string) *jrpc.BaseClient {
+		return connectors.NewJrpcClient(ctx, ip, weka.ManagementJrpcPort, creds.Username, creds.Password)
+	}
+
+	ips, err := common.GetBackendsPrivateIps(clusterName, "backend")
+	if err != nil {
+		return
+	}
+
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	r.Shuffle(len(ips), func(i, j int) { ips[i], ips[j] = ips[j], ips[i] })
+	logger.Info().Msgf("ips: %s", ips)
+	jpool := &jrpc.Pool{
+		Ips:     ips,
+		Clients: map[string]*jrpc.BaseClient{},
+		Active:  "",
+		Builder: jrpcBuilder,
+		Ctx:     ctx,
+	}
+
+	var rawWekaStatus json.RawMessage
+
+	err = jpool.Call(weka.JrpcStatus, struct{}{}, &rawWekaStatus)
+	if err != nil {
+		return
+	}
+
+	wekaStatus := protocol.WekaStatus{}
+	if err = json.Unmarshal(rawWekaStatus, &wekaStatus); err != nil {
+		return
+	}
+	clusterStatus.WekaStatus = wekaStatus
 
 	return
 }

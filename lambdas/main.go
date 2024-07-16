@@ -274,11 +274,12 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	}
 
 	clusterName := os.Getenv("CLUSTER_NAME")
+	passwordId := os.Getenv("PASSWORD_ID")
 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
-		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
+		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey, clusterName, passwordId)
 	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey, stateKey, clusterName, hostGroup)
 	} else {

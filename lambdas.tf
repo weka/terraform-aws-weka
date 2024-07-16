@@ -228,12 +228,9 @@ resource "aws_lambda_function" "status_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
-  dynamic "vpc_config" {
-    for_each = range(0, local.enable_lambda_vpc)
-    content {
-      security_group_ids = local.sg_ids
-      subnet_ids         = local.subnet_ids
-    }
+  vpc_config {
+    security_group_ids = local.sg_ids
+    subnet_ids         = local.subnet_ids
   }
   environment {
     variables = {
@@ -243,6 +240,8 @@ resource "aws_lambda_function" "status_lambda" {
       STATE_KEY            = local.state_key
       NFS_STATE_KEY        = local.nfs_state_key
       CLUSTER_NAME         = var.cluster_name
+      USERNAME_ID          = aws_secretsmanager_secret.weka_username.id
+      PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
