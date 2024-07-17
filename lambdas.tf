@@ -46,7 +46,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       REGION                            = local.region
       USERNAME_ID                       = aws_secretsmanager_secret.weka_username.id
       PASSWORD_ID                       = aws_secretsmanager_secret.weka_password.id
-      TOKEN_ID                          = aws_secretsmanager_secret.get_weka_io_token.id
+      TOKEN_ID                          = var.get_weka_io_token_secret_id != "" ? var.get_weka_io_token_secret_id : aws_secretsmanager_secret.get_weka_io_token[0].id
       STATE_TABLE                       = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY              = local.dynamodb_hash_key_name
       PREFIX                            = var.prefix

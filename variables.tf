@@ -167,6 +167,12 @@ variable "get_weka_io_token" {
   sensitive   = true
 }
 
+variable "get_weka_io_token_secret_id" {
+  type        = string
+  description = "The secrets manager secret id of the token to download the Weka release from get.weka.io. i.e. arn:aws:secretsmanager:<REGION>:<ACCOUNT_NUMBER>:secret:<SECRET_NAME>"
+  default     = ""
+}
+
 variable "ssh_public_key" {
   type        = string
   description = "Ssh public key to pass to the instances."
