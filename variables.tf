@@ -457,7 +457,7 @@ variable "client_instance_iam_profile_arn" {
 
 variable "client_instance_ami_id" {
   type        = string
-  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
+  description = "The default AMI ID is set to Amazon Linux 2. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system"
   default     = null
 }
 
