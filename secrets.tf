@@ -14,11 +14,13 @@ locals {
 }
 
 resource "aws_secretsmanager_secret" "get_weka_io_token" {
-  name = "${local.secret_prefix}get_weka_io_token-${random_password.suffix.result}"
+  count = var.get_weka_io_token_secret_id == "" ? 1 : 0
+  name  = "${local.secret_prefix}get_weka_io_token-${random_password.suffix.result}"
 }
 
 resource "aws_secretsmanager_secret_version" "get_weka_io_token" {
-  secret_id     = aws_secretsmanager_secret.get_weka_io_token.id
+  count         = var.get_weka_io_token_secret_id == "" ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.get_weka_io_token[0].id
   secret_string = var.get_weka_io_token
 }
 
