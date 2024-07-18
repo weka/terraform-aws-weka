@@ -496,6 +496,12 @@ variable "client_placement_group_name" {
   }
 }
 
+variable "client_use_backends_placement_group" {
+  type        = bool
+  default     = true
+  description = "Use backends placement group for clients"
+}
+
 variable "client_weka_volume_size" {
   type        = number
   description = "The client volume size in GB"
