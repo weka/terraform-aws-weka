@@ -25,7 +25,7 @@ locals {
 
   preparation_script = templatefile("${path.module}/init.sh", {
     proxy               = var.proxy_url
-    nics_num            = var.frontend_container_cores_num + 1
+    additional_nics_num = var.frontend_container_cores_num
     subnet_id           = var.subnet_id
     region              = local.region
     groups              = join(" ", var.sg_ids)
