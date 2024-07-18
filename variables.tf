@@ -387,6 +387,12 @@ variable "alb_additional_subnet_cidr_block" {
   default     = "10.0.3.0/24"
 }
 
+variable "alb_additional_subnet_zone" {
+  type        = string
+  description = "Zone for the ALB additional subnet"
+  default     = ""
+}
+
 variable "alb_cert_arn" {
   type        = string
   default     = null

@@ -14,6 +14,7 @@ module "network" {
   subnets_cidrs                    = var.subnets_cidrs
   nat_public_subnet_cidr           = var.nat_public_subnet_cidr
   alb_additional_subnet_cidr_block = var.alb_additional_subnet_cidr_block
+  alb_additional_subnet_zone       = var.alb_additional_subnet_zone
   create_nat_gateway               = var.create_nat_gateway
   vpc_cidr                         = var.vpc_cidr
 }
