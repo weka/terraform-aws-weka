@@ -4,7 +4,8 @@ data "aws_availability_zones" "available" {
 
 locals {
   subnets_cidrs           = var.additional_subnet ? concat(var.subnets_cidrs, [var.alb_additional_subnet_cidr_block]) : var.subnets_cidrs
-  availability_zones_list = var.additional_subnet || var.create_nat_gateway ? distinct(flatten([var.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
+  availability_zones      = var.additional_subnet && var.alb_additional_subnet_zone != "" ? concat(var.availability_zones, [var.alb_additional_subnet_zone]) : var.availability_zones
+  availability_zones_list = var.additional_subnet || var.create_nat_gateway ? distinct(flatten([local.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
 }
 
 # VPC
