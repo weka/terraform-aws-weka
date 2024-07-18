@@ -60,7 +60,7 @@ pip install --upgrade awscli
 
 region=${region}
 subnet_id=${subnet_id}
-nics_num=${nics_num}
+additional_nics_num=${additional_nics_num}
 
 instance_type=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 max_network_cards=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.MaximumNetworkCards" --output text)
@@ -73,7 +73,7 @@ for (( card_index=0; card_index<$max_network_cards ; card_index++)); do
     interface_index=0
   fi
   for (( interface_index=$interface_index; interface_index<$max_device; interface_index++ )); do
-      if [[  $counter -eq $nics_num ]]; then
+      if [[  $counter -eq $additional_nics_num ]]; then
           break
       fi
       eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups sg-005056932d969643a) # groups should not be in quotes it needs to be a list
