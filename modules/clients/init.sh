@@ -65,14 +65,24 @@ nics_num=${nics_num}
 instance_type=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 max_network_cards=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.MaximumNetworkCards" --output text)
 
-for (( i=1; i<nics_num; i++ ))
-do
-  network_card_index=$(($i % $max_network_cards))
-  eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
-  network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
-  attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$network_card_index" --device-index "$i" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
-  attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
-  aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
+counter=0
+interface_index=1
+for (( card_index=0; card_index<$max_network_cards ; card_index++)); do
+  max_device=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.NetworkCards[$card_index].MaximumNetworkInterfaces")
+  if [[ $card_index -gt 0 ]];then
+    interface_index=0
+  fi
+  for (( interface_index=$interface_index; interface_index<$max_device; interface_index++ )); do
+      if [[  $counter -eq $nics_num ]]; then
+          break
+      fi
+      eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups sg-005056932d969643a) # groups should not be in quotes it needs to be a list
+      network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
+      attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$card_index" --device-index "$interface_index" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
+      attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
+      aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
+      counter=$(($counter+1))
+  done
 done
 
 apt update && apt install -y net-tools || true
