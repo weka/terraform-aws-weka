@@ -76,7 +76,7 @@ for (( card_index=0; card_index<$max_network_cards ; card_index++)); do
       if [[  $counter -eq $additional_nics_num ]]; then
           break
       fi
-      eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups sg-005056932d969643a) # groups should not be in quotes it needs to be a list
+      eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
       network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
       attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$card_index" --device-index "$interface_index" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
       attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
