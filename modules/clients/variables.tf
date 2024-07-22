@@ -93,10 +93,10 @@ variable "instance_iam_profile_arn" {
   description = "Instance IAM profile ARN"
 }
 
-variable "weka_volume_size" {
+variable "root_volume_size" {
   type        = number
   description = "The root volume size in GB"
-  default     = 48
+  default     = 8
 }
 
 variable "alb_dns_name" {
