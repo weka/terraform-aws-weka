@@ -502,10 +502,10 @@ variable "client_use_backends_placement_group" {
   description = "Use backends placement group for clients"
 }
 
-variable "client_weka_volume_size" {
+variable "client_root_volume_size" {
   type        = number
   description = "The client volume size in GB"
-  default     = 48
+  default     = 8
 }
 
 variable "clients_use_autoscaling_group" {
@@ -523,10 +523,10 @@ variable "clients_custom_data" {
 variable "client_arch" {
   type        = string
   default     = null
-  description = "Use arch for ami id, value can be arm64/x86_64."
+  description = "Use arch for ami id, value can be arm64/amd64."
   validation {
-    condition     = var.client_arch == "arm64" || var.client_arch == "x86_64" || var.client_arch == null
-    error_message = "Allowed client_arch values: [\"arm64\", \"x86_64\", null]."
+    condition     = var.client_arch == "arm64" || var.client_arch == "amd64" || var.client_arch == null
+    error_message = "Allowed client_arch values: [\"arm64\", \"amd64\", null]."
   }
 }
 
