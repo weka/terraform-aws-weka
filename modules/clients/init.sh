@@ -55,8 +55,9 @@ function setup_aws_logs_agent() {
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
-yum -y install pip
-pip install --upgrade awscli
+yum -y install pip || true
+apt update && apt install -y net-tools && apt install -y python3-pip || true
+pip install --upgrade awscli || true
 
 region=${region}
 subnet_id=${subnet_id}
@@ -84,5 +85,3 @@ for (( card_index=0; card_index<$max_network_cards ; card_index++)); do
       counter=$(($counter+1))
   done
 done
-
-apt update && apt install -y net-tools || true
