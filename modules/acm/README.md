@@ -35,5 +35,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_acm_arn"></a> [acm\_arn](#output\_acm\_arn) | n/a |
+| <a name="output_cert_arn"></a> [cert\_arn](#output\_cert\_arn) | n/a |
 <!-- END_TF_DOCS -->
