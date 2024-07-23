@@ -67,11 +67,12 @@ nics_num=${nics_num}
 export AWS_MAX_ATTEMPTS=150
 export AWS_RETRY_MODE=standard
 
-for (( i=1; i<nics_num; i++ ))
+card_indexes=(8 16 24)
+for card_index in "$${card_indexes[@]}"
 do
   eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
   network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
-  attachment=$(aws ec2 attach-network-interface --region "$region" --device-index "$i" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
+  attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$card_index" --device-index 0 --instance-id "$instance_id" --network-interface-id "$network_interface_id")
   attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
   aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
 done

@@ -144,13 +144,17 @@ resource "aws_kms_key_policy" "kms_key_policy" {
 
 resource "aws_launch_template" "launch_template" {
   name_prefix                          = "${var.prefix}-${var.cluster_name}-backend"
-  disable_api_termination              = true
-  disable_api_stop                     = true
+  disable_api_termination              = false
+  disable_api_stop                     = false
   ebs_optimized                        = true
   image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.amzn_ami[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.enable_key_pair ? var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name : null
+
+  #instance_market_options {
+  #  market_type = "spot"
+  #}
 
   block_device_mappings {
     device_name = "/dev/sdp"

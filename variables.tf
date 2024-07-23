@@ -130,6 +130,14 @@ variable "containers_config_map" {
       nvme     = 8
       nics     = 15
       memory   = ["384GB", "384GB"]
+    },
+    "p5.48xlarge" = {
+      compute  = 1
+      drive    = 1
+      frontend = 1
+      nvme     = 2
+      nics     = 4
+      memory   = ["32.9GB", "32.64GB"]
     }
   }
   validation {
