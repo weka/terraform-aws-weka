@@ -332,9 +332,11 @@ To add ALB dns name to zone record, you must supply the following variables:
 alb_alias_name      = ALB_ALIAS_NAME
 alb_route53_zone_id = ROUTE53_ZONE_ID
 ```
-TO create alb listener with `certificate ARN`, you must supply the following variable:
+TO create and use HTTPS ALB listener a certificate and DNS zone Id are mandatory. You must provide the following variables:
 ```hcl
-alb_cert_arn = ALB_CERT_ARN
+alb_cert_arn        = ALB_CERT_ARN
+alb_alias_name      = ALB_ALIAS_NAME
+alb_route53_zone_id = ROUTE53_ZONE_ID
 ```
 
 ## OBS
