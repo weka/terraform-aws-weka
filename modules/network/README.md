@@ -53,7 +53,6 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_additional_subnet_id"></a> [additional\_subnet\_id](#output\_additional\_subnet\_id) | Additional subnet id |
-| <a name="output_route_table_id"></a> [route\_table\_id](#output\_route\_table\_id) | Route table id |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | List of subnet ids without the `additional subnet` |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | Vpc id |
 <!-- END_TF_DOCS -->
