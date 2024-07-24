@@ -23,14 +23,19 @@ variable "create_vpc_endpoint_lambda" {
   description = "Create lambda vpc endpoint"
 }
 
-variable "subnet_ids" {
-  type        = list(string)
-  description = "List of subnet ids"
+variable "create_vpc_endpoint_dynamodb_gateway" {
+  type        = bool
+  description = "Create dynamodb gateway vpc endpoint"
 }
 
-variable "sg_ids" {
-  type        = list(string)
-  description = "List of sg ids"
+variable "create_vpc_endpoint_autoscaling" {
+  type        = bool
+  description = "Create autoscaling vpc endpoint"
+}
+
+variable "subnet_id" {
+  type        = string
+  description = "Subnet id"
 }
 
 variable "prefix" {
@@ -65,14 +70,4 @@ variable "region_map" {
 variable "region" {
   type        = string
   description = "Region name"
-}
-
-variable "enable_lambda_vpc_config" {
-  type        = bool
-  description = "Enable all endpoints to run lambda inside vpc"
-}
-
-variable "route_table_id" {
-  type        = string
-  description = "Route table id"
 }

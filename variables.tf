@@ -718,6 +718,18 @@ variable "vpc_endpoint_lambda_create" {
   description = "Create Ec2 VPC endpoint"
 }
 
+variable "vpc_endpoint_dynamodb_gateway_create" {
+  type        = bool
+  default     = false
+  description = "Create dynamodb gateway VPC endpoint"
+}
+
+variable "vpc_endpoint_autoscaling_create" {
+  type        = bool
+  default     = false
+  description = "Create autoscaling VPC endpoint"
+}
+
 variable "metadata_http_tokens" {
   type        = string
   default     = "required"
@@ -758,10 +770,4 @@ variable "enable_lambda_vpc_config" {
   type        = bool
   default     = false
   description = "Config lambda to run inside vpc"
-}
-
-variable "route_table_id" {
-  type        = string
-  default     = null
-  description = "Route table id"
 }
