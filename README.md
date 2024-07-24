@@ -857,7 +857,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
-| <a name="input_route_table_id"></a> [route\_table\_id](#input\_route\_table\_id) | Route table id | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_fe_cores_num"></a> [s3\_protocol\_gateway\_fe\_cores\_num](#input\_s3\_protocol\_gateway\_fe\_cores\_num) | S3 protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_s3_protocol_gateway_instance_iam_profile_arn"></a> [s3\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_s3\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_s3_protocol_gateway_instance_type"></a> [s3\_protocol\_gateway\_instance\_type](#input\_s3\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
@@ -892,6 +891,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_tiering_obs_start_demote"></a> [tiering\_obs\_start\_demote](#input\_tiering\_obs\_start\_demote) | Target tiering cue (in seconds) before starting upload data to OBS (turning it into read cache). Default is 10 seconds. | `number` | `10` | no |
 | <a name="input_tiering_obs_target_ssd_retention"></a> [tiering\_obs\_target\_ssd\_retention](#input\_tiering\_obs\_target\_ssd\_retention) | Target retention period (in seconds) before tiering to OBS (how long data will stay in SSD). Default is 86400 seconds (24 hours). | `number` | `86400` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the vpc | `string` | `"10.0.0.0/16"` | no |
+| <a name="input_vpc_endpoint_autoscaling_create"></a> [vpc\_endpoint\_autoscaling\_create](#input\_vpc\_endpoint\_autoscaling\_create) | Create autoscaling VPC endpoint | `bool` | `false` | no |
+| <a name="input_vpc_endpoint_dynamodb_gateway_create"></a> [vpc\_endpoint\_dynamodb\_gateway\_create](#input\_vpc\_endpoint\_dynamodb\_gateway\_create) | Create dynamodb gateway VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_ec2_create"></a> [vpc\_endpoint\_ec2\_create](#input\_vpc\_endpoint\_ec2\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_lambda_create"></a> [vpc\_endpoint\_lambda\_create](#input\_vpc\_endpoint\_lambda\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_proxy_create"></a> [vpc\_endpoint\_proxy\_create](#input\_vpc\_endpoint\_proxy\_create) | creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy\_url variable | `bool` | `false` | no |
