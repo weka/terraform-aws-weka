@@ -645,7 +645,15 @@ To enable vpc config for lambdas, set:
 ```hcl
 enable_lambda_vpc_config = true
 ```
-This mean we will create endpoints for `dynamodb/lambda/autoscaling/ec2`
+
+If network VPC is not configured with a NAT gateway, the following needs to be set:
+```hcl
+vpc_endpoint_ec2_create              = true
+vpc_endpoint_lambda_create           = true
+vpc_endpoint_dynamodb_gateway_create = true
+vpc_endpoint_autoscaling_create      = true
+```
+
 
 
 #### Further explanation:
