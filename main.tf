@@ -52,14 +52,14 @@ resource "aws_key_pair" "generated_key" {
 }
 
 resource "local_file" "public_key" {
-  count           = var.enable_key_pair && var.ssh_public_key == null ? 1 : 0
+  count           = var.enable_key_pair && var.key_pair_name == null && var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].public_key_openssh
   filename        = "${local.ssh_path}-public-key.pub"
   file_permission = "0600"
 }
 
 resource "local_file" "private_key" {
-  count           = var.enable_key_pair && var.ssh_public_key == null ? 1 : 0
+  count           = var.enable_key_pair && var.key_pair_name == null && var.ssh_public_key == null ? 1 : 0
   content         = tls_private_key.key[count.index].private_key_pem
   filename        = "${local.ssh_path}-private-key.pem"
   file_permission = "0600"
