@@ -25,6 +25,10 @@ resource "aws_security_group" "proxy_sg" {
   }
 }
 
+data "aws_route_table" "subnet" {
+  subnet_id = var.subnet_id
+}
+
 # ec2 vpc endpoint proxy security group
 resource "aws_security_group" "ec2_endpoint_sg" {
   count       = var.create_vpc_endpoint_ec2 ? 1 : 0
@@ -53,12 +57,12 @@ resource "aws_security_group" "ec2_endpoint_sg" {
 }
 # ec2 endpoint
 resource "aws_vpc_endpoint" "ec2_endpoint" {
-  count               = var.create_vpc_endpoint_ec2 || var.enable_lambda_vpc_config ? 1 : 0
+  count               = var.create_vpc_endpoint_ec2 ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ec2"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = var.enable_lambda_vpc_config ? var.sg_ids : [aws_security_group.ec2_endpoint_sg[0].id]
-  subnet_ids          = var.subnet_ids
+  security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
+  subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-ec2-endpoint"
@@ -73,7 +77,7 @@ resource "aws_vpc_endpoint" "s3_gateway_endpoint" {
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [var.route_table_id]
+  route_table_ids   = [data.aws_route_table.subnet.route_table_id]
   tags = {
     Name        = "${var.prefix}-s3-gateway-endpoint"
     Environment = var.prefix
@@ -87,7 +91,7 @@ resource "aws_vpc_endpoint" "proxy_endpoint" {
   service_name        = lookup(var.region_map, var.region)
   vpc_endpoint_type   = "Interface"
   security_group_ids  = [aws_security_group.proxy_sg[0].id]
-  subnet_ids          = var.subnet_ids
+  subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-proxy-endpoint"
@@ -102,18 +106,18 @@ resource "aws_vpc_endpoint_security_group_association" "proxy_association_sg" {
 }
 
 resource "aws_vpc_endpoint_security_group_association" "ec2_association_sg" {
-  count             = var.create_vpc_endpoint_ec2 && !var.enable_lambda_vpc_config ? 1 : 0
+  count             = var.create_vpc_endpoint_ec2 ? 1 : 0
   vpc_endpoint_id   = aws_vpc_endpoint.ec2_endpoint[0].id
   security_group_id = aws_security_group.ec2_endpoint_sg[0].id
 }
 
 resource "aws_vpc_endpoint" "lambda_endpoint" {
-  count               = var.create_vpc_endpoint_lambda || var.enable_lambda_vpc_config ? 1 : 0
+  count               = var.create_vpc_endpoint_lambda ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.lambda"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = var.sg_ids
-  subnet_ids          = var.subnet_ids
+  security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
+  subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-lambda-endpoint"
@@ -122,11 +126,11 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
 }
 
 resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
-  count             = var.enable_lambda_vpc_config ? 1 : 0
+  count             = var.create_vpc_endpoint_dynamodb_gateway ? 1 : 0
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.dynamodb"
   vpc_endpoint_type = "Gateway"
-  route_table_ids   = [var.route_table_id]
+  route_table_ids   = [data.aws_route_table.subnet.route_table_id]
 
   tags = {
     Name        = "${var.prefix}-dynamodb-gateway-endpoint"
@@ -136,12 +140,12 @@ resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
 
 
 resource "aws_vpc_endpoint" "autoscaling_endpoint" {
-  count               = var.enable_lambda_vpc_config ? 1 : 0
+  count               = var.create_vpc_endpoint_autoscaling ? 1 : 0
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.autoscaling"
   vpc_endpoint_type   = "Interface"
-  security_group_ids  = var.sg_ids
-  subnet_ids          = var.subnet_ids
+  security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
+  subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
   tags = {
     Name        = "${var.prefix}-autoscaling-endpoint"

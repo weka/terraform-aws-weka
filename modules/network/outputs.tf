@@ -19,8 +19,3 @@ output "vpc_id" {
   value       = aws_vpc.vpc.id
   description = "Vpc id"
 }
-
-output "route_table_id" {
-  value       = var.create_nat_gateway || var.subnet_autocreate_as_private ? var.subnet_autocreate_as_private ? aws_vpc.vpc.main_route_table_id : aws_route_table.nat_route_table[0].id : aws_route_table.ig_route_table[0].id
-  description = "Route table id"
-}
