@@ -188,6 +188,36 @@ resource "aws_lambda_function" "join_nfs_finalization_lambda" {
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
+
+resource "aws_lambda_function" "management" {
+  function_name = "${var.prefix}-${var.cluster_name}-management-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.handler_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
+  vpc_config {
+    security_group_ids = local.sg_ids
+    subnet_ids         = local.subnet_ids
+  }
+  environment {
+    variables = {
+      LAMBDA                 = "management"
+      REGION                 = local.region
+      PREFIX                 = var.prefix
+      CLUSTER_NAME           = var.cluster_name
+      USERNAME_ID            = aws_secretsmanager_secret.weka_username.id
+      DEPLOYMENT_PASSWORD_ID = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
+    }
+  }
+  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+}
+
+
 resource "aws_lambda_function" "report_lambda" {
   function_name = "${var.prefix}-${var.cluster_name}-report-lambda"
   s3_bucket     = local.s3_bucket
@@ -243,6 +273,7 @@ resource "aws_lambda_function" "status_lambda" {
       STATE_KEY            = local.state_key
       NFS_STATE_KEY        = local.nfs_state_key
       CLUSTER_NAME         = var.cluster_name
+      MANAGEMENT_LAMBDA    = aws_lambda_function.management.function_name
     }
   }
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]

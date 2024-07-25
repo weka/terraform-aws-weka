@@ -96,7 +96,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
           "arn:aws:lambda:*:*:function:${var.status_lambda_name}*",
           "arn:aws:lambda:*:*:function:${var.clusterize_lambda_name}*",
           "arn:aws:lambda:*:*:function:${var.clusterize_finalization_lambda_name}*",
-          "arn:aws:lambda:*:*:function:${var.join_nfs_finalization_lambda_name}*"
+          "arn:aws:lambda:*:*:function:${var.join_nfs_finalization_lambda_name}*",
         ]
       }
     ]
