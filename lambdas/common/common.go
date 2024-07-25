@@ -2,6 +2,7 @@ package common
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -18,15 +19,14 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/semaphore"
 )
 
-var (
-	WaitForLockTimeout = time.Minute * 5
-)
+var WaitForLockTimeout = time.Minute * 5
 
 const (
 	NfsInterfaceGroupPortKey   = "nfs_interface_group_port"
@@ -306,7 +306,7 @@ func addInstanceToStateInstances(table, hashKey, stateKey string, newInstance pr
 	}
 
 	if len(state.Instances) == state.InitialSize {
-		//This might happen if someone increases the desired number before the clusterization id done
+		// This might happen if someone increases the desired number before the clusterization id done
 		err = fmt.Errorf("number of instances is already the initial size, not adding instance %s to state instances list", newInstance)
 		log.Error().Err(err).Send()
 		return
@@ -619,4 +619,29 @@ func GetClusterSecondaryIps(gatewaysName string) (secondaryIps []string, err err
 	}
 
 	return
+}
+
+func InvokeLambdaFunction[T any](functionName string, payload interface{}) (*T, error) {
+	svc := connectors.GetAWSSession().Lambda
+	log.Debug().Msgf("Invoking lambda function %s...", functionName)
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+	input := &lambda.InvokeInput{
+		FunctionName: aws.String(functionName),
+		Payload:      payloadBytes,
+	}
+
+	result, err := svc.Invoke(input)
+	if err != nil {
+		return nil, err
+	}
+
+	var response T
+	if err := json.Unmarshal(result.Payload, &response); err != nil {
+		return nil, err
+	}
+	return &response, nil
 }

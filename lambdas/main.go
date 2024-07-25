@@ -14,6 +14,7 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/management"
 	"github.com/weka/go-cloud-lib/logging"
 	"github.com/weka/go-cloud-lib/scale_down"
 
@@ -59,7 +60,7 @@ func clusterizeFinalizationHandler(ctx context.Context, VmProtocol Protocol) (st
 			return err.Error(), err
 		}
 		var instanceIds []*string
-		for i, _ := range state.Instances {
+		for i := range state.Instances {
 			instanceIds = append(instanceIds, &state.Instances[i].Name)
 		}
 		logger.Info().Msgf("Adding tag %s to instances %v", common.NfsInterfaceGroupPortKey, strings2.RefListToList(instanceIds))
@@ -278,7 +279,7 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	var clusterStatus interface{}
 	var err error
 	if req.Type == "status" {
-		clusterStatus, err = status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
+		clusterStatus, err = getClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
 	} else if req.Type == "progress" {
 		clusterStatus, err = status.GetReports(ctx, stateTable, stateTableHashKey, stateKey, clusterName, hostGroup)
 	} else {
@@ -286,8 +287,44 @@ func statusHandler(ctx context.Context, req StatusRequest) (interface{}, error) 
 	}
 
 	if err != nil {
+		log.Error().Err(err).Send()
 		return "Failed retrieving status: %s", err
 	}
+
+	return clusterStatus, nil
+}
+
+func getClusterStatus(ctx context.Context, stateTable, stateTableHashKey, stateKey string) (protocol.ClusterStatus, error) {
+	clusterStatus, err := status.GetClusterStatus(ctx, stateTable, stateTableHashKey, stateKey)
+	if err != nil {
+		return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > %w", err)
+	}
+
+	clusterName := os.Getenv("CLUSTER_NAME")
+	if clusterName == "" {
+		return protocol.ClusterStatus{}, fmt.Errorf("CLUSTER_NAME is not set")
+	}
+	ips, err := common.GetBackendsPrivateIps(clusterName, "backend")
+	if err != nil {
+		return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > GetBackendsPrivateIps: %w", err)
+	}
+	log.Info().Msgf("GetClusterStatus > Backend private IPs: %v", ips)
+
+	managementLambdaName := os.Getenv("MANAGEMENT_LAMBDA")
+	if managementLambdaName == "" {
+		return protocol.ClusterStatus{}, fmt.Errorf("MANAGEMENT_LAMBDA is not set")
+	}
+	managementRequest := management.ManagementRequest{
+		Type: "status",
+		StatusRequest: management.StatusRequest{
+			BackendPrivateIps: ips,
+		},
+	}
+	wekaStatus, err := common.InvokeLambdaFunction[protocol.WekaStatus](managementLambdaName, managementRequest)
+	if err != nil {
+		return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > InvokeLambdaFunction: %w", err)
+	}
+	clusterStatus.WekaStatus = *wekaStatus
 
 	return clusterStatus, nil
 }
@@ -346,6 +383,19 @@ func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) 
 	return scale_down.ScaleDown(ctx, info)
 }
 
+func managementHandler(ctx context.Context, req management.ManagementRequest) (interface{}, error) {
+	switch req.Type {
+	case "status":
+		req.DeploymentUsernameId = os.Getenv("USERNAME_ID")
+		req.DeploymentPasswordId = os.Getenv("DEPLOYMENT_PASSWORD_ID")
+		req.AdminPasswordId = os.Getenv("ADMIN_PASSWORD_ID")
+		return management.GetWekaStatus(ctx, req.StatusRequest)
+	default:
+		log.Error().Msgf("Invalid management type: %s", req.Type)
+		return protocol.WekaStatus{}, fmt.Errorf("invalid management type: %s", req.Type)
+	}
+}
+
 func main() {
 	switch lambdaType := os.Getenv("LAMBDA"); lambdaType {
 	case "deploy":
@@ -368,6 +418,8 @@ func main() {
 		lambda.Start(terminate.Handler)
 	case "transient":
 		lambda.Start(transientHandler)
+	case "management":
+		lambda.Start(managementHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}
