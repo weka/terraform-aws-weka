@@ -2,12 +2,13 @@ package status
 
 import (
 	"context"
+	"strings"
+
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	cloudLibCommon "github.com/weka/go-cloud-lib/common"
 	strgins2 "github.com/weka/go-cloud-lib/lib/strings"
 	"github.com/weka/go-cloud-lib/logging"
 	"github.com/weka/go-cloud-lib/protocol"
-	"strings"
 )
 
 func hostnameToIp(hostname string) string {

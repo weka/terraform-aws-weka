@@ -36,7 +36,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "ec2:ModifyInstanceAttribute",
           "ec2:TerminateInstances",
           "ec2:DescribeInstances",
-          "ec2:CreateTags"
+          "ec2:CreateTags",
         ]
         Resource = ["*"]
       },
@@ -64,6 +64,11 @@ resource "aws_iam_policy" "lambda_iam_policy" {
         ],
         "Effect" : "Allow",
         "Resource" : ["*"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["lambda:InvokeFunction"]
+        Resource = ["arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}*"]
       }
     ]
   })
