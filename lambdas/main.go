@@ -320,9 +320,12 @@ func getClusterStatus(ctx context.Context, stateTable, stateTableHashKey, stateK
 			BackendPrivateIps: ips,
 		},
 	}
-	wekaStatus, err := common.InvokeLambdaFunction[protocol.WekaStatus](managementLambdaName, managementRequest)
+	var wekaStatus *protocol.WekaStatus
+	wekaStatus, err = common.InvokeLambdaFunction[protocol.WekaStatus](managementLambdaName, managementRequest)
 	if err != nil {
-		return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > InvokeLambdaFunction: %w", err)
+		wrappedError := fmt.Errorf("getClusterStatus > InvokeLambdaFunction: %w", err)
+		log.Error().Err(wrappedError).Send()
+		wekaStatus = &protocol.WekaStatus{}
 	}
 	clusterStatus.WekaStatus = *wekaStatus
 
