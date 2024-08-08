@@ -39,7 +39,7 @@ locals {
     gateways_number = var.gateways_number
     gateways_name   = var.gateways_name
     region          = local.region
-    protocol        = lower(var.protocol)
+    protocol        = var.protocol
     smbw_enabled    = var.smbw_enabled
   })
 
