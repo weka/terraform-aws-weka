@@ -92,6 +92,11 @@ EOT
   description = "Ips of SMB protocol gateways"
 }
 
+output "smb_protocol_gateways_name" {
+  value       = var.smb_protocol_gateways_number == 0 ? null : module.smb_protocol_gateways[0].gateways_name
+  description = "Name of SMB protocol gateway instances"
+}
+
 output "pre_terraform_destroy_command" {
   value       = var.smb_protocol_gateways_number == 0 ? null : <<EOT
  echo ${join(" ", module.smb_protocol_gateways[0].instance_ids)} | xargs -n 1 aws ec2 modify-instance-attribute --region ${local.region} --no-disable-api-stop --instance-id
@@ -106,6 +111,11 @@ EOT
   description = "Ips of S3 protocol gateways"
 }
 
+output "s3_protocol_gateways_name" {
+  value       = var.s3_protocol_gateways_number == 0 ? null : module.s3_protocol_gateways[0].gateways_name
+  description = "Name of S3 protocol gateway instances"
+}
+
 output "s3_pre_terraform_destroy_command" {
   value       = var.s3_protocol_gateways_number == 0 ? null : <<EOT
  echo ${join(" ", module.s3_protocol_gateways[0].instance_ids)} | xargs -n 1 aws ec2 modify-instance-attribute --region ${local.region} --no-disable-api-stop --instance-id
@@ -118,6 +128,11 @@ output "nfs_protocol_gateways_ips" {
  echo $(aws ec2 describe-instances --region ${local.region} --filters "Name=tag:Name,Values=${module.nfs_protocol_gateways[0].gateways_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
 EOT
   description = "Ips of NFS protocol gateways"
+}
+
+output "nfs_protocol_gateways_name" {
+  value       = var.nfs_protocol_gateways_number == 0 ? null : module.nfs_protocol_gateways[0].gateways_name
+  description = "Name of NFS protocol gateway instances"
 }
 
 output "deploy_lambda_name" {
