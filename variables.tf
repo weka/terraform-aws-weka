@@ -70,7 +70,7 @@ variable "instance_type" {
 
 variable "ami_id" {
   type        = string
-  description = "Custom AMI ID to use, by default Amazon Linux 2 is used, other distributive might work, but only Amazon Linux 2 is tested by Weka with this TF module"
+  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
   default     = null
 }
 
