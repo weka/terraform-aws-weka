@@ -46,6 +46,7 @@ No modules.
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
 | <a name="input_subnet_autocreate_as_private"></a> [subnet\_autocreate\_as\_private](#input\_subnet\_autocreate\_as\_private) | Determines whether to enable a private or public network. The default is public network. | `bool` | `false` | no |
 | <a name="input_subnets_cidrs"></a> [subnets\_cidrs](#input\_subnets\_cidrs) | CIDR block for subnet | `list(string)` | <pre>[<br>  "10.0.1.0/24"<br>]</pre> | no |
+| <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | `{}` | no |
 | <a name="input_vpc_cidr"></a> [vpc\_cidr](#input\_vpc\_cidr) | CIDR block of the vpc | `string` | `"10.0.0.0/16"` | no |
 
 ## Outputs
