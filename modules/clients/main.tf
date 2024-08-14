@@ -53,6 +53,7 @@ resource "aws_placement_group" "this" {
   count    = var.placement_group_name == null ? 1 : 0
   name     = "${var.clients_name}-placement-group"
   strategy = "cluster"
+  tags     = var.tags_map
 }
 
 resource "aws_launch_template" "this" {
@@ -133,7 +134,7 @@ resource "aws_instance" "this" {
   lifecycle {
     ignore_changes = [tags, launch_template, user_data]
   }
-
+  tags       = var.tags_map
   depends_on = [aws_placement_group.this]
 }
 
@@ -155,6 +156,15 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 
   lifecycle {
     ignore_changes = [desired_capacity, min_size, max_size]
+  }
+
+  dynamic "tag" {
+    for_each = var.tags_map
+    content {
+      key                 = tag.key
+      value               = tag.value
+      propagate_at_launch = false # already propagated by launch template
+    }
   }
   depends_on = [aws_launch_template.this]
 }

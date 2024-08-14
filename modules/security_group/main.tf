@@ -41,8 +41,8 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
+  tags = merge(var.tags_map, {
     Environment = var.prefix
     Name        = "${var.prefix}-${var.cluster_name}-sg"
-  }
+  })
 }

@@ -49,6 +49,7 @@ resource "aws_key_pair" "generated_key" {
   count      = var.enable_key_pair && var.key_pair_name == null ? 1 : 0
   key_name   = "${var.prefix}-${var.cluster_name}-ssh-key"
   public_key = local.public_ssh_key
+  tags       = var.tags_map
 }
 
 resource "local_file" "public_key" {
@@ -69,6 +70,7 @@ resource "aws_placement_group" "placement_group" {
   count      = var.placement_group_name == null ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-placement-group"
   strategy   = "cluster"
+  tags       = var.tags_map
   depends_on = [module.network]
 }
 
@@ -77,9 +79,9 @@ resource "aws_kms_key" "kms_key" {
   enable_key_rotation     = true
   deletion_window_in_days = 20
   is_enabled              = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name = "${var.prefix}-${var.cluster_name}"
-  }
+  })
 }
 
 resource "aws_kms_alias" "kms_alias" {
