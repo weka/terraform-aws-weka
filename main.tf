@@ -151,7 +151,7 @@ resource "aws_launch_template" "launch_template" {
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.enable_key_pair ? var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name : null
-
+  update_default_version               = true
   block_device_mappings {
     device_name = "/dev/sdp"
     ebs {
