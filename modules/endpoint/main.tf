@@ -19,10 +19,10 @@ resource "aws_security_group" "proxy_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
+  tags = merge(var.tags_map, {
     Environment = var.prefix
     Name        = "${var.prefix}-proxy-vpc-endpoint-sg"
-  }
+  })
 }
 
 data "aws_route_table" "subnet" {
@@ -50,10 +50,10 @@ resource "aws_security_group" "ec2_endpoint_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = {
+  tags = merge(var.tags_map, {
     Environment = var.prefix
     Name        = "${var.prefix}-ec2-vpc-endpoint-sg"
-  }
+  })
 }
 # ec2 endpoint
 resource "aws_vpc_endpoint" "ec2_endpoint" {
@@ -64,10 +64,10 @@ resource "aws_vpc_endpoint" "ec2_endpoint" {
   security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
   subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-ec2-endpoint"
     Environment = var.prefix
-  }
+  })
   depends_on = [aws_security_group.ec2_endpoint_sg]
 }
 
@@ -78,10 +78,10 @@ resource "aws_vpc_endpoint" "s3_gateway_endpoint" {
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [data.aws_route_table.subnet.route_table_id]
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-s3-gateway-endpoint"
     Environment = var.prefix
-  }
+  })
 }
 
 # proxy endpoint
@@ -93,10 +93,10 @@ resource "aws_vpc_endpoint" "proxy_endpoint" {
   security_group_ids  = [aws_security_group.proxy_sg[0].id]
   subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-proxy-endpoint"
     Environment = var.prefix
-  }
+  })
 }
 
 resource "aws_vpc_endpoint_security_group_association" "proxy_association_sg" {
@@ -119,10 +119,10 @@ resource "aws_vpc_endpoint" "lambda_endpoint" {
   security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
   subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-lambda-endpoint"
     Environment = var.prefix
-  }
+  })
 }
 
 resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
@@ -132,10 +132,10 @@ resource "aws_vpc_endpoint" "dynamodb_endpoint_gtw" {
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [data.aws_route_table.subnet.route_table_id]
 
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-dynamodb-gateway-endpoint"
     Environment = var.prefix
-  }
+  })
 }
 
 
@@ -147,8 +147,8 @@ resource "aws_vpc_endpoint" "autoscaling_endpoint" {
   security_group_ids  = [aws_security_group.ec2_endpoint_sg[0].id]
   subnet_ids          = [var.subnet_id]
   private_dns_enabled = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-autoscaling-endpoint"
     Environment = var.prefix
-  }
+  })
 }

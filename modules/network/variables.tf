@@ -56,3 +56,9 @@ variable "create_nat_gateway" {
   default     = false
   description = "NAT needs to be created when no public ip is assigned to the backend, to allow internet access"
 }
+
+variable "tags_map" {
+  type        = map(string)
+  default     = {}
+  description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
+}

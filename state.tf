@@ -16,9 +16,7 @@ resource "aws_dynamodb_table" "weka_deployment" {
     name = local.dynamodb_hash_key_name
     type = "S"
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags = var.tags_map
 }
 
 resource "aws_dynamodb_table_item" "weka_deployment_state" {

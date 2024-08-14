@@ -44,3 +44,9 @@ variable "additional_iam_policy_statement" {
     error_message = "Additional IAM policy statement must be a non-empty list (if provided)."
   }
 }
+
+variable "tags_map" {
+  type        = map(string)
+  default     = {}
+  description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
+}

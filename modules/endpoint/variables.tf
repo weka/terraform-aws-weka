@@ -71,3 +71,9 @@ variable "region" {
   type        = string
   description = "Region name"
 }
+
+variable "tags_map" {
+  type        = map(string)
+  default     = {}
+  description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
+}
