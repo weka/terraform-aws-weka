@@ -210,13 +210,14 @@ resource "aws_lambda_function" "management" {
   }
   environment {
     variables = {
-      LAMBDA                 = "management"
-      REGION                 = local.region
-      PREFIX                 = var.prefix
-      CLUSTER_NAME           = var.cluster_name
-      USERNAME_ID            = aws_secretsmanager_secret.weka_username.id
-      DEPLOYMENT_PASSWORD_ID = aws_secretsmanager_secret.weka_deployment_password.id
-      ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
+      LAMBDA                     = "management"
+      REGION                     = local.region
+      PREFIX                     = var.prefix
+      CLUSTER_NAME               = var.cluster_name
+      USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
+      DEPLOYMENT_PASSWORD_ID     = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
+      USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
     }
   }
   tags       = var.tags_map
@@ -274,13 +275,17 @@ resource "aws_lambda_function" "status_lambda" {
   }
   environment {
     variables = {
-      LAMBDA               = "status"
-      STATE_TABLE          = local.dynamodb_table_name
-      STATE_TABLE_HASH_KEY = local.dynamodb_hash_key_name
-      STATE_KEY            = local.state_key
-      NFS_STATE_KEY        = local.nfs_state_key
-      CLUSTER_NAME         = var.cluster_name
-      MANAGEMENT_LAMBDA    = aws_lambda_function.management.function_name
+      LAMBDA                     = "status"
+      STATE_TABLE                = local.dynamodb_table_name
+      STATE_TABLE_HASH_KEY       = local.dynamodb_hash_key_name
+      STATE_KEY                  = local.state_key
+      NFS_STATE_KEY              = local.nfs_state_key
+      CLUSTER_NAME               = var.cluster_name
+      MANAGEMENT_LAMBDA          = aws_lambda_function.management.function_name
+      USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
+      DEPLOYMENT_PASSWORD_ID     = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
+      USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
     }
   }
   tags       = var.tags_map
