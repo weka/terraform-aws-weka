@@ -84,7 +84,7 @@ variable "placement_group_name" {
 
 variable "tags_map" {
   type        = map(string)
-  default     = { "env" : "dev", "creator" : "tf" }
+  default     = {}
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
 }
 

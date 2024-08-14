@@ -12,6 +12,7 @@ resource "aws_iam_role" "lambda_iam_role" {
       }
     ]
   })
+  tags = var.tags_map
 }
 
 resource "aws_iam_policy" "lambda_iam_policy" {
@@ -72,6 +73,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       }
     ]
   })
+  tags = var.tags_map
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
@@ -94,6 +96,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
       }
     ]
   })
+  tags = var.tags_map
 }
 
 resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {

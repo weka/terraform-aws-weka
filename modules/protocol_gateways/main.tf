@@ -70,6 +70,7 @@ resource "aws_placement_group" "this" {
   count    = var.placement_group_name == null ? 1 : 0
   name     = "${var.gateways_name}-placement-group"
   strategy = "cluster"
+  tags     = var.tags_map
 }
 
 resource "aws_launch_template" "this" {
@@ -173,7 +174,7 @@ resource "aws_instance" "this" {
       error_message = "The number of secondary IPs per single NIC per protocol gateway virtual machine must be at most 3 for SMB."
     }
   }
-
+  tags       = var.tags_map
   depends_on = [aws_placement_group.this, aws_iam_instance_profile.this, aws_iam_role.this]
 }
 

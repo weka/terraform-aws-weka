@@ -21,6 +21,7 @@ resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
   count             = length(local.function_name)
   name              = "/aws/lambda/${local.function_name[count.index]}"
   retention_in_days = 30
+  tags              = var.tags_map
 }
 
 resource "aws_lambda_function" "deploy_lambda" {
@@ -70,9 +71,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       ALB_ARN_SUFFIX                    = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 
   lifecycle {
@@ -134,9 +133,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       ALB_ARN_SUFFIX                      = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -166,9 +163,7 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
       NFS_STATE_KEY        = local.nfs_state_key
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -194,9 +189,7 @@ resource "aws_lambda_function" "join_nfs_finalization_lambda" {
       LAMBDA = "joinNfsFinalization"
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -226,9 +219,7 @@ resource "aws_lambda_function" "management" {
       ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -260,9 +251,7 @@ resource "aws_lambda_function" "report_lambda" {
       NFS_STATE_KEY        = local.nfs_state_key
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -294,9 +283,7 @@ resource "aws_lambda_function" "status_lambda" {
       MANAGEMENT_LAMBDA    = aws_lambda_function.management.function_name
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -334,9 +321,7 @@ resource "aws_lambda_function" "fetch_lambda" {
       USE_SECRETMANAGER_ENDPOINT    = var.secretmanager_use_vpc_endpoint
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -365,9 +350,7 @@ resource "aws_lambda_function" "scale_down_lambda" {
       ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -396,9 +379,7 @@ resource "aws_lambda_function" "transient_lambda" {
       CLUSTER_NAME = var.cluster_name
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }
 
@@ -429,8 +410,6 @@ resource "aws_lambda_function" "terminate_lambda" {
       NFS_ASG_NAME = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
     }
   }
-  tags = merge(var.tags_map, {
-    weka_cluster_name = var.cluster_name
-  })
+  tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
 }

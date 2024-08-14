@@ -17,6 +17,7 @@ module "network" {
   alb_additional_subnet_zone       = var.alb_additional_subnet_zone
   create_nat_gateway               = var.create_nat_gateway
   vpc_cidr                         = var.vpc_cidr
+  tags_map                         = var.tags_map
 }
 
 module "security_group" {
@@ -28,6 +29,7 @@ module "security_group" {
   allow_ssh_cidrs       = var.allow_ssh_cidrs
   alb_allow_https_cidrs = var.alb_allow_https_cidrs
   allow_weka_api_cidrs  = var.allow_weka_api_cidrs
+  tags_map              = var.tags_map
   depends_on            = [module.network]
 }
 
@@ -36,6 +38,7 @@ module "iam" {
   source                          = "./modules/iam"
   prefix                          = var.prefix
   cluster_name                    = var.cluster_name
+  tags_map                        = var.tags_map
   state_table_name                = local.dynamodb_table_name
   tiering_obs_name                = var.tiering_obs_name
   secret_prefix                   = local.secret_prefix
@@ -56,6 +59,7 @@ module "vpc_endpoint" {
   prefix                               = var.prefix
   vpc_id                               = local.vpc_id
   subnet_id                            = local.subnet_ids[0]
+  tags_map                             = var.tags_map
   depends_on                           = [module.network, module.security_group]
 }
 
@@ -82,9 +86,9 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   security_group_ids  = local.secretmanager_endpoint_sg_ids
   subnet_ids          = local.subnet_ids
   private_dns_enabled = true
-  tags = {
+  tags = merge(var.tags_map, {
     Name        = "${var.prefix}-secretmanager-endpoint"
     Environment = var.prefix
-  }
+  })
   depends_on = [module.network]
 }
