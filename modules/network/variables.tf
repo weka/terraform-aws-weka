@@ -60,5 +60,5 @@ variable "create_nat_gateway" {
 variable "tags_map" {
   type        = map(string)
   default     = {}
-  description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value."
+  description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value. Note: Manually tagged resources will be overridden by Terraform apply."
 }
