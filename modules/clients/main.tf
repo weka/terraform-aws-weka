@@ -50,7 +50,7 @@ locals {
 }
 
 resource "aws_placement_group" "this" {
-  count    = var.placement_group_name == null ? 1 : 0
+  count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${var.clients_name}-placement-group"
   strategy = "cluster"
   tags     = var.tags_map
@@ -106,7 +106,7 @@ resource "aws_launch_template" "this" {
 
   placement {
     availability_zone = data.aws_subnet.selected.availability_zone
-    group_name        = var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name
+    group_name        = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
   }
 
   dynamic "tag_specifications" {
