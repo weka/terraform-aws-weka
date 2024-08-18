@@ -14,6 +14,7 @@ module "clients" {
   key_pair_name                = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip             = local.assign_public_ip
   placement_group_name         = var.client_placement_group_name != null || !var.client_use_backends_placement_group ? var.client_placement_group_name : local.backends_placement_group_name
+  use_placement_group          = var.use_placement_group
   root_volume_size             = var.client_root_volume_size
   client_instance_ami_id       = var.client_instance_ami_id
   sg_ids                       = local.sg_ids

@@ -143,3 +143,9 @@ variable "alb_listener_protocol" {
     error_message = "Allowed ALB protocol values: [\"http\", \"https\"]."
   }
 }
+
+variable "use_placement_group" {
+  type        = bool
+  default     = true
+  description = "Use cluster placement group for clients. Note: If not using a cluster placement group, the instances will most likely be spread out across the underlying AWS infrastructure, resulting in not getting the maximum performance from the WEKA cluster"
+}

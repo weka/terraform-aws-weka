@@ -13,6 +13,7 @@ module "smb_protocol_gateways" {
   key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
+  use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.smb_protocol_gateway_weka_volume_size
   ami_id                              = var.ami_id
   sg_ids                              = local.sg_ids
@@ -52,6 +53,7 @@ module "s3_protocol_gateways" {
   key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
+  use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.s3_protocol_gateway_weka_volume_size
   ami_id                              = var.ami_id
   sg_ids                              = local.sg_ids
@@ -88,6 +90,7 @@ module "nfs_protocol_gateways" {
   key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
+  use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.nfs_protocol_gateway_weka_volume_size
   ami_id                              = var.ami_id
   sg_ids                              = local.sg_ids

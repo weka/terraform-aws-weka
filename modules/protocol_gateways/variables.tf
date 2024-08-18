@@ -196,3 +196,9 @@ variable "ebs_encrypted" {
   default     = false
   description = "Enables EBS encryption on the volume"
 }
+
+variable "use_placement_group" {
+  type        = bool
+  default     = true
+  description = "Use cluster placement group for clients. Note: If not using a cluster placement group, the instances will most likely be spread out across the underlying AWS infrastructure, resulting in not getting the maximum performance from the WEKA cluster"
+}
