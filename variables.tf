@@ -777,3 +777,9 @@ variable "enable_lambda_vpc_config" {
   default     = false
   description = "Config lambda to run inside vpc"
 }
+
+variable "capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the Capacity Reservation in which to run the backends"
+}
