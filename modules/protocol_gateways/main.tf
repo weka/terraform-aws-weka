@@ -63,11 +63,12 @@ locals {
 
   custom_data_parts = concat([local.init_script], local.setup_protocol_script)
 
-  custom_data = join("\n", local.custom_data_parts)
+  custom_data          = join("\n", local.custom_data_parts)
+  placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
 }
 
 resource "aws_placement_group" "this" {
-  count    = var.placement_group_name == null ? 1 : 0
+  count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${var.gateways_name}-placement-group"
   strategy = "cluster"
   tags     = var.tags_map
@@ -132,7 +133,7 @@ resource "aws_launch_template" "this" {
 
   placement {
     availability_zone = data.aws_subnet.selected.availability_zone
-    group_name        = var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name
+    group_name        = local.placement_group_name
   }
 
   dynamic "tag_specifications" {

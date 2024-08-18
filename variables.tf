@@ -201,6 +201,12 @@ variable "placement_group_name" {
   }
 }
 
+variable "use_placement_group" {
+  type        = bool
+  default     = true
+  description = "Use cluster placement group for backends. Note: If not using a cluster placement group, the instances will most likely be spread out across the underlying AWS infrastructure, resulting in not getting the maximum performance from the WEKA cluster"
+}
+
 variable "install_weka_url" {
   type        = string
   default     = ""

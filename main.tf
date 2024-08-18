@@ -14,7 +14,7 @@ locals {
     weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
     custom_data         = var.custom_data
   })
-  backends_placement_group_name = var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name
+  backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
   create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null
   kms_key_id                    = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
 }
@@ -67,7 +67,7 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_placement_group" "placement_group" {
-  count      = var.placement_group_name == null ? 1 : 0
+  count      = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name       = "${var.prefix}-${var.cluster_name}-placement-group"
   strategy   = "cluster"
   tags       = var.tags_map
