@@ -536,6 +536,12 @@ variable "client_arch" {
   }
 }
 
+variable "client_capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the clients"
+}
+
 ############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -588,6 +594,12 @@ variable "nfs_interface_group_name" {
     condition     = length(var.nfs_interface_group_name) <= 11
     error_message = "The interface group name should be up to 11 characters long."
   }
+}
+
+variable "nfs_capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the nfs clients"
 }
 
 ############################################### SMB protocol gateways variables ###################################################
@@ -656,6 +668,12 @@ variable "smb_domain_name" {
   default     = ""
 }
 
+variable "smb_capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the smb clients"
+}
+
 ############################################### S3 protocol gateways variables ###################################################
 variable "s3_protocol_gateway_fe_cores_num" {
   type        = number
@@ -691,6 +709,12 @@ variable "s3_setup_protocol" {
   type        = bool
   description = "Config protocol, default if false"
   default     = false
+}
+
+variable "s3_capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the s3 clients"
 }
 
 variable "weka_home_url" {
