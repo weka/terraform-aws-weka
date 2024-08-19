@@ -202,3 +202,9 @@ variable "use_placement_group" {
   default     = true
   description = "Use cluster placement group for clients. Note: If not using a cluster placement group, the instances will most likely be spread out across the underlying AWS infrastructure, resulting in not getting the maximum performance from the WEKA cluster"
 }
+
+variable "capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the clients"
+}
