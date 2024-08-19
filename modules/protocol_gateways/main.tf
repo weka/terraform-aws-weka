@@ -136,6 +136,12 @@ resource "aws_launch_template" "this" {
     group_name        = local.placement_group_name
   }
 
+  capacity_reservation_specification {
+    capacity_reservation_target {
+      capacity_reservation_id = var.capacity_reservation_id
+    }
+  }
+
   dynamic "tag_specifications" {
     for_each = local.tags_dest
     content {
