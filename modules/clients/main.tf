@@ -109,6 +109,12 @@ resource "aws_launch_template" "this" {
     group_name        = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
   }
 
+  capacity_reservation_specification {
+    capacity_reservation_target {
+      capacity_reservation_id = var.capacity_reservation_id
+    }
+  }
+
   dynamic "tag_specifications" {
     for_each = local.tags_dest
     content {
