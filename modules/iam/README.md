@@ -54,7 +54,7 @@ No modules.
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources names | `string` | `"weka"` | no |
 | <a name="input_secret_prefix"></a> [secret\_prefix](#input\_secret\_prefix) | Secrets prefix | `string` | n/a | yes |
 | <a name="input_state_table_name"></a> [state\_table\_name](#input\_state\_table\_name) | State DynamoDB table name | `string` | n/a | yes |
-| <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. | `map(string)` | `{}` | no |
+| <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. Note: Manually tagged resources will be overridden by Terraform apply. | `map(string)` | `{}` | no |
 | <a name="input_tiering_enable_obs_integration"></a> [tiering\_enable\_obs\_integration](#input\_tiering\_enable\_obs\_integration) | Determines whether to enable object stores integration with the Weka cluster. Set true to enable the integration. | `bool` | `false` | no |
 | <a name="input_tiering_obs_name"></a> [tiering\_obs\_name](#input\_tiering\_obs\_name) | Obs name | `string` | n/a | yes |
 
