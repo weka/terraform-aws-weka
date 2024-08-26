@@ -79,6 +79,10 @@ resource "aws_lambda_function" "deploy_lambda" {
       condition     = var.lambdas_dist == "release" || var.lambdas_version == local.lambdas_hash
       error_message = "Please update lambdas version."
     }
+    precondition {
+      condition     = var.install_weka_url != "" || var.weka_version != ""
+      error_message = "Please provide either 'install_weka_url' or 'weka_version' variables."
+    }
   }
 }
 
