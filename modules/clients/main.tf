@@ -66,7 +66,7 @@ resource "aws_launch_template" "this" {
   update_default_version               = true
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = var.weka_volume_device_name
     ebs {
       volume_size           = var.weka_volume_size
       volume_type           = "gp3"
