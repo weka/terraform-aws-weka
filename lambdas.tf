@@ -1,8 +1,8 @@
 locals {
   handler_name = "bootstrap"
   source_dir   = "${path.module}/lambdas"
-  s3_bucket    = "weka-tf-aws-releases-${local.region}"
-  s3_key       = "${var.lambdas_dist}/${var.lambdas_version}.zip"
+  s3_bucket    = var.lambdas_custom_s3_bucket != null ? var.lambdas_custom_s3_bucket : "weka-tf-aws-releases-${local.region}"
+  s3_key       = var.lambdas_custom_s3_key != null ? var.lambdas_custom_s3_key : "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions = toset([
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
     "transient", "join-nfs-finalization"
