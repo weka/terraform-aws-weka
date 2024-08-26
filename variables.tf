@@ -158,6 +158,7 @@ variable "cluster_name" {
 variable "weka_version" {
   type        = string
   description = "The Weka version to deploy."
+  default     = ""
 }
 
 variable "get_weka_io_token" {
