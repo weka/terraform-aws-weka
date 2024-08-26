@@ -93,6 +93,12 @@ variable "instance_iam_profile_arn" {
   description = "Instance IAM profile ARN"
 }
 
+variable "weka_volume_device_name" {
+  type        = string
+  description = "The root volume device name"
+  default     = "/dev/xvda"
+}
+
 variable "weka_volume_size" {
   type        = number
   description = "The root volume size in GB"
