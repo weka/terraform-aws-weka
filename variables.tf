@@ -813,3 +813,14 @@ variable "capacity_reservation_id" {
   default     = null
   description = "The ID of the Capacity Reservation in which to run the backends"
 }
+
+variable "lambdas_custom_s3_bucket" {
+  type        = string
+  description = "S3 bucket name for lambdas"
+  default     = null
+}
+variable "lambdas_custom_s3_key" {
+  type        = string
+  description = "S3 key for lambdas"
+  default     = null
+}
