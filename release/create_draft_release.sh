@@ -2,7 +2,7 @@
 set -ex
 
 # This script will be called when a new content was merged to the main branch.
-# It will create a new draft release with the new weka version.
+# It will create a new draft release.
 export new_tag="$1"
 
 if [ -z "$new_tag" ]
