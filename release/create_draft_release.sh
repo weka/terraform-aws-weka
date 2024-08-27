@@ -11,9 +11,10 @@ then
       source release/calculate_next_tag.sh
 else
       echo "Using provided tag: $new_tag"
-      git checkout main
-      git pull
 fi
+
+git checkout main
+git pull
 
 git tag "$new_tag"
 git push origin "$new_tag"
