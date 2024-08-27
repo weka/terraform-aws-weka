@@ -818,6 +818,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client instance type (sku) to deploy | `string` | `"c5.2xlarge"` | no |
 | <a name="input_client_placement_group_name"></a> [client\_placement\_group\_name](#input\_client\_placement\_group\_name) | The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically | `string` | `null` | no |
 | <a name="input_client_use_backends_placement_group"></a> [client\_use\_backends\_placement\_group](#input\_client\_use\_backends\_placement\_group) | Use backends placement group for clients | `bool` | `true` | no |
+| <a name="input_client_weka_volume_device_name"></a> [client\_weka\_volume\_device\_name](#input\_client\_weka\_volume\_device\_name) | The client volume device name | `string` | `"/dev/xvda"` | no |
 | <a name="input_client_weka_volume_size"></a> [client\_weka\_volume\_size](#input\_client\_weka\_volume\_size) | The client volume size in GB | `number` | `48` | no |
 | <a name="input_clients_custom_data"></a> [clients\_custom\_data](#input\_clients\_custom\_data) | Custom data to pass to the client instances | `string` | `""` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client instances to deploy | `number` | `0` | no |
