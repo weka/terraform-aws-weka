@@ -120,7 +120,8 @@ AWS terraform weka deployment module.
                 "ec2:DeleteNetworkInterface",
                 "ec2:ModifyInstanceAttribute",
                 "ec2:TerminateInstances",
-                "ec2:DescribeInstances"
+                "ec2:DescribeInstances",
+                "ec2:CreateTags"
             ],
             "Effect": "Allow",
             "Resource": [
@@ -139,7 +140,8 @@ AWS terraform weka deployment module.
         },
         {
             "Action": [
-              "secretsmanager:GetSecretValue"
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:PutSecretValue"
             ],
             "Effect": "Allow",
             "Resource": [
@@ -156,6 +158,15 @@ AWS terraform weka deployment module.
             "Resource": [
               "*"
             ]
+        },
+        {
+          "Action": [
+            "lambda:InvokeFunction"
+          ],
+          "Effect": "Allow",
+          "Resource": [
+            "arn:aws:lambda:*:*:function:prefix-cluster_name-*-lambda"
+          ]
         }
         ],
         "Version": "2012-10-17"
@@ -375,7 +386,8 @@ tiering_ssd_percent = VALUE
           "ec2:CreateNetworkInterface",
           "ec2:ModifyNetworkInterfaceAttribute",
           "ec2:DeleteNetworkInterface",
-          "ec2:DescribeInstances"
+          "ec2:DescribeInstances",
+          "ec2:DescribeInstanceTypes"
         ],
         "Effect": "Allow",
         "Resource": "*"
@@ -459,8 +471,10 @@ nfs_setup_protocol = true
       "ec2:CreateNetworkInterface",
       "ec2:ModifyNetworkInterfaceAttribute",
       "ec2:DeleteNetworkInterface",
-      "ec2:DescribeInstances"
-    ]
+      "ec2:DescribeInstances",
+      "ec2:DescribeTags",
+      "ec2:AssignPrivateIpAddresses"
+    ],
     "Resource":  "*",
     },
     {
@@ -483,7 +497,7 @@ nfs_setup_protocol = true
       "logs:PutLogEvents",
       "logs:DescribeLogStreams",
       "logs:PutRetentionPolicy"
-    ]
+    ],
     "Resource":
     [
       "arn:aws:logs:*:*:log-group:/wekaio/clients/gateways_name*"
@@ -499,7 +513,16 @@ nfs_setup_protocol = true
     [
       "*"
     ]
-    }
+    },
+    {
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:lambda:*:*:function:prefix-cluster_name*"
+      ]
+    },
   ]
 }
 
