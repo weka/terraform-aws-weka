@@ -601,8 +601,9 @@ To join an SMB cluster in Active Directory, need to run manually command:
       "ec2:CreateNetworkInterface",
       "ec2:ModifyNetworkInterfaceAttribute",
       "ec2:DeleteNetworkInterface",
-      "ec2:DescribeInstances"
-    ]
+      "ec2:DescribeInstances",
+      "ec2:DescribeTags"
+    ],
     "Resource":  "*",
     },
     {
@@ -641,6 +642,15 @@ To join an SMB cluster in Active Directory, need to run manually command:
     [
       "*"
     ]
+    },
+    {
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:lambda:*:*:function:prefix-cluster_name*"
+      ]
     }
   ]
 }
