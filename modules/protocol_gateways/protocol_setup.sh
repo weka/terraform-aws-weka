@@ -109,7 +109,7 @@ done
 max_retries=60
 for (( retry=1; retry<=max_retries; retry++ )); do
     # get all UP gateway container ids
-    all_container_ids=$(weka cluster container | grep frontend0 | grep $gw_ips | grep UP | awk '{print $1}')
+    all_container_ids=$(weka cluster container | grep frontend0 | grep -w -F $gw_ips | grep UP | awk '{print $1}')
     # if number of all_container_ids < cluster_size, do nothing
     all_container_ids_number=$(echo "$all_container_ids" | wc -l)
     if (( all_container_ids_number <  cluster_size )); then
