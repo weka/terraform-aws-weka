@@ -68,18 +68,18 @@ weka local stop && weka local rm -f --all
 
 FRONTEND_CONTAINER_CORES_NUM="${frontend_container_cores_num}"
 NICS_NUM=$((FRONTEND_CONTAINER_CORES_NUM+1))
-first_interface=$(ip -o link show | awk -F ': ' '!/docker0/ && !/^lo/ {print $2}' | sort | head -n 1)
-interface_str=$(echo $first_interface | awk '{gsub(/[0-9]/,"",$1); print $1}')
-first_interface_number=$(echo $first_interface | awk '{gsub(/[^0-9]/,"",$1); print $1}')
-first_interface_ip=$(ip addr show $first_interface | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
+first_interface_name=$(ls /sys/class/net | grep -vE 'docker|veth|lo' | head -n 1)
+interfaces_base_name=$(echo $first_interface_name | awk '{gsub(/[0-9]/,"",$1); print $1}')
+first_interface_number=$(echo $first_interface_name | grep -o '[0-9]*$')
+first_interface_ip=$(ip addr show $first_interface_name | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
 
 function getNetStrForDpdk() {
 	i=$1
 	j=$2
-
+	interface_name=$3
 	net=""
 	for ((i; i<$j; i++)); do
-		net="$net -o net=$interface_str$i"
+		net="$net -o net=$interface_name$i"
 	done
 }
 
@@ -105,7 +105,7 @@ function retry {
 echo "$(date -u): Retry mount client"
 mount_command="mount -t wekafs -o net=udp $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 if [[ ${clients_use_dpdk} == true ]]; then
-    getNetStrForDpdk $(($first_interface_number+1)) $(($NICS_NUM+$first_interface_number))
+    getNetStrForDpdk $(($first_interface_number+1)) $(($NICS_NUM+$first_interface_number)) "$interfaces_base_name"
     mount_command="mount -t wekafs $net -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$first_interface_ip $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 

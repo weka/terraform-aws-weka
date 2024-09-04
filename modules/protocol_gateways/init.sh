@@ -82,7 +82,13 @@ do
   aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
 done
 
-aws lambda invoke --region "$region" --function-name "${deploy_lambda_name}" --payload "{\"name\": \"$instance_id\", \"protocol\": \"${protocol}\"}" output
+aws_version=$(aws --version)
+cli_binary_format=""
+if [[ "$aws_version" == aws-cli/2* ]]; then
+  cli_binary_format="--cli-binary-format raw-in-base64-out"
+fi
+
+aws lambda invoke --region "$region" --function-name "${deploy_lambda_name}" $cli_binary_format --payload "{\"name\": \"$instance_id\", \"protocol\": \"${protocol}\"}" output
 printf "%b" "$(cat output | sed 's/^"//' | sed 's/"$//' | sed 's/\\\"/"/g')" > /tmp/deploy.sh
 chmod +x /tmp/deploy.sh
 /tmp/deploy.sh 2>&1 | tee /tmp/weka_deploy.log
