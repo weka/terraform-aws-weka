@@ -15,7 +15,7 @@ module "smb_protocol_gateways" {
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.smb_protocol_gateway_weka_volume_size
-  ami_id                              = var.ami_id
+  ami_id                              = var.smb_protocol_gateway_instance_ami_id
   sg_ids                              = local.sg_ids
   tags_map                            = var.tags_map
   instance_iam_profile_arn            = var.smb_protocol_gateway_instance_iam_profile_arn
@@ -56,7 +56,7 @@ module "s3_protocol_gateways" {
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.s3_protocol_gateway_weka_volume_size
-  ami_id                              = var.ami_id
+  ami_id                              = var.s3_protocol_gateway_instance_ami_id
   sg_ids                              = local.sg_ids
   tags_map                            = var.tags_map
   instance_iam_profile_arn            = var.s3_protocol_gateway_instance_iam_profile_arn
@@ -94,7 +94,7 @@ module "nfs_protocol_gateways" {
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
   weka_volume_size                    = var.nfs_protocol_gateway_weka_volume_size
-  ami_id                              = var.ami_id
+  ami_id                              = var.nfs_protocol_gateway_instance_ami_id
   sg_ids                              = local.sg_ids
   tags_map                            = var.tags_map
   instance_iam_profile_arn            = var.nfs_protocol_gateway_instance_iam_profile_arn
