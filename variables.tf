@@ -608,6 +608,12 @@ variable "nfs_capacity_reservation_id" {
   description = "The ID of the capacity reservation in which to run the nfs clients"
 }
 
+variable "nfs_protocol_gateway_instance_ami_id" {
+  type        = string
+  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  default     = null
+}
+
 ############################################### SMB protocol gateways variables ###################################################
 variable "smb_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -680,6 +686,12 @@ variable "smb_capacity_reservation_id" {
   description = "The ID of the capacity reservation in which to run the smb clients"
 }
 
+variable "smb_protocol_gateway_instance_ami_id" {
+  type        = string
+  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  default     = null
+}
+
 ############################################### S3 protocol gateways variables ###################################################
 variable "s3_protocol_gateway_fe_cores_num" {
   type        = number
@@ -721,6 +733,12 @@ variable "s3_capacity_reservation_id" {
   type        = string
   default     = null
   description = "The ID of the capacity reservation in which to run the s3 clients"
+}
+
+variable "s3_protocol_gateway_instance_ami_id" {
+  type        = string
+  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  default     = null
 }
 
 variable "weka_home_url" {
