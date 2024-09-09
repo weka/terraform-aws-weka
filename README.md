@@ -447,6 +447,7 @@ nfs_protocol_gateway_nics_num                 = 2
 nfs_protocol_gateway_disk_size                = 48
 nfs_protocol_gateway_fe_cores_num             = 1
 nfs_protocol_gateway_instance_iam_profile_arn = ""
+nfs_protocol_gateway_instance_ami_id          = "<YOUR AMI_ID>"
 ```
 
 <br>In order to create stateless clients, need to set variable:
@@ -544,6 +545,7 @@ s3_protocol_gateway_instance_type            = "c5.2xlarge"
 s3_protocol_gateway_disk_size                = 48
 s3_protocol_gateway_fe_cores_num             = 1
 s3_protocol_gateway_instance_iam_profile_arn = "<YOUR ARN>"
+s3_protocol_gateway_instance_ami_id          = "<YOUR AMI_ID>"
 ```
 
 ## SMB Protocol Gateways
@@ -567,6 +569,7 @@ smb_protocol_gateway_fe_cores_num             = 1
 smb_protocol_gateway_instance_iam_profile_arn = ""
 smb_cluster_name                              = ""
 smb_domain_name                               = ""
+smb_protocol_gateway_instance_ami_id          = "<YOUR AMI_ID>"
 ```
 
 <br>In order to create stateless clients, need to set variable:
