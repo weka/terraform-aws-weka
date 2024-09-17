@@ -1,13 +1,16 @@
 data "aws_region" "current" {}
 
-data "aws_caller_identity" "current" {}
+data "aws_caller_identity" "current" {
+  count = var.clients_number > 0 ? 1 : 0
+}
 
 data "aws_subnet" "selected" {
-  id = var.subnet_id
+  count = var.clients_number > 0 ? 1 : 0
+  id    = var.subnet_id
 }
 
 data "aws_ami" "selected" {
-  count       = var.client_instance_ami_id == null ? 1 : 0
+  count       = var.client_instance_ami_id == null && var.clients_number > 0 ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
 
@@ -49,7 +52,7 @@ locals {
 }
 
 resource "aws_placement_group" "this" {
-  count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
+  count    = var.use_placement_group && var.placement_group_name == null && var.clients_number > 0 ? 1 : 0
   name     = "${var.clients_name}-placement-group"
   strategy = "cluster"
   tags = merge(var.tags_map, {
@@ -58,6 +61,7 @@ resource "aws_placement_group" "this" {
 }
 
 resource "aws_launch_template" "this" {
+  count                                = var.clients_number > 0 ? 1 : 0
   name                                 = "${var.clients_name}-launch-template"
   disable_api_termination              = false
   ebs_optimized                        = true
@@ -106,7 +110,7 @@ resource "aws_launch_template" "this" {
   }
 
   placement {
-    availability_zone = data.aws_subnet.selected.availability_zone
+    availability_zone = data.aws_subnet.selected[0].availability_zone
     group_name        = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
   }
 
@@ -123,7 +127,7 @@ resource "aws_launch_template" "this" {
       tags = merge(var.tags_map, {
         Name                = var.clients_name
         weka_hostgroup_type = "client"
-        user                = data.aws_caller_identity.current.user_id
+        user                = data.aws_caller_identity.current[0].user_id
       })
     }
   }
@@ -135,7 +139,7 @@ resource "aws_launch_template" "this" {
 resource "aws_instance" "this" {
   count = var.use_autoscaling_group ? 0 : var.clients_number
   launch_template {
-    id = aws_launch_template.this.id
+    id = aws_launch_template.this[0].id
   }
 
   lifecycle {
@@ -157,8 +161,8 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   protect_from_scale_in = true
 
   launch_template {
-    id      = aws_launch_template.this.id
-    version = aws_launch_template.this.latest_version
+    id      = aws_launch_template.this[0].id
+    version = aws_launch_template.this[0].latest_version
   }
 
   lifecycle {

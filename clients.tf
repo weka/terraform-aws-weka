@@ -1,5 +1,6 @@
 module "clients" {
-  count                        = var.clients_number > 0 ? 1 : 0
+  # in case the clients number is 0 and the instance_iam_profile_arn is empty, we will run the module just to create the IAM role
+  count                        = var.clients_number > 0 || var.instance_iam_profile_arn == "" ? 1 : 0
   source                       = "./modules/clients"
   subnet_id                    = local.subnet_ids[0]
   clients_name                 = "${var.prefix}-${var.cluster_name}-client"
