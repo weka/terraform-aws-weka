@@ -71,7 +71,9 @@ resource "aws_placement_group" "this" {
   count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${var.gateways_name}-placement-group"
   strategy = "cluster"
-  tags     = var.tags_map
+  tags = merge(var.tags_map, {
+    CreationDate = timestamp()
+  })
 }
 
 resource "aws_launch_template" "this" {
