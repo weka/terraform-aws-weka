@@ -67,10 +67,12 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_placement_group" "placement_group" {
-  count      = var.use_placement_group && var.placement_group_name == null ? 1 : 0
-  name       = "${var.prefix}-${var.cluster_name}-placement-group"
-  strategy   = "cluster"
-  tags       = var.tags_map
+  count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
+  name     = "${var.prefix}-${var.cluster_name}-placement-group"
+  strategy = "cluster"
+  tags = merge(var.tags_map, {
+    CreationDate = timestamp()
+  })
   depends_on = [module.network]
 }
 
