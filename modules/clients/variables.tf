@@ -167,3 +167,9 @@ variable "metadata_http_tokens" {
   default     = "required"
   description = "Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2)"
 }
+
+variable "iam_base_name" {
+  type        = string
+  description = "The prefix of the IAM role"
+  default     = "weka"
+}

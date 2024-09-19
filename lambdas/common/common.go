@@ -596,15 +596,19 @@ func GetInstancesNames(instances []protocol.Vm) (vmNames []string) {
 	return
 }
 
-func GetClusterSecondaryIps(gatewaysName string) (secondaryIps []string, err error) {
+func GetNfsClusterSecondaryIps(clusterName string) (secondaryIps []string, err error) {
 	svc := connectors.GetAWSSession().EC2
-	log.Debug().Msgf("Fetching cluster %s secondary ips...", gatewaysName)
+	log.Debug().Msgf("Fetching cluster %s nfs secondary ips...", clusterName)
 
 	describeOutput, err := svc.DescribeNetworkInterfaces(&ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name:   aws.String("tag:Name"),
-				Values: []*string{&gatewaysName},
+				Name:   aws.String("tag:weka_cluster_name"),
+				Values: []*string{&clusterName},
+			},
+			{
+				Name:   aws.String("tag:weka_hostgroup_type"),
+				Values: []*string{aws.String("gateways-protocol")},
 			},
 		},
 	})

@@ -1,6 +1,11 @@
+locals {
+  lb_prefix = lookup(var.custom_prefix, "lb", var.prefix)
+}
+
+
 resource "aws_lb" "alb" {
   count                            = var.create_alb ? 1 : 0
-  name                             = substr("${var.prefix}-${var.cluster_name}-lb", 0, 32)
+  name                             = substr("${local.lb_prefix}-${var.cluster_name}-lb", 0, 32)
   internal                         = true
   load_balancer_type               = "application"
   security_groups                  = local.alb_sg_ids
@@ -8,14 +13,14 @@ resource "aws_lb" "alb" {
   enable_cross_zone_load_balancing = false
   enable_deletion_protection       = false
   tags = merge(var.tags_map, {
-    Name         = "${var.prefix}-${var.cluster_name}-lb"
+    Name         = "${local.lb_prefix}-${var.cluster_name}-lb"
     cluster_name = var.cluster_name
   })
 }
 
 resource "aws_lb_target_group" "alb_target_group" {
   count    = var.create_alb ? 1 : 0
-  name     = replace(substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32), "/-$/", "")
+  name     = replace(substr("${local.lb_prefix}-${var.cluster_name}-lb-target-group", 0, 32), "/-$/", "")
   vpc_id   = local.vpc_id
   port     = 14000
   protocol = "HTTPS"
@@ -31,7 +36,7 @@ resource "aws_lb_target_group" "alb_target_group" {
   }
 
   tags = merge(var.tags_map, {
-    Name = "${var.prefix}-${var.cluster_name}-lb-target-group"
+    Name = "${local.lb_prefix}-${var.cluster_name}-lb-target-group"
   })
 }
 
@@ -48,7 +53,7 @@ resource "aws_lb_listener" "lb_weka_listener" {
     type             = "forward"
   }
   tags = merge(var.tags_map, {
-    Name = "${var.prefix}-${var.cluster_name}-lb-weka-listener"
+    Name = "${local.lb_prefix}-${var.cluster_name}-lb-weka-listener"
   })
 }
 
@@ -65,7 +70,7 @@ resource "aws_lb_listener" "lb_listener" {
     type             = "forward"
   }
   tags = merge(var.tags_map, {
-    Name = "${var.prefix}-${var.cluster_name}-lb-listener"
+    Name = "${local.lb_prefix}-${var.cluster_name}-lb-listener"
   })
 }
 

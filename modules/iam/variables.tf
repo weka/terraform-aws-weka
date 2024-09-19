@@ -4,6 +4,17 @@ variable "prefix" {
   default     = "weka"
 }
 
+variable "custom_prefix" {
+  type        = map(string)
+  description = "Custom prefix for resources. The supported keys are: lb, db, kms, cloudwatch, sfn, lambda, secrets, ec2, iam, obs"
+  default     = {}
+  validation {
+    condition     = alltrue([for k, v in var.custom_prefix : contains(["lb", "db", "kms", "cloudwatch", "sfn", "lambda", "secrets", "ec2", "iam", "obs"], k)])
+    error_message = "Custom prefix keys should be of the following: [\"lb\", \"db\", \"kms\", \"cloudwatch\", \"sfn\", \"lambda\", \"secrets\", \"ec2\", \"iam\", \"obs\"]."
+  }
+}
+
+
 variable "cluster_name" {
   type        = string
   description = "Cluster name"

@@ -17,10 +17,11 @@ import (
 type AWSDeploymentParams struct {
 	Ctx                          context.Context
 	TokenId                      string
-	Prefix                       string
 	ClusterName                  string
 	StateTable                   string
 	StateTableHashKey            string
+	StateKey                     string
+	NfsStateKey                  string
 	InstanceName                 string
 	NicsNumStr                   string
 	ComputeMemory                string
@@ -45,8 +46,7 @@ func getAWSInstanceNameCmd() string {
 
 func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string, err error) {
 	log.Info().Msg("Getting NFS deploy script")
-	stateKey := fmt.Sprintf("%s-%s-nfs-state", awsDeploymentParams.Prefix, awsDeploymentParams.ClusterName)
-	state, err := common.GetClusterState(awsDeploymentParams.StateTable, awsDeploymentParams.StateTableHashKey, stateKey)
+	state, err := common.GetClusterState(awsDeploymentParams.StateTable, awsDeploymentParams.StateTableHashKey, awsDeploymentParams.NfsStateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
@@ -163,9 +163,8 @@ func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw prot
 
 func GetDeployScript(params AWSDeploymentParams) (bashScript string, err error) {
 	log.Info().Msg("Getting deploy script")
-	stateKey := fmt.Sprintf("%s-%s-state", params.Prefix, params.ClusterName)
 
-	state, err := common.GetClusterState(params.StateTable, params.StateTableHashKey, stateKey)
+	state, err := common.GetClusterState(params.StateTable, params.StateTableHashKey, params.StateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return

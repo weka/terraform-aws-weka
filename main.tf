@@ -1,5 +1,6 @@
 locals {
-  ssh_path         = "/tmp/${var.prefix}-${var.cluster_name}"
+  ec2_prefix       = lookup(var.custom_prefix, "ec2", var.prefix)
+  ssh_path         = "/tmp/${local.ec2_prefix}-${var.cluster_name}"
   nics             = var.install_cluster_dpdk ? var.containers_config_map[var.instance_type].nics : 1
   public_ssh_key   = var.enable_key_pair && var.ssh_public_key == null ? tls_private_key.key[0].public_key_openssh : var.ssh_public_key
   tags_dest        = ["instance", "network-interface", "volume"]
@@ -11,12 +12,14 @@ locals {
     groups              = join(" ", local.sg_ids)
     nics_num            = local.nics
     deploy_lambda_name  = aws_lambda_function.deploy_lambda.function_name
-    weka_log_group_name = "/wekaio/${var.prefix}-${var.cluster_name}"
+    weka_log_group_name = "/wekaio/${local.ec2_prefix}-${var.cluster_name}"
     custom_data         = var.custom_data
   })
   backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
   create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null
   kms_key_id                    = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  kms_prefix                    = lookup(var.custom_prefix, "kms", var.prefix)
+  iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
 }
 
 data "aws_caller_identity" "current" {}
@@ -47,7 +50,7 @@ resource "tls_private_key" "key" {
 
 resource "aws_key_pair" "generated_key" {
   count      = var.enable_key_pair && var.key_pair_name == null ? 1 : 0
-  key_name   = "${var.prefix}-${var.cluster_name}-ssh-key"
+  key_name   = "${local.ec2_prefix}-${var.cluster_name}-ssh-key"
   public_key = local.public_ssh_key
   tags       = var.tags_map
 }
@@ -68,7 +71,7 @@ resource "local_file" "private_key" {
 
 resource "aws_placement_group" "placement_group" {
   count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
-  name     = "${var.prefix}-${var.cluster_name}-placement-group"
+  name     = "${local.ec2_prefix}-${var.cluster_name}-placement-group"
   strategy = "cluster"
   tags = merge(var.tags_map, {
     CreationDate = timestamp()
@@ -82,13 +85,13 @@ resource "aws_kms_key" "kms_key" {
   deletion_window_in_days = 20
   is_enabled              = true
   tags = merge(var.tags_map, {
-    Name = "${var.prefix}-${var.cluster_name}"
+    Name = "${local.kms_prefix}-${var.cluster_name}"
   })
 }
 
 resource "aws_kms_alias" "kms_alias" {
   count         = local.create_kms_key ? 1 : 0
-  name          = "alias/${var.prefix}-${var.cluster_name}"
+  name          = "alias/${local.kms_prefix}-${var.cluster_name}"
   target_key_id = aws_kms_key.kms_key[0].key_id
   depends_on    = [aws_kms_key.kms_key]
 }
@@ -147,7 +150,7 @@ resource "aws_kms_key_policy" "kms_key_policy" {
 }
 
 resource "aws_launch_template" "launch_template" {
-  name_prefix                          = "${var.prefix}-${var.cluster_name}-backend"
+  name_prefix                          = "${local.ec2_prefix}-${var.cluster_name}-backend"
   disable_api_termination              = true
   disable_api_stop                     = true
   ebs_optimized                        = true
@@ -217,7 +220,7 @@ resource "aws_launch_template" "launch_template" {
     content {
       resource_type = tag_specifications.value
       tags = merge(var.tags_map, {
-        Name                = "${var.prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
+        Name                = "${local.ec2_prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
         user                = data.aws_caller_identity.current.user_id
@@ -229,7 +232,7 @@ resource "aws_launch_template" "launch_template" {
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name = "${var.prefix}-${var.cluster_name}-autoscaling-group"
+  name = "${local.ec2_prefix}-${var.cluster_name}-autoscaling-group"
   #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
   desired_capacity      = var.cluster_size
   max_size              = var.cluster_size * 7
@@ -243,7 +246,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     version = aws_launch_template.launch_template.latest_version
   }
   tag {
-    key                 = "${var.prefix}-${var.cluster_name}-asg"
+    key                 = "${local.ec2_prefix}-${var.cluster_name}-asg"
     propagate_at_launch = true
     value               = var.cluster_name
   }

@@ -1,6 +1,7 @@
 locals {
   dynamodb_table_name    = var.dynamodb_table_name == "" ? aws_dynamodb_table.weka_deployment[0].name : var.dynamodb_table_name
   dynamodb_hash_key_name = var.dynamodb_hash_key_name == "" ? "Key" : var.dynamodb_hash_key_name
+  db_prefix              = lookup(var.custom_prefix, "db", var.prefix)
   state_key              = "${var.prefix}-${var.cluster_name}-state"
   nfs_state_key          = "${var.prefix}-${var.cluster_name}-nfs-state"
 }
@@ -8,7 +9,7 @@ locals {
 resource "aws_dynamodb_table" "weka_deployment" {
   count = var.dynamodb_table_name == "" ? 1 : 0
 
-  name         = "${var.prefix}-${var.cluster_name}-weka-deployment"
+  name         = "${local.db_prefix}-${var.cluster_name}-weka-deployment"
   hash_key     = local.dynamodb_hash_key_name
   billing_mode = "PAY_PER_REQUEST"
 
