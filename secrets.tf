@@ -10,7 +10,8 @@ resource "random_password" "suffix" {
 }
 
 locals {
-  secret_prefix = "weka/${var.prefix}-${var.cluster_name}/"
+  prefix        = lookup(var.custom_prefix, "secrets", "weka/${var.prefix}")
+  secret_prefix = "${local.prefix}-${var.cluster_name}/"
 }
 
 resource "aws_secretsmanager_secret" "get_weka_io_token" {

@@ -3,7 +3,8 @@ module "clients" {
   count                        = var.clients_number > 0 || var.instance_iam_profile_arn == "" ? 1 : 0
   source                       = "./modules/clients"
   subnet_id                    = local.subnet_ids[0]
-  clients_name                 = "${var.prefix}-${var.cluster_name}-client"
+  clients_name                 = "${local.ec2_prefix}-${var.cluster_name}-client"
+  iam_base_name                = "${local.iam_prefix}-${var.cluster_name}-client"
   clients_number               = var.clients_number
   clients_use_dpdk             = var.clients_use_dpdk
   proxy_url                    = var.proxy_url

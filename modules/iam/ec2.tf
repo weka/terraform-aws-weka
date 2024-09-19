@@ -1,11 +1,11 @@
 # Create an IAM policy
 
 locals {
-  obs_name = var.tiering_obs_name == "" ? "${var.prefix}-${var.cluster_name}-obs" : var.tiering_obs_name
+  obs_name = var.tiering_obs_name == "" ? "${local.obs_prefix}-${var.cluster_name}-obs" : var.tiering_obs_name
 }
 
 resource "aws_iam_policy" "backend_eni_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-eni-policy"
+  name = "${local.iam_prefix}-${var.cluster_name}-eni-policy"
   tags = var.tags_map
   policy = jsonencode({
     Version = "2012-10-17"
@@ -27,7 +27,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
 
 resource "aws_iam_policy" "backend_obs_iam_policy" {
   count = var.tiering_enable_obs_integration ? 1 : 0
-  name  = "${var.prefix}-${var.cluster_name}-obs-policy"
+  name  = "${local.iam_prefix}-${var.cluster_name}-obs-policy"
   tags  = var.tags_map
   policy = jsonencode({
     Version = "2012-10-17"
@@ -48,7 +48,7 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
 
 resource "aws_iam_policy" "additional" {
   count = var.additional_iam_policy_statement != null ? 1 : 0
-  name  = "${var.prefix}-${var.cluster_name}-additional-policy"
+  name  = "${local.iam_prefix}-${var.cluster_name}-additional-policy"
   policy = jsonencode({
     Version   = "2012-10-17"
     Statement = var.additional_iam_policy_statement
@@ -57,7 +57,7 @@ resource "aws_iam_policy" "additional" {
 }
 
 resource "aws_iam_policy" "invoke_lambda_function" {
-  name = "${var.prefix}-${var.cluster_name}-invoke-lambda-function"
+  name = "${local.iam_prefix}-${var.cluster_name}-invoke-lambda-function"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -67,7 +67,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
           "lambda:InvokeFunction"
         ]
         Resource = [
-          "arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}*"
+          "arn:aws:lambda:*:*:function:${local.lambda_prefix}-${var.cluster_name}*"
         ]
       }
     ]
@@ -77,7 +77,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
 
 # Create an IAM policy
 resource "aws_iam_policy" "backend_log_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-send-log-to-cloud-watch-policy"
+  name = "${local.iam_prefix}-${var.cluster_name}-send-log-to-cloud-watch-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -92,7 +92,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
           "logs:PutRetentionPolicy"
         ]
         Resource = [
-          "arn:aws:logs:*:*:log-group:/wekaio/${var.prefix}-${var.cluster_name}*"
+          "arn:aws:logs:*:*:log-group:/wekaio/${local.ec2_prefix}-${var.cluster_name}*"
         ]
       }
     ]
@@ -102,7 +102,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
 
 # Create an IAM role
 resource "aws_iam_role" "iam_role" {
-  name = "${var.prefix}-${var.cluster_name}-iam-role"
+  name = "${local.iam_prefix}-${var.cluster_name}-iam-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -121,14 +121,14 @@ resource "aws_iam_role" "iam_role" {
 
 # Attach the IAM policy to the IAM role
 resource "aws_iam_policy_attachment" "backend_eni_role_attachment" {
-  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_eni_iam_policy.arn
   roles      = [aws_iam_role.iam_role.name]
 }
 
 resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
   count      = var.tiering_enable_obs_integration ? 1 : 0
-  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
   roles      = [aws_iam_role.iam_role.name]
 }
@@ -141,13 +141,13 @@ resource "aws_iam_policy_attachment" "additional" {
 }
 
 resource "aws_iam_policy_attachment" "backend_log_role_attachment" {
-  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_log_iam_policy.arn
   roles      = [aws_iam_role.iam_role.name]
 }
 
 resource "aws_iam_policy_attachment" "invoke_lambda_function_attachment" {
-  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.invoke_lambda_function.arn
   roles      = [aws_iam_role.iam_role.name]
 }
@@ -159,7 +159,7 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
 
 # Create an IAM instance profile
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "${var.prefix}-${var.cluster_name}-instance-profile"
+  name = "${local.iam_prefix}-${var.cluster_name}-instance-profile"
   role = aws_iam_role.iam_role.name
   tags = var.tags_map
 }

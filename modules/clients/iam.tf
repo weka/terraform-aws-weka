@@ -1,7 +1,11 @@
+locals {
+  base_name = var.iam_base_name != null ? var.iam_base_name : var.clients_name
+}
+
 resource "aws_iam_policy" "ec2" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name = "${var.clients_name}-ec2-policy"
+  name = "${local.base_name}-ec2-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -27,7 +31,7 @@ resource "aws_iam_policy" "ec2" {
 resource "aws_iam_policy" "logging" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name = "${var.clients_name}-send-log-to-cloud-watch-policy"
+  name = "${local.base_name}-send-log-to-cloud-watch-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -53,7 +57,7 @@ resource "aws_iam_policy" "logging" {
 resource "aws_iam_policy" "autoscaling" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name = "${var.clients_name}-autoscaling-policy"
+  name = "${local.base_name}-autoscaling-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -75,7 +79,7 @@ resource "aws_iam_policy" "autoscaling" {
 resource "aws_iam_role" "this" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name = "${var.clients_name}-iam-role"
+  name = "${local.base_name}-iam-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -96,7 +100,7 @@ resource "aws_iam_role" "this" {
 resource "aws_iam_policy_attachment" "ec2" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name       = "${var.clients_name}-ec2-policy-attachment"
+  name       = "${local.base_name}-ec2-policy-attachment"
   policy_arn = aws_iam_policy.ec2[0].arn
   roles      = [aws_iam_role.this[0].name]
 }
@@ -104,7 +108,7 @@ resource "aws_iam_policy_attachment" "ec2" {
 resource "aws_iam_policy_attachment" "logging" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name       = "${var.clients_name}-log-policy-attachment"
+  name       = "${local.base_name}-log-policy-attachment"
   policy_arn = aws_iam_policy.logging[0].arn
   roles      = [aws_iam_role.this[0].name]
 }
@@ -112,7 +116,7 @@ resource "aws_iam_policy_attachment" "logging" {
 resource "aws_iam_policy_attachment" "autoscaling" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name       = "${var.clients_name}-autoscaling-policy-attachment"
+  name       = "${local.base_name}-autoscaling-policy-attachment"
   policy_arn = aws_iam_policy.autoscaling[0].arn
   roles      = [aws_iam_role.this[0].name]
 }
@@ -127,7 +131,7 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
 resource "aws_iam_instance_profile" "this" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
-  name = "${var.clients_name}-instance-profile"
+  name = "${local.base_name}-instance-profile"
   role = aws_iam_role.this[0].name
   tags = var.tags_map
 }

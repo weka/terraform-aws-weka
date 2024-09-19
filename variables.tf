@@ -46,6 +46,16 @@ variable "prefix" {
   default     = "weka"
 }
 
+variable "custom_prefix" {
+  type        = map(string)
+  description = "Custom prefix for resources. The supported keys are: lb, db, kms, cloudwatch, sfn, lambda, secrets, ec2, iam, obs"
+  default     = {}
+  validation {
+    condition     = alltrue([for k, v in var.custom_prefix : contains(["lb", "db", "kms", "cloudwatch", "sfn", "lambda", "secrets", "ec2", "iam", "obs"], k)])
+    error_message = "Custom prefix keys should be of the following: [\"lb\", \"db\", \"kms\", \"cloudwatch\", \"sfn\", \"lambda\", \"secrets\", \"ec2\", \"iam\", \"obs\"]."
+  }
+}
+
 variable "subnet_autocreate_as_private" {
   type        = bool
   default     = false
@@ -324,13 +334,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "23b310b040a6ea53217b8d7ef8d1d275"
+  default     = "101d90f51db4218356cab9d30f728e3e"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)

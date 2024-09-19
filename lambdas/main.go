@@ -121,6 +121,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+	stateKey := os.Getenv("STATE_KEY")
+	nfsStateKey := os.Getenv("NFS_STATE_KEY")
 	// data protection-related vars
 	stripeWidth, _ := strconv.Atoi(os.Getenv("STRIPE_WIDTH"))
 	protectionLevel, _ := strconv.Atoi(os.Getenv("PROTECTION_LEVEL"))
@@ -154,6 +156,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		DeploymentPasswordId: deploymentPasswordId,
 		StateTable:           stateTable,
 		StateTableHashKey:    stateTableHashKey,
+		StateKey:             stateKey,
+		NfsStateKey:          nfsStateKey,
 		Vm:                   vm,
 		Cluster: clusterizeCommon.ClusterParams{
 			ClusterizationTarget: hostsNum,
@@ -191,6 +195,8 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	tokenId := os.Getenv("TOKEN_ID")
 	stateTable := os.Getenv("STATE_TABLE")
 	stateTableHashKey := os.Getenv("STATE_TABLE_HASH_KEY")
+	stateKey := os.Getenv("STATE_KEY")
+	nfsStateKey := os.Getenv("NFS_STATE_KEY")
 	clusterName := os.Getenv("CLUSTER_NAME")
 	computeMemory := os.Getenv("COMPUTE_MEMORY")
 	computeContainerNum, _ := strconv.Atoi(os.Getenv("COMPUTE_CONTAINER_CORES_NUM"))
@@ -205,7 +211,6 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	smbProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("SMB_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	s3ProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("S3_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
-	prefix := os.Getenv("PREFIX")
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 
@@ -214,10 +219,11 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	awsDeploymentParams := deploy.AWSDeploymentParams{
 		Ctx:                          ctx,
 		TokenId:                      tokenId,
-		Prefix:                       prefix,
 		ClusterName:                  clusterName,
 		StateTable:                   stateTable,
 		StateTableHashKey:            stateTableHashKey,
+		StateKey:                     stateKey,
+		NfsStateKey:                  nfsStateKey,
 		InstanceName:                 vm.Name,
 		NicsNumStr:                   nicsNumStr,
 		ComputeMemory:                computeMemory,

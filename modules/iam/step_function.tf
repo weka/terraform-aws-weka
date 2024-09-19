@@ -1,5 +1,5 @@
 resource "aws_iam_role" "sfn_iam_role" {
-  name = "${var.prefix}-${var.cluster_name}-sfn-role"
+  name = "${local.iam_prefix}-${var.cluster_name}-sfn-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -16,14 +16,14 @@ resource "aws_iam_role" "sfn_iam_role" {
 }
 
 resource "aws_iam_policy" "sfn_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-sfn-policy"
+  name = "${local.iam_prefix}-${var.cluster_name}-sfn-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
         Action   = ["lambda:InvokeFunction"]
-        Resource = ["arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}-*-lambda"]
+        Resource = ["arn:aws:lambda:*:*:function:${local.lambda_prefix}-${var.cluster_name}-*-lambda"]
       },
       {
         Effect = "Allow"

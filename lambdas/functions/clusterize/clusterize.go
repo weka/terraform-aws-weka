@@ -24,6 +24,8 @@ type ClusterizationParams struct {
 	DeploymentPasswordId string
 	StateTable           string
 	StateTableHashKey    string
+	StateKey             string
+	NfsStateKey          string
 	InstallDpdk          bool
 	Vm                   protocol.Vm
 	Cluster              clusterize.ClusterParams
@@ -47,8 +49,7 @@ func Clusterize(p ClusterizationParams) (clusterizeScript string, err error) {
 }
 
 func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
-	stateKey := fmt.Sprintf("%s-%s-state", p.Cluster.Prefix, p.Cluster.ClusterName)
-	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, stateKey, p.Vm)
+	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.StateKey, p.Vm)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
@@ -72,7 +73,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 						Type:     "error",
 						Hostname: p.Vm.Name,
 						Message:  fmt.Sprintf("Failed creating obs bucket %s: %s", p.Obs.Name, err),
-					}, p.StateTable, p.StateTableHashKey, stateKey)
+					}, p.StateTable, p.StateTableHashKey, p.StateKey)
 				if err != nil {
 					log.Error().Err(err).Send()
 				}
@@ -123,8 +124,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 }
 
 func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
-	stateKey := fmt.Sprintf("%s-%s-nfs-state", p.Cluster.Prefix, p.Cluster.ClusterName)
-	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, stateKey, p.Vm)
+	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.NfsStateKey, p.Vm)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
@@ -145,8 +145,7 @@ func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) 
 		nicNames = append(nicNames, instance.NicName)
 	}
 
-	gatewaysName := fmt.Sprintf("%s-%s-nfs-protocol-gateway", p.Cluster.Prefix, p.Cluster.ClusterName)
-	secondaryIps, err := common.GetClusterSecondaryIps(gatewaysName)
+	secondaryIps, err := common.GetNfsClusterSecondaryIps(p.Cluster.ClusterName)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
