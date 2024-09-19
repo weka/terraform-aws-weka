@@ -208,3 +208,9 @@ variable "capacity_reservation_id" {
   default     = null
   description = "The ID of the capacity reservation in which to run the clients"
 }
+
+variable "iam_base_name" {
+  type        = string
+  description = "The prefix of the IAM role"
+  default     = null
+}

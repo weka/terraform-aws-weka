@@ -8,7 +8,9 @@ locals {
     "transient", "join-nfs-finalization"
   ])
   enable_lambda_vpc = var.enable_lambda_vpc_config ? 1 : 0
-  function_name     = [for func in local.functions : "${var.prefix}-${var.cluster_name}-${func}-lambda"]
+  obs_prefix        = lookup(var.custom_prefix, "obs", var.prefix)
+  lambda_prefix     = lookup(var.custom_prefix, "lambda", var.prefix)
+  function_name     = [for func in local.functions : "${local.lambda_prefix}-${var.cluster_name}-${func}-lambda"]
   lambdas_hash = md5(join("", [
     for f in fileset(local.source_dir, "**") : filemd5("${local.source_dir}/${f}")
   ]))
@@ -17,15 +19,15 @@ locals {
   install_weka_url        = var.install_weka_url != "" ? var.install_weka_url : "https://$TOKEN@get.weka.io/dist/v1/install/${var.weka_version}/${var.weka_version}?provider=aws&region=${data.aws_region.current.name}"
 }
 
-resource "aws_cloudwatch_log_group" "cloudwatch_log_group" {
+resource "aws_cloudwatch_log_group" "lambdas_log_group" {
   count             = length(local.function_name)
-  name              = "/aws/lambda/${local.function_name[count.index]}"
+  name              = "/aws/lambda/${local.cloudwatch_prefix}/${local.function_name[count.index]}"
   retention_in_days = 30
   tags              = var.tags_map
 }
 
 resource "aws_lambda_function" "deploy_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-deploy-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-deploy-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -48,7 +50,8 @@ resource "aws_lambda_function" "deploy_lambda" {
       TOKEN_ID                          = var.get_weka_io_token_secret_id != "" ? var.get_weka_io_token_secret_id : aws_secretsmanager_secret.get_weka_io_token[0].id
       STATE_TABLE                       = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY              = local.dynamodb_hash_key_name
-      PREFIX                            = var.prefix
+      STATE_KEY                         = local.state_key
+      NFS_STATE_KEY                     = local.nfs_state_key
       CLUSTER_NAME                      = var.cluster_name
       COMPUTE_MEMORY                    = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].memory[1] : var.containers_config_map[var.instance_type].memory[0]
       COMPUTE_CONTAINER_CORES_NUM       = var.set_dedicated_fe_container ? var.containers_config_map[var.instance_type].compute : var.containers_config_map[var.instance_type].compute + 1
@@ -72,7 +75,7 @@ resource "aws_lambda_function" "deploy_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 
   lifecycle {
     precondition {
@@ -87,7 +90,7 @@ resource "aws_lambda_function" "deploy_lambda" {
 }
 
 resource "aws_lambda_function" "clusterize_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-clusterize-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-clusterize-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -109,12 +112,14 @@ resource "aws_lambda_function" "clusterize_lambda" {
       REGION                       = local.region
       HOSTS_NUM                    = var.cluster_size
       CLUSTER_NAME                 = var.cluster_name
-      PREFIX                       = var.prefix
+      PREFIX                       = local.obs_prefix
       NVMES_NUM                    = var.containers_config_map[var.instance_type].nvme
       ADMIN_PASSWORD_ID            = aws_secretsmanager_secret.weka_password.id
       DEPLOYMENT_PASSWORD_ID       = aws_secretsmanager_secret.weka_deployment_password.id
       STATE_TABLE                  = local.dynamodb_table_name
       STATE_TABLE_HASH_KEY         = local.dynamodb_hash_key_name
+      STATE_KEY                    = local.state_key
+      NFS_STATE_KEY                = local.nfs_state_key
       STRIPE_WIDTH                 = var.stripe_width != -1 ? var.stripe_width : local.stripe_width
       PROTECTION_LEVEL             = var.protection_level
       HOTSPARE                     = var.hotspare
@@ -138,11 +143,11 @@ resource "aws_lambda_function" "clusterize_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "clusterize_finalization_lambda" {
-  function_name = substr("${var.prefix}-${var.cluster_name}-clusterize-finalization-lambda", 0, 64)
+  function_name = substr("${local.lambda_prefix}-${var.cluster_name}-clusterize-finalization-lambda", 0, 64)
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -168,11 +173,11 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "join_nfs_finalization_lambda" {
-  function_name = substr("${var.prefix}-${var.cluster_name}-join-nfs-finalization-lambda", 0, 64)
+  function_name = substr("${local.lambda_prefix}-${var.cluster_name}-join-nfs-finalization-lambda", 0, 64)
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -194,12 +199,12 @@ resource "aws_lambda_function" "join_nfs_finalization_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 
 resource "aws_lambda_function" "management" {
-  function_name = "${var.prefix}-${var.cluster_name}-management-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-management-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -216,7 +221,6 @@ resource "aws_lambda_function" "management" {
     variables = {
       LAMBDA                     = "management"
       REGION                     = local.region
-      PREFIX                     = var.prefix
       CLUSTER_NAME               = var.cluster_name
       USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
       DEPLOYMENT_PASSWORD_ID     = aws_secretsmanager_secret.weka_deployment_password.id
@@ -225,12 +229,12 @@ resource "aws_lambda_function" "management" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 
 resource "aws_lambda_function" "report_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-report-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-report-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -257,11 +261,11 @@ resource "aws_lambda_function" "report_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "status_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-status-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-status-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -293,11 +297,11 @@ resource "aws_lambda_function" "status_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "fetch_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-fetch-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-fetch-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -320,10 +324,9 @@ resource "aws_lambda_function" "fetch_lambda" {
       STATE_TABLE                   = local.dynamodb_table_name
       ROLE                          = "backend"
       DOWN_BACKENDS_REMOVAL_TIMEOUT = var.debug_down_backends_removal_timeout
-      PREFIX                        = var.prefix
       CLUSTER_NAME                  = var.cluster_name
-      ASG_NAME                      = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-      NFS_ASG_NAME                  = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
+      ASG_NAME                      = "${local.ec2_prefix}-${var.cluster_name}-autoscaling-group"
+      NFS_ASG_NAME                  = "${local.ec2_prefix}-${var.cluster_name}-nfs-protocol-gateway"
       USERNAME_ID                   = aws_secretsmanager_secret.weka_username.id
       DEPLOYMENT_PASSWORD_ID        = aws_secretsmanager_secret.weka_deployment_password.id
       ADMIN_PASSWORD_ID             = aws_secretsmanager_secret.weka_password.id
@@ -331,11 +334,11 @@ resource "aws_lambda_function" "fetch_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "scale_down_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-scale-down-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-scale-down-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -352,7 +355,6 @@ resource "aws_lambda_function" "scale_down_lambda" {
     variables = {
       LAMBDA                 = "scaleDown"
       REGION                 = local.region
-      PREFIX                 = var.prefix
       CLUSTER_NAME           = var.cluster_name
       USERNAME_ID            = aws_secretsmanager_secret.weka_username.id
       DEPLOYMENT_PASSWORD_ID = aws_secretsmanager_secret.weka_deployment_password.id
@@ -360,11 +362,11 @@ resource "aws_lambda_function" "scale_down_lambda" {
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "transient_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-transient-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-transient-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -384,16 +386,15 @@ resource "aws_lambda_function" "transient_lambda" {
     variables = {
       LAMBDA       = "transient"
       REGION       = local.region
-      PREFIX       = var.prefix
       CLUSTER_NAME = var.cluster_name
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
 
 resource "aws_lambda_function" "terminate_lambda" {
-  function_name = "${var.prefix}-${var.cluster_name}-terminate-lambda"
+  function_name = "${local.lambda_prefix}-${var.cluster_name}-terminate-lambda"
   s3_bucket     = local.s3_bucket
   s3_key        = local.s3_key
   handler       = local.handler_name
@@ -413,12 +414,11 @@ resource "aws_lambda_function" "terminate_lambda" {
     variables = {
       LAMBDA       = "terminate"
       REGION       = local.region
-      PREFIX       = var.prefix
       CLUSTER_NAME = var.cluster_name
-      ASG_NAME     = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-      NFS_ASG_NAME = "${var.prefix}-${var.cluster_name}-nfs-protocol-gateway"
+      ASG_NAME     = "${local.ec2_prefix}-${var.cluster_name}-autoscaling-group"
+      NFS_ASG_NAME = "${local.ec2_prefix}-${var.cluster_name}-nfs-protocol-gateway"
     }
   }
   tags       = var.tags_map
-  depends_on = [aws_cloudwatch_log_group.cloudwatch_log_group]
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }

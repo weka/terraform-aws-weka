@@ -37,6 +37,7 @@ module "iam" {
   count                           = var.instance_iam_profile_arn == "" ? 1 : 0
   source                          = "./modules/iam"
   prefix                          = var.prefix
+  custom_prefix                   = var.custom_prefix
   cluster_name                    = var.cluster_name
   tags_map                        = var.tags_map
   state_table_name                = local.dynamodb_table_name

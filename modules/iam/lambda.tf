@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_iam_role" {
-  name = "${var.prefix}-${var.cluster_name}-lambda-role"
+  name = "${local.iam_prefix}-${var.cluster_name}-lambda-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -16,7 +16,7 @@ resource "aws_iam_role" "lambda_iam_role" {
 }
 
 resource "aws_iam_policy" "lambda_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-lambda-policy"
+  name = "${local.iam_prefix}-${var.cluster_name}-lambda-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -27,7 +27,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = ["arn:aws:logs:*:*:log-group:/aws/lambda/${var.prefix}-${var.cluster_name}*:*"]
+        Resource = ["arn:aws:logs:*:*:log-group:/aws/lambda/${local.lambda_prefix}-${var.cluster_name}*:*"]
         }, {
         Effect = "Allow"
         Action = [
@@ -69,7 +69,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
       {
         Effect   = "Allow"
         Action   = ["lambda:InvokeFunction"]
-        Resource = ["arn:aws:lambda:*:*:function:${var.prefix}-${var.cluster_name}*"]
+        Resource = ["arn:aws:lambda:*:*:function:${local.lambda_prefix}-${var.cluster_name}*"]
       }
     ]
   })
@@ -83,7 +83,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 
 resource "aws_iam_policy" "lambda_obs_iam_policy" {
   count = var.tiering_enable_obs_integration && var.tiering_obs_name == "" ? 1 : 0
-  name  = "${var.prefix}-${var.cluster_name}-lambda-obs-policy"
+  name  = "${local.iam_prefix}-${var.cluster_name}-lambda-obs-policy"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -92,7 +92,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
         Action = [
           "s3:CreateBucket",
         ]
-        Resource = ["arn:aws:s3:::${var.prefix}-${var.cluster_name}-obs"]
+        Resource = ["arn:aws:s3:::${local.obs_name}"]
       }
     ]
   })
@@ -101,7 +101,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
 
 resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {
   count      = var.tiering_enable_obs_integration && var.tiering_obs_name == "" ? 1 : 0
-  name       = "${var.prefix}-${var.cluster_name}-policy-attachment"
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.lambda_obs_iam_policy[0].arn
   roles      = [aws_iam_role.lambda_iam_role.name]
 }

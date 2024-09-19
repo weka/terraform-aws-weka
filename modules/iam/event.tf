@@ -1,5 +1,5 @@
 resource "aws_iam_role" "event_iam_role" {
-  name = "${var.prefix}-${var.cluster_name}-event-role"
+  name = "${local.iam_prefix}-${var.cluster_name}-event-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -16,7 +16,7 @@ resource "aws_iam_role" "event_iam_role" {
 }
 
 resource "aws_iam_policy" "event_iam_policy" {
-  name = "${var.prefix}-${var.cluster_name}-event-policy"
+  name = "${local.iam_prefix}-${var.cluster_name}-event-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -27,7 +27,7 @@ resource "aws_iam_policy" "event_iam_policy" {
           "states:StartExecution"
         ]
         Resource = [
-          "arn:aws:states:*:*:stateMachine:${var.prefix}-${var.cluster_name}-scale-down-state-machine"
+          "arn:aws:states:*:*:stateMachine:${local.sfn_prefix}-${var.cluster_name}-scale-down-state-machine"
         ]
       }
     ]
