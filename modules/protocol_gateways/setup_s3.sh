@@ -42,7 +42,7 @@ function retry_create_s3_cluster {
   return 0
 }
 
-if [[ $(weka s3 cluster status) ]]; then
+if [[ $(weka s3 cluster status |grep -v 'IP') ]]; then
         echo "almog before check_cluster_status 1 "
         check_cluster_status
         echo "almog after check_cluster_status 1 "
