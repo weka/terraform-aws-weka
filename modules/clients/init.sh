@@ -63,7 +63,7 @@ region=${region}
 subnet_id=${subnet_id}
 additional_nics_num=${additional_nics_num}
 
-instance_type=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+instance_type=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-type)
 max_network_cards=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.MaximumNetworkCards" --output text)
 
 counter=0
