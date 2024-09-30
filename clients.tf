@@ -28,5 +28,6 @@ module "clients" {
   custom_data                  = var.clients_custom_data
   arch                         = var.client_arch
   capacity_reservation_id      = var.client_capacity_reservation_id
+  metadata_http_tokens         = var.metadata_http_tokens
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }
