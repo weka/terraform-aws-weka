@@ -10,7 +10,7 @@ module "smb_protocol_gateways" {
   frontend_container_cores_num        = var.smb_protocol_gateway_fe_cores_num
   secondary_ips_per_nic               = var.smb_protocol_gateway_secondary_ips_per_nic
   instance_type                       = var.smb_protocol_gateway_instance_type
-  key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
+  key_pair_name                       = var.enable_key_pair ? var.key_pair_name == null ? aws_key_pair.generated_key[0].key_name : var.key_pair_name : null
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
@@ -51,7 +51,7 @@ module "s3_protocol_gateways" {
   frontend_container_cores_num        = var.s3_protocol_gateway_fe_cores_num
   secondary_ips_per_nic               = 0
   instance_type                       = var.s3_protocol_gateway_instance_type
-  key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
+  key_pair_name                       = var.enable_key_pair ? var.key_pair_name == null ? aws_key_pair.generated_key[0].key_name : var.key_pair_name : null
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
@@ -89,7 +89,7 @@ module "nfs_protocol_gateways" {
   frontend_container_cores_num        = var.nfs_protocol_gateway_fe_cores_num
   secondary_ips_per_nic               = var.nfs_protocol_gateway_secondary_ips_per_nic
   instance_type                       = var.nfs_protocol_gateway_instance_type
-  key_pair_name                       = var.key_pair_name != null ? var.key_pair_name : aws_key_pair.generated_key[0].key_name
+  key_pair_name                       = var.enable_key_pair ? var.key_pair_name == null ? aws_key_pair.generated_key[0].key_name : var.key_pair_name : null
   assign_public_ip                    = var.assign_public_ip
   placement_group_name                = local.backends_placement_group_name
   use_placement_group                 = var.use_placement_group
