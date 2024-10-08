@@ -15,7 +15,7 @@ resource "aws_lb" "alb" {
 
 resource "aws_lb_target_group" "alb_target_group" {
   count    = var.create_alb ? 1 : 0
-  name     = substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32)
+  name     = replace(substr("${var.prefix}-${var.cluster_name}-lb-target-group", 0, 32), "/-$/", "")
   vpc_id   = local.vpc_id
   port     = 14000
   protocol = "HTTPS"
