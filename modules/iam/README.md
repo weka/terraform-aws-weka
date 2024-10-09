@@ -51,6 +51,7 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_additional_iam_policy_statement"></a> [additional\_iam\_policy\_statement](#input\_additional\_iam\_policy\_statement) | Additional IAM policy statement to be added to the instance IAM role. | <pre>list(object({<br>    Effect   = string<br>    Action   = list(string)<br>    Resource = list(string)<br>  }))</pre> | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | Cluster name | `string` | n/a | yes |
+| <a name="input_custom_prefix"></a> [custom\_prefix](#input\_custom\_prefix) | Custom prefix for resources. The supported keys are: lb, db, kms, cloudwatch, sfn, lambda, secrets, ec2, iam, obs | `map(string)` | `{}` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources names | `string` | `"weka"` | no |
 | <a name="input_secret_prefix"></a> [secret\_prefix](#input\_secret\_prefix) | Secrets prefix | `string` | n/a | yes |
 | <a name="input_state_table_name"></a> [state\_table\_name](#input\_state\_table\_name) | State DynamoDB table name | `string` | n/a | yes |
