@@ -17,8 +17,6 @@ module "clients" {
   assign_public_ip             = local.assign_public_ip
   placement_group_name         = var.client_placement_group_name != null || !var.client_use_backends_placement_group ? var.client_placement_group_name : local.backends_placement_group_name
   use_placement_group          = var.use_placement_group
-  weka_volume_device_name      = var.client_weka_volume_device_name
-  weka_volume_size             = var.client_weka_volume_size
   client_instance_ami_id       = var.client_instance_ami_id
   sg_ids                       = local.sg_ids
   tags_map                     = var.tags_map
@@ -30,5 +28,6 @@ module "clients" {
   arch                         = var.client_arch
   capacity_reservation_id      = var.client_capacity_reservation_id
   metadata_http_tokens         = var.metadata_http_tokens
+  root_volume_size             = var.clients_root_volume_size
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }
