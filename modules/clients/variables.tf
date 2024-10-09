@@ -93,18 +93,6 @@ variable "instance_iam_profile_arn" {
   description = "Instance IAM profile ARN"
 }
 
-variable "weka_volume_device_name" {
-  type        = string
-  description = "The root volume device name"
-  default     = "/dev/xvda"
-}
-
-variable "weka_volume_size" {
-  type        = number
-  description = "The root volume size in GB"
-  default     = 48
-}
-
 variable "alb_dns_name" {
   type        = string
   description = "ALB DNS name"
@@ -172,4 +160,10 @@ variable "iam_base_name" {
   type        = string
   description = "The prefix of the IAM role"
   default     = "weka"
+}
+
+variable "root_volume_size" {
+  type        = number
+  default     = null
+  description = "root disk size."
 }

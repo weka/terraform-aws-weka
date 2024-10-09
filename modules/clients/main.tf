@@ -9,7 +9,7 @@ data "aws_subnet" "selected" {
   id    = var.subnet_id
 }
 
-data "aws_ami" "selected" {
+data "aws_ami" "amzn_ami" {
   count       = var.client_instance_ami_id == null && var.clients_number > 0 ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
@@ -17,6 +17,14 @@ data "aws_ami" "selected" {
   filter {
     name   = "name"
     values = ["amzn2-ami-kernel-5.*-${local.arch}-gp2"]
+  }
+}
+
+data "aws_ami" "provided_ami" {
+  count = var.client_instance_ami_id != null ? 1 : 0
+  filter {
+    name   = "image-id"
+    values = [var.client_instance_ami_id]
   }
 }
 
@@ -49,6 +57,7 @@ locals {
   arm_instances     = ["c7gd.2xlarge", "c7gd.4xlarge", "c7gd.8xlarge", "c7gd.12xlarge", "c7gd.16xlarge", "c7g.2xlarge", "c7g.4xlarge", "c7g.8xlarge", "c7g.12xlarge", "c7g.16xlarge", "m7gd.xlarge", "m7gd.2xlarge", "m7gd.4xlarge", "m7gd.8xlarge", "m7gd.12xlarge", "m7gd.16xlarge", "m7g.xlarge", "m7g.2xlarge", "m7g.4xlarge", "m7g.8xlarge", "m7g.12xlarge", "m7g.16xlarge", "c6gn.2xlarge", "c6gn.4xlarge", "c6gn.8xlarge", "c6gn.12xlarge", "c6gn.16xlarge", "c6gd.2xlarge", "c6gd.4xlarge", "c6gd.8xlarge", "c6gd.12xlarge", "c6gd.16xlarge", "c6g.2xlarge", "c6g.4xlarge", "c6g.8xlarge", "c6g.12xlarge", "c6g.16xlarge", "m6gd.xlarge", "m6gd.2xlarge", "m6gd.4xlarge", "m6gd.8xlarge", "m6gd.12xlarge", "m6gd.16xlarge", "m6g.xlarge", "m6g.2xlarge", "m6g.4xlarge", "m6g.8xlarge", "m6g.12xlarge", "m6g.16xlarge", "g5g.2xlarge", "g5g.4xlarge", "g5g.8xlarge", "g5g.16xlarge"]
   default_arch      = contains(local.arm_instances, var.instance_type) ? "arm64" : "x86_64"
   arch              = var.arch == null ? local.default_arch : var.arch
+  root_device_name  = var.clients_number > 0 ? var.client_instance_ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name : ""
 }
 
 resource "aws_placement_group" "this" {
@@ -65,16 +74,16 @@ resource "aws_launch_template" "this" {
   name                                 = "${var.clients_name}-launch-template"
   disable_api_termination              = false
   ebs_optimized                        = true
-  image_id                             = var.client_instance_ami_id != null ? var.client_instance_ami_id : data.aws_ami.selected[0].id
+  image_id                             = var.client_instance_ami_id != null ? var.client_instance_ami_id : data.aws_ami.amzn_ami[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.key_pair_name
   update_default_version               = true
 
   block_device_mappings {
-    device_name = var.weka_volume_device_name
+    device_name = local.root_device_name
     ebs {
-      volume_size           = var.weka_volume_size
+      volume_size           = var.root_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
       encrypted             = var.ebs_encrypted

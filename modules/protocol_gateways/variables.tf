@@ -214,3 +214,9 @@ variable "iam_base_name" {
   description = "The prefix of the IAM role"
   default     = null
 }
+
+variable "root_volume_size" {
+  type        = number
+  default     = null
+  description = "root disk size."
+}
