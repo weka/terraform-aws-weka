@@ -37,6 +37,7 @@ module "smb_protocol_gateways" {
   join_nfs_finalization_lambda_name   = aws_lambda_function.join_nfs_finalization_lambda.function_name
   metadata_http_tokens                = var.metadata_http_tokens
   capacity_reservation_id             = var.smb_capacity_reservation_id
+  root_volume_size                    = var.smb_protocol_gateway_root_volume_size
   depends_on                          = [aws_autoscaling_group.autoscaling_group, aws_lb.alb, module.network]
 }
 
@@ -76,6 +77,7 @@ module "s3_protocol_gateways" {
   join_nfs_finalization_lambda_name   = aws_lambda_function.join_nfs_finalization_lambda.function_name
   metadata_http_tokens                = var.metadata_http_tokens
   capacity_reservation_id             = var.s3_capacity_reservation_id
+  root_volume_size                    = var.s3_protocol_gateway_root_volume_size
   depends_on                          = [aws_autoscaling_group.autoscaling_group, aws_lb.alb, module.network]
 }
 
@@ -115,5 +117,6 @@ module "nfs_protocol_gateways" {
   join_nfs_finalization_lambda_name   = aws_lambda_function.join_nfs_finalization_lambda.function_name
   metadata_http_tokens                = var.metadata_http_tokens
   capacity_reservation_id             = var.nfs_capacity_reservation_id
+  root_volume_size                    = var.nfs_protocol_gateway_root_volume_size
   depends_on                          = [aws_autoscaling_group.autoscaling_group, aws_lb.alb, module.network]
 }

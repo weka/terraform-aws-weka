@@ -20,6 +20,7 @@ locals {
   kms_key_id                    = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
   kms_prefix                    = lookup(var.custom_prefix, "kms", var.prefix)
   iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
+  root_device_name              = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
 }
 
 data "aws_caller_identity" "current" {}
@@ -38,6 +39,14 @@ data "aws_ami" "amzn_ami" {
   filter {
     name   = "name"
     values = ["amzn2-ami-kernel-5.*-x86_64-gp2"]
+  }
+}
+
+data "aws_ami" "provided_ami" {
+  count = var.ami_id != null ? 1 : 0
+  filter {
+    name   = "image-id"
+    values = [var.ami_id]
   }
 }
 
@@ -170,10 +179,11 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = local.root_device_name
     ebs {
-      encrypted  = var.ebs_encrypted
-      kms_key_id = local.kms_key_id
+      volume_size = var.backends_root_volume_size
+      encrypted   = var.ebs_encrypted
+      kms_key_id  = local.kms_key_id
     }
   }
 
