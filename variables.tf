@@ -384,6 +384,12 @@ variable "backends_weka_volume_size" {
   description = "The backends' default disk size."
 }
 
+variable "backends_root_volume_size" {
+  type        = number
+  default     = null
+  description = "The backends' root disk size."
+}
+
 ########################## alb #####################################
 variable "create_alb" {
   type        = bool
@@ -518,16 +524,10 @@ variable "client_use_backends_placement_group" {
   description = "Use backends placement group for clients"
 }
 
-variable "client_weka_volume_device_name" {
-  type        = string
-  description = "The client volume device name"
-  default     = "/dev/xvda"
-}
-
-variable "client_weka_volume_size" {
+variable "clients_root_volume_size" {
   type        = number
-  description = "The client volume size in GB"
-  default     = 48
+  description = "The client's root volume size in GB"
+  default     = null
 }
 
 variable "clients_use_autoscaling_group" {
@@ -595,6 +595,12 @@ variable "nfs_protocol_gateway_weka_volume_size" {
   description = "The protocol gateways' default disk size."
 }
 
+variable "nfs_protocol_gateway_root_volume_size" {
+  type        = number
+  default     = null
+  description = "The protocol gateways' root volume size."
+}
+
 variable "nfs_setup_protocol" {
   type        = bool
   description = "Setup protocol, default if false"
@@ -659,6 +665,12 @@ variable "smb_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
+}
+
+variable "smb_protocol_gateway_root_volume_size" {
+  type        = number
+  default     = null
+  description = "The protocol gateways' root volume size."
 }
 
 variable "smb_setup_protocol" {
@@ -731,6 +743,12 @@ variable "s3_protocol_gateway_weka_volume_size" {
   type        = number
   default     = 48
   description = "The protocol gateways' default disk size."
+}
+
+variable "s3_protocol_gateway_root_volume_size" {
+  type        = number
+  default     = null
+  description = "The protocol gateways' root volume size."
 }
 
 variable "s3_setup_protocol" {

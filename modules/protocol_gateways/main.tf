@@ -6,7 +6,7 @@ data "aws_subnet" "selected" {
   id = var.subnet_id
 }
 
-data "aws_ami" "selected" {
+data "aws_ami" "amzn_ami" {
   count       = var.ami_id == null ? 1 : 0
   most_recent = true
   owners      = ["amazon"]
@@ -14,6 +14,14 @@ data "aws_ami" "selected" {
   filter {
     name   = "name"
     values = ["amzn2-ami-kernel-5.*-x86_64-gp2"]
+  }
+}
+
+data "aws_ami" "provided_ami" {
+  count = var.ami_id != null ? 1 : 0
+  filter {
+    name   = "image-id"
+    values = [var.ami_id]
   }
 }
 
@@ -65,6 +73,7 @@ locals {
 
   custom_data          = join("\n", local.custom_data_parts)
   placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
+  root_device_name     = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
 }
 
 resource "aws_placement_group" "this" {
@@ -81,7 +90,7 @@ resource "aws_launch_template" "this" {
   disable_api_termination              = true
   disable_api_stop                     = true
   ebs_optimized                        = true
-  image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.selected[0].id
+  image_id                             = var.ami_id != null ? var.ami_id : data.aws_ami.amzn_ami[0].id
   instance_initiated_shutdown_behavior = "terminate"
   instance_type                        = var.instance_type
   key_name                             = var.key_pair_name
@@ -99,10 +108,11 @@ resource "aws_launch_template" "this" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = local.root_device_name
     ebs {
-      encrypted  = var.ebs_encrypted
-      kms_key_id = var.ebs_kms_key_id
+      volume_size = var.root_volume_size
+      encrypted   = var.ebs_encrypted
+      kms_key_id  = var.ebs_kms_key_id
     }
   }
 
