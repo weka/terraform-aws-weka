@@ -71,12 +71,33 @@ output "sg_ids" {
 }
 
 output "cluster_helper_commands" {
-  value = <<EOT
-aws ec2 describe-instances --instance-ids $(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name ${local.asg_name} --region ${local.region} --query "AutoScalingGroups[].Instances[].InstanceId" --output text) --region ${local.region} --query 'Reservations[].Instances[].${local.ips_type}' --output json
-# for nfs use: --payload '{"type": "progress", "protocl": "nfs"}'
-aws lambda invoke --function-name ${aws_lambda_function.status_lambda.function_name} --payload '{"type": "progress"}' --region ${local.region} --cli-binary-format raw-in-base64-out /dev/stdout
-aws secretsmanager get-secret-value --secret-id ${local.weka_admin_password_secret_id} --region ${local.region} --query SecretString --output text
+  value = {
+    "get_ips"      = <<EOT
+aws ec2 describe-instances \
+  --instance-ids $(aws autoscaling describe-auto-scaling-groups \
+      --auto-scaling-group-name ${local.asg_name} \
+      --region ${local.region} \
+      --query "AutoScalingGroups[].Instances[].InstanceId" --output text) \
+  --region ${local.region} \
+  --query 'Reservations[].Instances[].${local.ips_type}' \
+  --output json
 EOT
+    "get_password" = <<EOT
+aws secretsmanager get-secret-value \
+  --secret-id ${local.weka_admin_password_secret_id} \
+  --region ${local.region} \
+  --query SecretString \
+  --output text
+EOT
+    "get_status"   = <<EOT
+# for nfs use: --payload '{"type": "progress", "protocl": "nfs"}'
+aws lambda invoke \
+  --function-name ${aws_lambda_function.status_lambda.function_name} \
+  --payload '{"type": "progress"}' \
+  --region ${local.region} \
+  --cli-binary-format raw-in-base64-out /dev/stdout
+EOT
+  }
 }
 
 output "client_helper_commands" {
