@@ -231,7 +231,7 @@ variable "tags_map" {
 
 variable "set_dedicated_fe_container" {
   type        = bool
-  default     = true
+  default     = false
   description = "Create cluster with FE containers"
 }
 
