@@ -5,7 +5,7 @@ module "smb_protocol_gateways" {
   setup_protocol                      = var.smb_setup_protocol
   gateways_number                     = var.smb_protocol_gateways_number
   gateways_name                       = "${local.ec2_prefix}-${var.cluster_name}-smb-protocol-gateway"
-  iam_base_name                       = "${local.iam_prefix}-${var.cluster_name}-nfs-protocol-gateway"
+  iam_base_name                       = "${local.iam_prefix}-${var.cluster_name}-smb-protocol-gateway"
   cluster_name                        = var.cluster_name
   protocol                            = "SMB"
   frontend_container_cores_num        = var.smb_protocol_gateway_fe_cores_num
@@ -47,7 +47,7 @@ module "s3_protocol_gateways" {
   setup_protocol                      = var.s3_setup_protocol
   gateways_number                     = var.s3_protocol_gateways_number
   gateways_name                       = "${local.ec2_prefix}-${var.cluster_name}-s3-protocol-gateway"
-  iam_base_name                       = "${local.iam_prefix}-${var.cluster_name}-nfs-protocol-gateway"
+  iam_base_name                       = "${local.iam_prefix}-${var.cluster_name}-s3-protocol-gateway"
   cluster_name                        = var.cluster_name
   protocol                            = "S3"
   frontend_container_cores_num        = var.s3_protocol_gateway_fe_cores_num
