@@ -22,6 +22,17 @@ resource "aws_security_group" "sg" {
     protocol    = "tcp"
     cidr_blocks = var.alb_allow_https_cidrs
   }
+
+  dynamic "ingress" {
+    for_each = var.custom_ingress_rules
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
+  }
+
   ingress {
     from_port   = 14000
     to_port     = 14000
