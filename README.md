@@ -822,6 +822,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | [random_password.suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/password) | resource |
 | [tls_private_key.key](https://registry.terraform.io/providers/hashicorp/tls/latest/docs/resources/private_key) | resource |
 | [aws_ami.amzn_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
+| [aws_ami.provided_ami](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/ami) | data source |
 | [aws_caller_identity.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity) | data source |
 | [aws_region.current](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region) | data source |
 | [aws_subnet.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/subnet) | data source |
@@ -844,6 +845,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public IP to all instances deployed by TF module. Includes backends, clients and protocol gateways | `string` | `"auto"` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Required only if not specifying subnet\_ids, this zone(s) will be used to create subnet that will be used by weka. Currently limited to single subnet | `list(string)` | `[]` | no |
+| <a name="input_backends_root_volume_size"></a> [backends\_root\_volume\_size](#input\_backends\_root\_volume\_size) | The backends' root disk size. | `number` | `null` | no |
 | <a name="input_backends_weka_volume_size"></a> [backends\_weka\_volume\_size](#input\_backends\_weka\_volume\_size) | The backends' default disk size. | `number` | `48` | no |
 | <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the Capacity Reservation in which to run the backends | `string` | `null` | no |
 | <a name="input_client_arch"></a> [client\_arch](#input\_client\_arch) | Use arch for ami id, value can be arm64/x86\_64. | `string` | `null` | no |
@@ -854,10 +856,9 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_instance_type"></a> [client\_instance\_type](#input\_client\_instance\_type) | The client instance type (sku) to deploy | `string` | `"c5.2xlarge"` | no |
 | <a name="input_client_placement_group_name"></a> [client\_placement\_group\_name](#input\_client\_placement\_group\_name) | The client instances placement group name. Backend placement group can be reused. If not specified placement group will be created automatically | `string` | `null` | no |
 | <a name="input_client_use_backends_placement_group"></a> [client\_use\_backends\_placement\_group](#input\_client\_use\_backends\_placement\_group) | Use backends placement group for clients | `bool` | `true` | no |
-| <a name="input_client_weka_volume_device_name"></a> [client\_weka\_volume\_device\_name](#input\_client\_weka\_volume\_device\_name) | The client volume device name | `string` | `"/dev/xvda"` | no |
-| <a name="input_client_weka_volume_size"></a> [client\_weka\_volume\_size](#input\_client\_weka\_volume\_size) | The client volume size in GB | `number` | `48` | no |
 | <a name="input_clients_custom_data"></a> [clients\_custom\_data](#input\_clients\_custom\_data) | Custom data to pass to the client instances | `string` | `""` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client instances to deploy | `number` | `0` | no |
+| <a name="input_clients_root_volume_size"></a> [clients\_root\_volume\_size](#input\_clients\_root\_volume\_size) | The client's root volume size in GB | `number` | `null` | no |
 | <a name="input_clients_use_autoscaling_group"></a> [clients\_use\_autoscaling\_group](#input\_clients\_use\_autoscaling\_group) | Use autoscaling group for clients | `bool` | `false` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | `"poc"` | no |
@@ -896,6 +897,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_nfs_protocol_gateway_instance_ami_id"></a> [nfs\_protocol\_gateway\_instance\_ami\_id](#input\_nfs\_protocol\_gateway\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
 | <a name="input_nfs_protocol_gateway_instance_iam_profile_arn"></a> [nfs\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_nfs\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_nfs_protocol_gateway_instance_type"></a> [nfs\_protocol\_gateway\_instance\_type](#input\_nfs\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
+| <a name="input_nfs_protocol_gateway_root_volume_size"></a> [nfs\_protocol\_gateway\_root\_volume\_size](#input\_nfs\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_nfs_protocol_gateway_secondary_ips_per_nic"></a> [nfs\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_nfs\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `3` | no |
 | <a name="input_nfs_protocol_gateway_weka_volume_size"></a> [nfs\_protocol\_gateway\_weka\_volume\_size](#input\_nfs\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateways_number"></a> [nfs\_protocol\_gateways\_number](#input\_nfs\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
@@ -909,6 +911,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_s3_protocol_gateway_instance_ami_id"></a> [s3\_protocol\_gateway\_instance\_ami\_id](#input\_s3\_protocol\_gateway\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_instance_iam_profile_arn"></a> [s3\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_s3\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_s3_protocol_gateway_instance_type"></a> [s3\_protocol\_gateway\_instance\_type](#input\_s3\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
+| <a name="input_s3_protocol_gateway_root_volume_size"></a> [s3\_protocol\_gateway\_root\_volume\_size](#input\_s3\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_s3_protocol_gateway_weka_volume_size"></a> [s3\_protocol\_gateway\_weka\_volume\_size](#input\_s3\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_s3_protocol_gateways_number"></a> [s3\_protocol\_gateways\_number](#input\_s3\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
@@ -925,6 +928,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_smb_protocol_gateway_instance_ami_id"></a> [smb\_protocol\_gateway\_instance\_ami\_id](#input\_smb\_protocol\_gateway\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
 | <a name="input_smb_protocol_gateway_instance_iam_profile_arn"></a> [smb\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_smb\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_smb_protocol_gateway_instance_type"></a> [smb\_protocol\_gateway\_instance\_type](#input\_smb\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
+| <a name="input_smb_protocol_gateway_root_volume_size"></a> [smb\_protocol\_gateway\_root\_volume\_size](#input\_smb\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_smb_protocol_gateway_secondary_ips_per_nic"></a> [smb\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_smb\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `0` | no |
 | <a name="input_smb_protocol_gateway_weka_volume_size"></a> [smb\_protocol\_gateway\_weka\_volume\_size](#input\_smb\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_smb_protocol_gateways_number"></a> [smb\_protocol\_gateways\_number](#input\_smb\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
