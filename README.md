@@ -920,6 +920,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_secretmanager_use_vpc_endpoint"></a> [secretmanager\_use\_vpc\_endpoint](#input\_secretmanager\_use\_vpc\_endpoint) | Use of secret manager is optional, if not used secrets will be passed between lambdas over step function. If secret manager is used, all lambdas will fetch secret directly when needed. | `bool` | `true` | no |
 | <a name="input_set_dedicated_fe_container"></a> [set\_dedicated\_fe\_container](#input\_set\_dedicated\_fe\_container) | Create cluster with FE containers | `bool` | `false` | no |
 | <a name="input_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#input\_sfn\_iam\_role\_arn) | Step function iam role arn | `string` | `""` | no |
+| <a name="input_sg_custom_ingress_rules"></a> [sg\_custom\_ingress\_rules](#input\_sg\_custom\_ingress\_rules) | Custom inbound rules to be added to the security group. | <pre>list(object({<br>    from_port   = number<br>    to_port     = number<br>    protocol    = string<br>    cidr_blocks = list(string)<br>  }))</pre> | `[]` | no |
 | <a name="input_sg_ids"></a> [sg\_ids](#input\_sg\_ids) | Security group ids | `list(string)` | `[]` | no |
 | <a name="input_smb_capacity_reservation_id"></a> [smb\_capacity\_reservation\_id](#input\_smb\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the smb clients | `string` | `null` | no |
 | <a name="input_smb_cluster_name"></a> [smb\_cluster\_name](#input\_smb\_cluster\_name) | The name of the SMB setup. | `string` | `"Weka-SMB"` | no |
