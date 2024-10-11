@@ -313,6 +313,17 @@ variable "allow_weka_api_cidrs" {
   default     = []
 }
 
+variable "sg_custom_ingress_rules" {
+  type = list(object({
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+  default     = []
+  description = "Custom inbound rules to be added to the security group."
+}
+
 variable "proxy_url" {
   type        = string
   description = "Weka proxy url"

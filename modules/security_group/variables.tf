@@ -38,3 +38,14 @@ variable "tags_map" {
   default     = {}
   description = "A map of tags to assign the same metadata to all resources in the environment. Format: key:value. Note: Manually tagged resources will be overridden by Terraform apply."
 }
+
+variable "custom_ingress_rules" {
+  type = list(object({
+    from_port   = number
+    to_port     = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+  default     = []
+  description = "Custom inbound rules to be added to the security group."
+}

@@ -30,6 +30,7 @@ module "security_group" {
   alb_allow_https_cidrs = var.alb_allow_https_cidrs
   allow_weka_api_cidrs  = var.allow_weka_api_cidrs
   tags_map              = var.tags_map
+  custom_ingress_rules  = var.sg_custom_ingress_rules
   depends_on            = [module.network]
 }
 
