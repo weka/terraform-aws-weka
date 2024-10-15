@@ -538,7 +538,7 @@ variable "client_use_backends_placement_group" {
 variable "clients_root_volume_size" {
   type        = number
   description = "The client's root volume size in GB"
-  default     = null
+  default     = 48
 }
 
 variable "clients_use_autoscaling_group" {
