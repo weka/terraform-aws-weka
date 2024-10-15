@@ -858,7 +858,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_client_use_backends_placement_group"></a> [client\_use\_backends\_placement\_group](#input\_client\_use\_backends\_placement\_group) | Use backends placement group for clients | `bool` | `true` | no |
 | <a name="input_clients_custom_data"></a> [clients\_custom\_data](#input\_clients\_custom\_data) | Custom data to pass to the client instances | `string` | `""` | no |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of client instances to deploy | `number` | `0` | no |
-| <a name="input_clients_root_volume_size"></a> [clients\_root\_volume\_size](#input\_clients\_root\_volume\_size) | The client's root volume size in GB | `number` | `null` | no |
+| <a name="input_clients_root_volume_size"></a> [clients\_root\_volume\_size](#input\_clients\_root\_volume\_size) | The client's root volume size in GB | `number` | `48` | no |
 | <a name="input_clients_use_autoscaling_group"></a> [clients\_use\_autoscaling\_group](#input\_clients\_use\_autoscaling\_group) | Use autoscaling group for clients | `bool` | `false` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Mount weka clients in DPDK mode | `bool` | `true` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | `"poc"` | no |
