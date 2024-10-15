@@ -164,6 +164,6 @@ variable "iam_base_name" {
 
 variable "root_volume_size" {
   type        = number
-  default     = null
+  default     = 48
   description = "root disk size."
 }
