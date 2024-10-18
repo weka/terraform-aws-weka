@@ -19,7 +19,8 @@ resource "aws_iam_policy" "ec2" {
           "ec2:ModifyNetworkInterfaceAttribute",
           "ec2:DeleteNetworkInterface",
           "ec2:DescribeInstances",
-          "ec2:DescribeInstanceTypes"
+          "ec2:DescribeInstanceTypes",
+          "ec2:CreateTags",
         ]
         Resource = "*"
       }
