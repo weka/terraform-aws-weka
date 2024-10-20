@@ -112,7 +112,6 @@ resource "aws_launch_template" "this" {
   }
 
   network_interfaces {
-    associate_public_ip_address = var.assign_public_ip
     delete_on_termination       = true
     device_index                = 0
     security_groups             = var.sg_ids
@@ -121,7 +120,6 @@ resource "aws_launch_template" "this" {
   }
 
   network_interfaces {
-    associate_public_ip_address = var.assign_public_ip
     delete_on_termination       = true
     device_index                = 1
     security_groups             = var.sg_ids
