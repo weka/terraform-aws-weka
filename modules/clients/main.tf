@@ -120,6 +120,15 @@ resource "aws_launch_template" "this" {
     interface_type              = var.interface_type
   }
 
+  network_interfaces {
+    associate_public_ip_address = var.assign_public_ip
+    delete_on_termination       = true
+    device_index                = 1
+    security_groups             = var.sg_ids
+    subnet_id                   = var.subnet_id
+    interface_type              = var.interface_type
+  }
+
   placement {
     availability_zone = data.aws_subnet.selected[0].availability_zone
     group_name        = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
