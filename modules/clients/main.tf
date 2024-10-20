@@ -40,6 +40,7 @@ locals {
     subnet_id           = var.subnet_id
     region              = local.region
     groups              = join(" ", var.sg_ids)
+    interface_type      = var.interface_type
     weka_log_group_name = "/wekaio/clients/${var.clients_name}"
   })
 
@@ -116,6 +117,7 @@ resource "aws_launch_template" "this" {
     device_index                = 0
     security_groups             = var.sg_ids
     subnet_id                   = var.subnet_id
+    interface_type              = var.interface_type
   }
 
   placement {

@@ -29,5 +29,6 @@ module "clients" {
   capacity_reservation_id      = var.client_capacity_reservation_id
   metadata_http_tokens         = var.metadata_http_tokens
   root_volume_size             = var.clients_root_volume_size
+  interface_type               = var.client_interface_type
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }

@@ -569,6 +569,16 @@ variable "client_capacity_reservation_id" {
   description = "The ID of the capacity reservation in which to run the clients"
 }
 
+variable "client_interface_type" {
+  type        = string
+  description = "The type of the client network interface."
+  default     = "interface"
+  validation {
+    condition     = var.client_interface_type == "interface" || var.client_interface_type == "efa"
+    error_message = "Allowed interface_type values: [\"interface\", \"efa\"]."
+  }
+}
+
 ############################################### NFS protocol gateways variables ###################################################
 variable "nfs_protocol_gateway_instance_iam_profile_arn" {
   type        = string

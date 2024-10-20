@@ -167,3 +167,13 @@ variable "root_volume_size" {
   default     = 48
   description = "root disk size."
 }
+
+variable "interface_type" {
+  type        = string
+  description = "The type of network interface."
+  default     = "interface"
+  validation {
+    condition     = var.interface_type == "interface" || var.interface_type == "efa"
+    error_message = "Allowed interface_type values: [\"interface\", \"efa\"]."
+  }
+}
