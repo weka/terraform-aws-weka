@@ -140,6 +140,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	nfsProtocolgwsNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAYS_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
+	setDefaultFs, _ := strconv.ParseBool(os.Getenv("SET_DEFAULT_FS"))
+	postClusterSetupScript := os.Getenv("POST_CLUSTER_SETUP_SCRIPT")
 
 	addFrontend := false
 	if addFrontendNum > 0 {
@@ -176,6 +178,8 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 			WekaHomeUrl:               wekaHomeUrl,
 			TieringTargetSSDRetention: tieringTargetSsdRetention,
 			TieringStartDemote:        tieringStartDemote,
+			SetDefaultFs:              setDefaultFs,
+			PostClusterSetupScript:    postClusterSetupScript,
 		},
 		Obs: protocol.ObsParams{
 			Name:              obsName,

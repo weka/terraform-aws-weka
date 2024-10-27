@@ -345,7 +345,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "101d90f51db4218356cab9d30f728e3e"
+  default     = "34d97b1900967aa00d1a9d951e18adff"
 }
 
 variable "lambdas_dist" {
@@ -880,4 +880,16 @@ variable "lambdas_custom_s3_key" {
   type        = string
   description = "S3 key for lambdas"
   default     = null
+}
+
+variable "set_default_fs" {
+  type        = bool
+  description = "Set the default filesystem which will use the full available capacity"
+  default     = true
+}
+
+variable "post_cluster_setup_script" {
+  type        = string
+  description = "A script to run after the cluster is up"
+  default     = ""
 }
