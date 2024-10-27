@@ -888,7 +888,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambdas_custom_s3_bucket"></a> [lambdas\_custom\_s3\_bucket](#input\_lambdas\_custom\_s3\_bucket) | S3 bucket name for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_custom_s3_key"></a> [lambdas\_custom\_s3\_key](#input\_lambdas\_custom\_s3\_key) | S3 key for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"101d90f51db4218356cab9d30f728e3e"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"34d97b1900967aa00d1a9d951e18adff"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
@@ -903,6 +903,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_nfs_protocol_gateways_number"></a> [nfs\_protocol\_gateways\_number](#input\_nfs\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_nfs_setup_protocol"></a> [nfs\_setup\_protocol](#input\_nfs\_setup\_protocol) | Setup protocol, default if false | `bool` | `false` | no |
 | <a name="input_placement_group_name"></a> [placement\_group\_name](#input\_placement\_group\_name) | n/a | `string` | `null` | no |
+| <a name="input_post_cluster_setup_script"></a> [post\_cluster\_setup\_script](#input\_post\_cluster\_setup\_script) | A script to run after the cluster is up | `string` | `""` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
@@ -919,6 +920,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_secretmanager_sg_ids"></a> [secretmanager\_sg\_ids](#input\_secretmanager\_sg\_ids) | Secret manager endpoint security groups ids | `list(string)` | `[]` | no |
 | <a name="input_secretmanager_use_vpc_endpoint"></a> [secretmanager\_use\_vpc\_endpoint](#input\_secretmanager\_use\_vpc\_endpoint) | Use of secret manager is optional, if not used secrets will be passed between lambdas over step function. If secret manager is used, all lambdas will fetch secret directly when needed. | `bool` | `true` | no |
 | <a name="input_set_dedicated_fe_container"></a> [set\_dedicated\_fe\_container](#input\_set\_dedicated\_fe\_container) | Create cluster with FE containers | `bool` | `false` | no |
+| <a name="input_set_default_fs"></a> [set\_default\_fs](#input\_set\_default\_fs) | Set the default filesystem which will use the full available capacity | `bool` | `true` | no |
 | <a name="input_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#input\_sfn\_iam\_role\_arn) | Step function iam role arn | `string` | `""` | no |
 | <a name="input_sg_custom_ingress_rules"></a> [sg\_custom\_ingress\_rules](#input\_sg\_custom\_ingress\_rules) | Custom inbound rules to be added to the security group. | <pre>list(object({<br>    from_port   = number<br>    to_port     = number<br>    protocol    = string<br>    cidr_blocks = list(string)<br>  }))</pre> | `[]` | no |
 | <a name="input_sg_ids"></a> [sg\_ids](#input\_sg\_ids) | Security group ids | `list(string)` | `[]` | no |
