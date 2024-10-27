@@ -116,7 +116,7 @@ resource "aws_launch_template" "this" {
     device_index                = 0
     security_groups             = var.sg_ids
     subnet_id                   = var.subnet_id
-    interface_type              = var.interface_type
+    interface_type              = "interface"
   }
 
   network_interfaces {
