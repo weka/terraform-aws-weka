@@ -227,10 +227,11 @@ resource "aws_launch_template" "launch_template" {
   user_data  = base64encode(local.user_data)
   depends_on = [aws_placement_group.placement_group, aws_kms_key.kms_key]
 }
-
 resource "aws_autoscaling_group" "autoscaling_group" {
+  count = var.enable_autoscaling ? 1 : 0  # Add this line to conditionally create the resource
+
   name = "${var.prefix}-${var.cluster_name}-autoscaling-group"
-  #availability_zones  = [ for z in var.availability_zones: format("%s%s", local.region,z) ]
+  # availability_zones = [ for z in var.availability_zones: format("%s%s", local.region, z) ]
   desired_capacity      = var.cluster_size
   max_size              = var.cluster_size * 7
   min_size              = var.cluster_size
@@ -242,10 +243,11 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     id      = aws_launch_template.launch_template.id
     version = aws_launch_template.launch_template.latest_version
   }
+
   tag {
     key                 = "${var.prefix}-${var.cluster_name}-asg"
-    propagate_at_launch = true
     value               = var.cluster_name
+    propagate_at_launch = true
   }
 
   dynamic "tag" {
@@ -253,12 +255,13 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     content {
       key                 = tag.key
       value               = tag.value
-      propagate_at_launch = false # already propagated by launch template
+      propagate_at_launch = false  # Already propagated by launch template
     }
   }
 
   lifecycle {
     ignore_changes = [desired_capacity, min_size, max_size]
   }
+
   depends_on = [aws_launch_template.launch_template, aws_placement_group.placement_group]
 }

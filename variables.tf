@@ -842,3 +842,8 @@ variable "lambdas_custom_s3_key" {
   description = "S3 key for lambdas"
   default     = null
 }
+variable "enable_autoscaling" {
+  description = "Enable or disable the autoscaling group"
+  type        = bool
+  default     = true
+}
