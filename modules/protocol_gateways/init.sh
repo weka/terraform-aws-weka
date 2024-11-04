@@ -56,6 +56,7 @@ function setup_aws_logs_agent() {
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
 yum install -y jq
+yum install -y "kernel-devel-$(uname -r)"
 
 region=${region}
 subnet_id=${subnet_id}
