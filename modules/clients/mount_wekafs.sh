@@ -68,7 +68,7 @@ weka local stop && weka local rm -f --all
 
 FRONTEND_CONTAINER_CORES_NUM="${frontend_container_cores_num}"
 NICS_NUM=$((FRONTEND_CONTAINER_CORES_NUM+1))
-first_interface_name=$(ls /sys/class/net | grep -vE 'docker|veth|lo' | head -n 1)
+first_interface_name=$(ls /sys/class/net | grep -vE 'docker|veth|lo' | sort --version-sort | head -n 1)
 interfaces_base_name=$(echo $first_interface_name | awk '{gsub(/[0-9]/,"",$1); print $1}')
 first_interface_number=$(echo $first_interface_name | grep -o '[0-9]*$')
 first_interface_ip=$(ip addr show $first_interface_name | grep -oP '(?<=inet\s)\d+(\.\d+){3}')
