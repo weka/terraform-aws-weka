@@ -49,3 +49,8 @@ variable "expiration_time" {
   type        = number
   default     = 4
 }
+variable "s3_bucket_name" {
+  description = "Name of the existing S3 bucket for Lambda code"
+  type        = string
+  default     = "cst-scenario-lab"  # Replace with your actual bucket name if it may vary
+}
