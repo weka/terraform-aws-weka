@@ -9,7 +9,7 @@ resource "aws_instance" "cst-scenario-test" {
 
 
   tags = {
-    Name = "${var.name_prefix}${random_pet.keypair_suffix.id}-${count.index + 1}"
+    Name = "cst-scenario-test-${count.index + 1}"
     "${var.expiration_tag_key}" = var.expiration_tag_value
   }
 }

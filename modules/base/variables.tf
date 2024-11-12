@@ -23,13 +23,13 @@ variable "instance_count" {
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "m6a.2xlarge"
+  default     = "i3en.2xlarge"
 }
 
 variable "ami_id" {
   description = "AMI ID for the instances"
   type        = string
-  default     = "ami-018ba43095ff50d08"  
+  default     = "ami-018ba43095ff50d08"
 }
 
 variable "expiration_tag_key" {
@@ -58,4 +58,40 @@ variable "s3_bucket_name" {
 variable "name_prefix" {
   type = string
 }
+
+variable "vpc_id" {
+  type = string
+    default = "vpc-095aac6b3a88602c5"
+}
+
+
+variable "subnet_id" {
+  type = string
+    default = "subnet-08d4ebd2380395528"
+}
+
+variable "private_subnet_id" {
+  type = string
+    default = "subnet-0afc2a64737a60b7b"
+}
+
+
+
+
+variable "internet_gateway_id" {
+  type = string
+    default = "igw-0bac62110ba96bf8a"
+}
+
+variable "security_group_id" {
+  type = string
+    default = "sg-0fb34eaaedf2907c1"
+}
+
+
+variable "route_table_id" {
+  type = string
+    default = "rtb-0104f6891bced69db"
+}
+
 

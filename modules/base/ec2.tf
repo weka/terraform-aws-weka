@@ -1,15 +1,87 @@
-resource "aws_instance" "cst-scenario-test" {
-  ami           = var.ami_id
-  instance_type = var.instance_type
-  count         = var.instance_count
-  subnet_id	= "subnet-041fbb944f79e6f99"
+# Define the EC2 instances
+resource "aws_instance" "cst_scenario_test" {
+  ami                         = var.ami_id
+  instance_type               = var.instance_type
+  count                       = var.instance_count
+  subnet_id                   = local.subnet_id
   associate_public_ip_address = true
-  vpc_security_group_ids = ["sg-0734316b8d192a303"]
-  key_name = aws_key_pair.autodestroy_keypair.key_name
+  vpc_security_group_ids      = [local.security_group_id]
+  key_name                    = aws_key_pair.autodestroy_keypair.key_name
 
+  # User data script
+  user_data = <<-EOF
+             # Set hostname
+             sudo hostnamectl set-hostname weka${count.index + 1}
+
+             EOF
+
+  root_block_device {
+    volume_type           = "gp2"
+    volume_size           = 50
+    delete_on_termination = true
+  }
+
+  ebs_block_device {
+    device_name           = "/dev/xvdb"
+    volume_type           = "gp2"
+    volume_size           = 500
+    delete_on_termination = true
+  }
 
   tags = {
-    Name = "${var.name_prefix}-${random_pet.keypair_suffix.id}-${count.index + 1}"
-    "${var.expiration_tag_key}" = var.expiration_tag_value
+    Name        = "${var.name_prefix}-${random_pet.fun-name.id}-${count.index + 1}"
+    "AutoDestroy" = "true"
+    Lab = "CST-Scenario-lab"
   }
+}
+
+# Additional network interfaces
+resource "aws_network_interface" "private_nic1" {
+  count            = var.instance_count
+  subnet_id        = var.private_subnet_id
+  security_groups  = [var.security_group_id]
+  description      = "Private NIC 1"
+}
+
+resource "aws_network_interface" "private_nic2" {
+  count            = var.instance_count
+  subnet_id        = var.private_subnet_id
+  security_groups  = [var.security_group_id]
+  description      = "Private NIC 2"
+}
+
+resource "aws_network_interface" "private_nic3" {
+  count            = var.instance_count
+  subnet_id        = var.private_subnet_id
+  security_groups  = [var.security_group_id]
+  description      = "Private NIC 3"
+}
+
+# Attach network interfaces
+resource "aws_network_interface_attachment" "nic1_attachment" {
+  count                = var.instance_count
+  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  network_interface_id = aws_network_interface.private_nic1[count.index].id
+  device_index         = 1
+}
+
+resource "aws_network_interface_attachment" "nic2_attachment" {
+  count                = var.instance_count
+  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  network_interface_id = aws_network_interface.private_nic2[count.index].id
+  device_index         = 2
+}
+
+resource "aws_network_interface_attachment" "nic3_attachment" {
+  count                = var.instance_count
+  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  network_interface_id = aws_network_interface.private_nic3[count.index].id
+  device_index         = 3
+}
+
+# Output private IPs and hostnames for external processing
+output "host_entries" {
+  value = [
+    for index, ip in aws_instance.cst_scenario_test : "${ip.private_ip} weka${index + 1}"
+  ]
 }
