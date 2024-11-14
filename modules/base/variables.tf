@@ -17,13 +17,13 @@ variable "environment" {
 variable "instance_count" {
   description = "The number of EC2 instances to create"
   type        = number
-  default     = 6
+  default     = 5
 }
 
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "i3en.2xlarge"
+  default     = "m6a.2xlarge"
 }
 
 variable "ami_id" {
