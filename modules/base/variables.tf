@@ -19,11 +19,21 @@ variable "instance_count" {
   type        = number
   default     = 5
 }
-
+variable "client_instance_count" {
+  description = "The number of EC2 instances to create"
+  type        = number
+  default     = 1
+}
 variable "instance_type" {
   description = "EC2 instance type"
   type        = string
   default     = "m6a.2xlarge"
+}
+
+variable "client_instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3a.micro"
 }
 
 variable "ami_id" {
