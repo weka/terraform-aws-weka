@@ -33,7 +33,7 @@ variable "instance_type" {
 variable "client_instance_type" {
   description = "EC2 instance type"
   type        = string
-  default     = "t3a.micro"
+  default     = "t3.large"
 }
 
 variable "ami_id" {

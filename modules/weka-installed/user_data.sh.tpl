@@ -2,9 +2,6 @@
 
 cd /root || exit
 
-# Set hostname
-sudo hostnamectl set-hostname weka-instance
-
 # Save the PEM key to a file
 echo "${private_key_pem}" > /root/${key_name}.pem
 chmod 600 /root/${key_name}.pem
@@ -118,6 +115,9 @@ for i in {0..5}; do weka cluster drive add $i /dev/nvme1n1; done
 weka cluster start-io
 
 sleep 10
+
+weka fs group create default
+weka fs create default default 1TiB
 
 # Check Weka status
 WEKA_STATUS=$(weka status)

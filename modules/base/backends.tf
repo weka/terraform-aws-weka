@@ -9,11 +9,9 @@ resource "aws_instance" "cst_scenario_backend" {
   key_name                    = aws_key_pair.autodestroy_keypair.key_name
 
   # User data script
-  user_data = <<-EOF
-             # Set hostname
-             sudo hostnamectl set-hostname weka${count.index + 2}
-
-             EOF
+#  user_data = <<-EOF
+#
+#             EOF
 
   root_block_device {
     volume_type           = "gp2"

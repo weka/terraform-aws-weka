@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# Update packages and install necessary tools
+sudo yum update -y
+sudo yum install -y awscli jq
+
+# Retrieve the region from the instance metadata and save it to a file
+REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+if [ -z "$REGION" ]; then
+  echo "Error: Unable to determine the AWS region from instance metadata."
+  exit 1
+fi
+echo "$REGION" > /root/region.txt
+
+# Retrieve the Name prefix and save it to a file (this would be passed from Terraform)
+echo "${NAME_PREFIX}" > /root/name-prefix.txt
+
+# Retrieve backend IPs using AWS CLI and save them to a file
+INSTANCE_INFO=$(aws ec2 describe-instances \
+  --filters "Name=tag:Cluster,Values=$(cat /root/name-prefix.txt)" \
+  --query "Reservations[*].Instances[*].PrivateIpAddress" \
+  --output text --region $(cat /root/region.txt))
+
+if [ $? -ne 0 ]; then
+  echo "Error: Failed to retrieve backend IPs. Check AWS CLI configuration and permissions."
+  exit 1
+fi
+
+# Save backend IPs to a file
+echo "$INSTANCE_INFO" > /root/backend-ips.txt
+
+# Remove the instance's own IP from the backend IPs and save it to a file
+LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+echo "$LOCAL_IP" > /root/local-ip.txt
+
+BACKENDS=($(cat /root/backend-ips.txt))
+BACKENDS=(${BACKENDS[@]/$(cat /root/local-ip.txt)/})
+echo "${BACKENDS[@]}" > /root/filtered-backend-ips.txt
+
+# Define retry settings and save them to files
+echo 30 > /root/retry-delay.txt
+echo 10 > /root/max-retries.txt
+
+# Function to perform Weka installation on a given backend
+install_weka() {
+  local IP=$1
+  echo "Starting Weka installation on backend: $IP"
+
+  RETRY_DELAY=$(cat /root/retry-delay.txt)
+  MAX_RETRIES=$(cat /root/max-retries.txt)
+
+  for ((i=1; i<=MAX_RETRIES; i++)); do
+    sudo curl -s "http://$IP:14000/dist/v1/install" | sudo sh
+    if [ $? -eq 0 ]; then
+      echo "Weka installation succeeded on $IP"
+      return 0
+    else
+      echo "Weka installation failed on $IP, attempt $i. Retrying in $RETRY_DELAY seconds..."
+      sleep $RETRY_DELAY
+    fi
+  done
+
+  echo "Weka installation failed on $IP after $MAX_RETRIES attempts."
+  return 1
+}
+
+# Loop through each backend IP and attempt to install Weka with retries
+for IP in $(cat /root/filtered-backend-ips.txt); do
+  install_weka $IP
+done
+
+echo "Weka installation script completed for all backends."
