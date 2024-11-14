@@ -33,7 +33,7 @@ resource "aws_network_interface" "client_private_nic1" {
 resource "aws_network_interface_attachment" "client_nic1_attachment" {
   count                = var.client_instance_count
   instance_id          = aws_instance.cst_scenario_client[count.index].id
-  network_interface_id = aws_network_interface.private_nic1[count.index].id
+  network_interface_id = aws_network_interface.client_private_nic1[count.index].id
   device_index         = 1
 }
 

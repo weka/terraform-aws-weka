@@ -16,18 +16,31 @@ resource "aws_iam_role" "ec2_instance_role" {
   })
 }
 
-# Create an IAM policy for describing instances
+# Create an IAM policy for describing instances and accessing S3
 resource "aws_iam_policy" "describe_instances_policy" {
   name        = "describe-instances-policy-${var.random_pet_id}"  # Make policy name unique
-  description = "Policy to allow describing EC2 instances"
-  
+  description = "Policy to allow describing EC2 instances and accessing S3"
+
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
-        Action = "ec2:DescribeInstances"
+        Action = [
+          "ec2:DescribeInstances"
+        ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::cst-scenario-lab",                    # Permission to list the bucket
+          "arn:aws:s3:::cst-scenario-lab/weka-installation/*" # Permission to get objects in this path
+        ]
       }
     ]
   })

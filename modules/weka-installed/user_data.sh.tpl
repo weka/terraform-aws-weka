@@ -70,8 +70,23 @@ cd ..
 export PDSH_SSH_ARGS="-i $(\pwd|ls *.pem) -o StrictHostKeyChecking=no"
 
 # Install Weka on backend nodes
+while IFS= read -r ip || [ -n "$ip" ]; do
+  echo "Running installation for $ip"
 
-pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo curl -s http://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):14000/dist/v1/install | sudo sh"
+  # Run the SSH command and redirect stdin from /dev/null
+  ssh -o StrictHostKeyChecking=no -i ./*.pem ec2-user@$ip \
+    "sudo curl -s http://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):14000/dist/v1/install | sudo sh" < /dev/null
+
+  # Check if the command was successful
+  if [ $? -eq 0 ]; then
+    echo "Installation succeeded for $ip"
+  else
+    echo "Installation failed for $ip"
+  fi
+
+  # Sleep for 1 second before moving to the next IP
+  sleep 3
+done < /root/private-backends.txt
 
 # Set and configure Weka version
 pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka version get $(cat weka-version.txt)"
@@ -94,7 +109,7 @@ pdsh -R ssh -l ec2-user -w ^public-backends.txt "cd /tmp && sudo chmod +x contai
 
 # Create and configure the Weka cluster
 weka cluster create $(\cat private-backends.txt|xargs)
-sleep 10
+sleep 30
 weka debug config override clusterInfo.nvmeEnabled false
 weka cluster hot-spare 1 && weka cluster update --data-drives 4 --parity-drives 2 && weka cluster update --cluster-name $(cat instance-name.txt)
 

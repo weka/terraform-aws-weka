@@ -1,8 +1,8 @@
 # Define the EC2 instance
-resource "aws_instance" "cst_scenario_test" {
+resource "aws_instance" "cst_scenario_specialty" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
-  count                       = 1
+#  count                       = 1
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
   vpc_security_group_ids      = [var.security_group_id]
@@ -62,19 +62,23 @@ resource "aws_network_interface" "private_nic3" {
 
 # Attach network interfaces
 resource "aws_network_interface_attachment" "nic1_attachment" {
-  instance_id          = aws_instance.cst_scenario_test[0].id
+  instance_id          = aws_instance.cst_scenario_specialty.id
   network_interface_id = aws_network_interface.private_nic1.id
   device_index         = 1
 }
 
 resource "aws_network_interface_attachment" "nic2_attachment" {
-  instance_id          = aws_instance.cst_scenario_test[0].id
+  instance_id          = aws_instance.cst_scenario_specialty.id
   network_interface_id = aws_network_interface.private_nic2.id
   device_index         = 2
 }
 
 resource "aws_network_interface_attachment" "nic3_attachment" {
-  instance_id          = aws_instance.cst_scenario_test[0].id
+  instance_id          = aws_instance.cst_scenario_specialty.id
   network_interface_id = aws_network_interface.private_nic3.id
   device_index         = 3
+}
+
+output "scenario_handler_public_ip" {
+  value = aws_instance.cst_scenario_specialty.private_ip
 }

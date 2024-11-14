@@ -1,22 +1,22 @@
 # Collect all private IPs into a list
 output "private_ips" {
-  value = [for instance in aws_instance.cst_scenario_test : instance.private_ip]
+  value = [for instance in aws_instance.cst_scenario_backend : instance.private_ip]
 }
 
 # Collect all public IPs into a list
 output "public_ips" {
-  value = [for instance in aws_instance.cst_scenario_test : instance.public_ip]
+  value = [for instance in aws_instance.cst_scenario_backend : instance.public_ip]
 }
 
 # Create a file with private IPs
 resource "local_file" "private_backends" {
-  content  = join("\n", [for instance in aws_instance.cst_scenario_test : instance.private_ip])
+  content  = join("\n", [for instance in aws_instance.cst_scenario_backend : instance.private_ip])
   filename = "private-backends.txt"
 }
 
 # Create a file with public IPs
 resource "local_file" "public_backends" {
-  content  = join("\n", [for instance in aws_instance.cst_scenario_test : instance.public_ip])
+  content  = join("\n", [for instance in aws_instance.cst_scenario_backend : instance.public_ip])
   filename = "public-backends.txt"
 }
 
