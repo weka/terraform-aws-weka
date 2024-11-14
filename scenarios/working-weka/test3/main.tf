@@ -1,11 +1,12 @@
 module "base_infrastructure" {
-  source      = "../../modules/base"
+  source      = "../../../modules/base"
   name_prefix = "working-weka"
 }
 
 module "scenario_infrastructure" {
-  source = "../../modules/weka-installed"
+  source = "../../../modules/weka-installed"
   name_prefix = "working-weka"
+  weka_version = "4.3.4"
   
   subnet_id         = module.base_infrastructure.subnet_id
   private_subnet_id = module.base_infrastructure.private_subnet_id

@@ -17,6 +17,7 @@ resource "aws_instance" "cst_scenario_test" {
     private_key_pem = var.private_key_pem
     key_name        = var.key_name
     NAME_PREFIX     = "${var.name_prefix}-${var.random_pet_id}"# Pass the generated pet name
+    WEKA_VERSION    = var.weka_version
 
   })
 

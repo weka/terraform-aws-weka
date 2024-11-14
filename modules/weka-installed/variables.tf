@@ -60,3 +60,10 @@ variable "other_public_ips" {
   type        = list(string)
   description = "List of public IPs from the other module"
 }
+
+variable "weka_version" {
+  type        = string
+  description = "Weka version"
+  default     = "4.4.0"
+}
+

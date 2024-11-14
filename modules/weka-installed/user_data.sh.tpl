@@ -36,7 +36,7 @@ echo "$PRIVATE_IPS" > /root/private-backends.txt
 echo "$PUBLIC_IPS" > /root/public-backends.txt
 echo "$NAME_PREFIX" > /root/instance-name.txt
 echo "SELF_PRIVATE_IP" > /root/self-ip.txt
-echo "WEKA_VERSION" > /root/weka-version.txt
+echo "$WEKA_VERSION" > /root/weka-version.txt
 
 ################################################################################################
 ################################################################################################
@@ -60,9 +60,9 @@ sudo yum update -y
 sudo yum install git pdsh -y
 
 # Download and extract Weka
-curl -LO https://dNTW8maCGBuuAa0Y@get.weka.io/dist/v1/pkg/weka-4.4.0.tar
-tar xvf weka-4.4.0.tar
-cd weka-4.4.0
+curl -LO https://dNTW8maCGBuuAa0Y@get.weka.io/dist/v1/pkg/weka-$(cat weka-version.txt).tar
+tar xvf weka-$(cat weka-version.txt).tar
+cd weka-$(cat weka-version.txt)
 sudo ./install.sh
 cd ..
 
@@ -74,8 +74,8 @@ export PDSH_SSH_ARGS="-i $(\pwd|ls *.pem) -o StrictHostKeyChecking=no"
 pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo curl -s http://$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4):14000/dist/v1/install | sudo sh"
 
 # Set and configure Weka version
-pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka version get 4.4.0"
-pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka version set 4.4.0"
+pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka version get $(cat weka-version.txt)"
+pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka version set $(cat weka-version.txt)"
 
 # Stop and remove the default Weka setup
 pdsh -R ssh -l ec2-user -w ^public-backends.txt "sudo weka local stop default"

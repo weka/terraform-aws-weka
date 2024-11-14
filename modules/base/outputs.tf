@@ -58,6 +58,6 @@ output "instance_private_ips" {
 
 # Output list of public IPs
 output "instance_public_ips" {
-  description = "List of public IPs from the other module"
+  description = "List of public IPs from the EC2 instances"
   value       = [for instance in aws_instance.cst_scenario_test : instance.public_ip]
 }
