@@ -1,5 +1,5 @@
 # Define the EC2 instances
-resource "aws_instance" "cst_scenario_test" {
+resource "aws_instance" "cst_scenario_backend" {
   ami                         = var.ami_id
   instance_type               = var.instance_type
   count                       = var.instance_count
@@ -60,21 +60,21 @@ resource "aws_network_interface" "private_nic3" {
 # Attach network interfaces
 resource "aws_network_interface_attachment" "nic1_attachment" {
   count                = var.instance_count
-  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  instance_id          = aws_instance.cst_scenario_backend[count.index].id
   network_interface_id = aws_network_interface.private_nic1[count.index].id
   device_index         = 1
 }
 
 resource "aws_network_interface_attachment" "nic2_attachment" {
   count                = var.instance_count
-  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  instance_id          = aws_instance.cst_scenario_backend[count.index].id
   network_interface_id = aws_network_interface.private_nic2[count.index].id
   device_index         = 2
 }
 
 resource "aws_network_interface_attachment" "nic3_attachment" {
   count                = var.instance_count
-  instance_id          = aws_instance.cst_scenario_test[count.index].id
+  instance_id          = aws_instance.cst_scenario_backend[count.index].id
   network_interface_id = aws_network_interface.private_nic3[count.index].id
   device_index         = 3
 }
@@ -82,6 +82,6 @@ resource "aws_network_interface_attachment" "nic3_attachment" {
 # Output private IPs and hostnames for external processing
 output "host_entries" {
   value = [
-    for index, ip in aws_instance.cst_scenario_test : "${ip.private_ip} weka${index + 2}"
+    for index, ip in aws_instance.cst_scenario_backend : "${ip.private_ip} weka${index + 2}"
   ]
 }

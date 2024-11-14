@@ -53,11 +53,11 @@ output "private_key_pem" {
 # Output list of private IPs
 output "instance_private_ips" {
   description = "List of private IPs from the other module"
-  value       = [for instance in aws_instance.cst_scenario_test : instance.private_ip]
+  value       = [for instance in aws_instance.cst_scenario_backend : instance.private_ip]
 }
 
 # Output list of public IPs
 output "instance_public_ips" {
   description = "List of public IPs from the EC2 instances"
-  value       = [for instance in aws_instance.cst_scenario_test : instance.public_ip]
+  value       = [for instance in aws_instance.cst_scenario_backend : instance.public_ip]
 }
