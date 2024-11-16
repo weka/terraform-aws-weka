@@ -19,7 +19,11 @@ resource "local_file" "public_backends" {
   content  = join("\n", [for instance in aws_instance.cst_scenario_backend : instance.public_ip])
   filename = "public-backends.txt"
 }
-
+# Create a file with client public IPs
+resource "local_file" "public_clients" {
+  content  = join("\n", [for instance in aws_instance.cst_scenario_client : instance.public_ip])
+  filename = "public-clients.txt"
+}
 resource "local_file" "autodestroy_private_key" {
   content  = tls_private_key.autodestroy_key.private_key_pem
   filename = "./${random_pet.fun-name.id}-key.pem"

@@ -64,6 +64,6 @@ variable "other_public_ips" {
 variable "weka_version" {
   type        = string
   description = "Weka version"
-  default     = "4.4.0"
+  default     = "4.2.15"
 }
 
