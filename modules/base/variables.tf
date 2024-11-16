@@ -42,6 +42,13 @@ variable "ami_id" {
   default     = "ami-018ba43095ff50d08"
 }
 
+variable "client_ami_id" {
+  description = "AMI ID for the instances"
+  type        = string
+  default     = "ami-018ba43095ff50d08"
+}
+
+
 variable "expiration_tag_key" {
   description = "Tag key to identify instances for auto-destruction"
   type        = string

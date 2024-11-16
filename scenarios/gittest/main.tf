@@ -1,14 +1,11 @@
 module "base_infrastructure" {
-  source      = "../../../modules/base"
-  client_instance_type = "t4g.large"
-  ami_id = "ami-012967cc5a8c9f891"
+  source      = "git::https://github.com/NanoBlazer915/repo.git//from-scratch/modules/base"
   name_prefix = "working-weka"
 }
 
 module "scenario_infrastructure" {
-  source = "../../../modules/weka-installed"
+  source      = "git::https://github.com/NanoBlazer915/repo.git//from-scratch/modules/weka-installed"
   name_prefix = "working-weka"
-  weka_version = "4.4.0"
   
   subnet_id         = module.base_infrastructure.subnet_id
   private_subnet_id = module.base_infrastructure.private_subnet_id

@@ -1,6 +1,6 @@
 # Define the EC2 instances
 resource "aws_instance" "cst_scenario_client" {
-  ami                         = var.ami_id
+  ami                         = var.client_ami_id
   instance_type               = var.client_instance_type
   count                       = var.client_instance_count
   subnet_id                   = local.subnet_id
