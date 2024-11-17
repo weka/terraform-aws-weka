@@ -220,3 +220,9 @@ variable "root_volume_size" {
   default     = null
   description = "root disk size."
 }
+
+variable "use_ipv6" {
+  type        = bool
+  description = "Create the network resources using ipv6"
+  default     = false
+}

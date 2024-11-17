@@ -18,6 +18,7 @@ module "network" {
   create_nat_gateway               = var.create_nat_gateway
   vpc_cidr                         = var.vpc_cidr
   tags_map                         = var.tags_map
+  use_ipv6                         = var.use_ipv6
 }
 
 module "security_group" {

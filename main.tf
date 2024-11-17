@@ -14,6 +14,7 @@ locals {
     deploy_lambda_name  = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${local.ec2_prefix}-${var.cluster_name}"
     custom_data         = var.custom_data
+    ipv6_address_count  = var.use_ipv6 ? 1 : 0
   })
   backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
   create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null

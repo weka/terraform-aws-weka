@@ -41,6 +41,7 @@ locals {
     region              = local.region
     groups              = join(" ", var.sg_ids)
     weka_log_group_name = "/wekaio/clients/${var.clients_name}"
+    ipv6_address_count  = var.use_ipv6 ? 1 : 0
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {

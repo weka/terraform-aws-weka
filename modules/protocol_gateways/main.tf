@@ -41,6 +41,7 @@ locals {
     deploy_lambda_name    = var.deploy_lambda_name
     secondary_ips_per_nic = var.secondary_ips_per_nic
     protocol              = lower(var.protocol)
+    ipv6_address_count    = var.use_ipv6 ? 1 : 0
   })
 
   setup_init_protocol_script = templatefile("${path.module}/protocol_setup.sh", {

@@ -1,3 +1,9 @@
+variable "use_ipv6" {
+  type        = bool
+  description = "Create the network resources using ipv6"
+  default     = false
+}
+
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block of the vpc"

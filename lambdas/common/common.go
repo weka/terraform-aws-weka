@@ -235,11 +235,13 @@ func GetBackendsPrivateIps(clusterName, hostGroup string) (ips []string, err err
 
 	for _, reservation := range describeResponse.Reservations {
 		for _, instance := range reservation.Instances {
-			if instance.PrivateIpAddress == nil {
+			if instance.Ipv6Address != nil {
+				ips = append(ips, *instance.Ipv6Address)
+			} else if instance.PrivateIpAddress != nil {
+				ips = append(ips, *instance.PrivateIpAddress)
+			} else {
 				log.Warn().Msgf("Found backend instance %s without private ip!", *instance.InstanceId)
-				continue
 			}
-			ips = append(ips, *instance.PrivateIpAddress)
 		}
 	}
 	log.Debug().Msgf("found %d backends private ips: %s", len(ips), ips)
@@ -360,8 +362,12 @@ func GetBackendsPrivateIPsFromInstanceIds(instanceIds []*string) (privateIps []s
 		return
 	}
 	for _, i := range instances {
-		if i.InstanceId != nil && i.PrivateIpAddress != nil {
-			privateIps = append(privateIps, *i.PrivateIpAddress)
+		if i.InstanceId != nil {
+			if i.Ipv6Address != nil {
+				privateIps = append(privateIps, *i.Ipv6Address)
+			} else if i.PrivateIpAddress != nil {
+				privateIps = append(privateIps, *i.PrivateIpAddress)
+			}
 		}
 	}
 	return
@@ -580,7 +586,11 @@ func GetALBIp(albArnSuffix string) (albIp string, err error) {
 	}
 
 	if len(describeOutput.NetworkInterfaces) > 0 {
-		albIp = *describeOutput.NetworkInterfaces[0].PrivateIpAddress
+		if describeOutput.NetworkInterfaces[0].Ipv6Address != nil {
+			albIp = *describeOutput.NetworkInterfaces[0].Ipv6Address
+		} else {
+			albIp = *describeOutput.NetworkInterfaces[0].PrivateIpAddress
+		}
 		log.Debug().Msgf("ALB ip %s", albIp)
 	} else {
 		log.Debug().Msgf("No ALB network interface was found")

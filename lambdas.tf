@@ -215,10 +215,11 @@ resource "aws_lambda_function" "management" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
-  vpc_config {
-    security_group_ids = local.sg_ids
-    subnet_ids         = local.subnet_ids
-  }
+  # vpc_config {
+  #   security_group_ids = local.sg_ids
+  #   subnet_ids         = local.subnet_ids
+  #   ipv6_allowed_for_dual_stack = var.use_ipv6
+  # }
   environment {
     variables = {
       LAMBDA                     = "management"
@@ -349,10 +350,11 @@ resource "aws_lambda_function" "scale_down_lambda" {
   timeout       = 20
   runtime       = "provided.al2"
   architectures = ["arm64"]
-  vpc_config {
-    security_group_ids = local.sg_ids
-    subnet_ids         = local.subnet_ids
-  }
+  # vpc_config {
+  #   security_group_ids = local.sg_ids
+  #   subnet_ids         = local.subnet_ids
+  #   ipv6_allowed_for_dual_stack = var.use_ipv6
+  # }
   environment {
     variables = {
       LAMBDA                 = "scaleDown"

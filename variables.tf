@@ -8,6 +8,12 @@ variable "availability_zones" {
   }
 }
 
+variable "use_ipv6" {
+  type        = bool
+  description = "Create the network resources using ipv6"
+  default     = false
+}
+
 variable "subnet_ids" {
   type        = list(string)
   description = "List of subnet ids"
@@ -36,6 +42,16 @@ variable "subnets_cidrs" {
   default     = ["10.0.1.0/24"]
   validation {
     condition     = length(var.subnets_cidrs) <= 1
+    error_message = "Multiple subnets are not supported. Please provide only one subnet cidr."
+  }
+}
+
+variable "subnet_ipv6_cidrs" {
+  type        = list(string)
+  description = "CIDR block for subnet creation, required only if not specifying subnet_ids, this block will be used to create subnet that will be used by weka. Currently limited to single"
+  default     = ["2a05:d018:9c:2f00::/64"]
+  validation {
+    condition     = length(var.subnet_ipv6_cidrs) <= 1
     error_message = "Multiple subnets are not supported. Please provide only one subnet cidr."
   }
 }
@@ -345,7 +361,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "5f53a22a99629b40d3f8be9dd00a0226"
+  default     = "e3d39a8dbf54a6487df0d4052e5548fc"
 }
 
 variable "lambdas_dist" {
