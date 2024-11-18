@@ -94,10 +94,10 @@ resource "aws_route_table" "nat_route_table" {
 resource "aws_subnet" "public_subnet" {
   count                                          = !var.subnet_autocreate_as_private ? var.create_nat_gateway ? 1 : length(local.subnets_cidrs) : 0
   vpc_id                                         = aws_vpc.vpc.id
-  cidr_block                                     = var.use_ipv6 ? null : var.create_nat_gateway ? var.nat_public_subnet_cidr : local.subnets_cidrs[count.index]
+  cidr_block                                     = var.create_nat_gateway ? var.nat_public_subnet_cidr : local.subnets_cidrs[count.index]
   assign_ipv6_address_on_creation                = var.use_ipv6
   ipv6_cidr_block                                = var.use_ipv6 ? cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 8, count.index) : null
-  ipv6_native                                    = var.use_ipv6
+  #ipv6_native                                    = var.use_ipv6
   enable_resource_name_dns_aaaa_record_on_launch = var.use_ipv6
   availability_zone                              = local.availability_zones_list[count.index]
   map_public_ip_on_launch                        = !var.use_ipv6
@@ -121,10 +121,10 @@ resource "aws_route_table_association" "public_rt_associate" {
 resource "aws_subnet" "private_subnet" {
   count                                          = var.subnet_autocreate_as_private || var.create_nat_gateway ? length(local.subnets_cidrs) : 0
   vpc_id                                         = aws_vpc.vpc.id
-  cidr_block                                     = var.use_ipv6 ? null : local.subnets_cidrs[count.index]
+  cidr_block                                     = local.subnets_cidrs[count.index]
   assign_ipv6_address_on_creation                = var.use_ipv6
   ipv6_cidr_block                                = var.use_ipv6 ? cidrsubnet(aws_vpc.vpc.ipv6_cidr_block, 8, count.index) : null
-  ipv6_native                                    = var.use_ipv6
+  #ipv6_native                                    = var.use_ipv6
   enable_resource_name_dns_aaaa_record_on_launch = var.use_ipv6
   availability_zone                              = local.availability_zones_list[count.index]
   map_public_ip_on_launch                        = false
