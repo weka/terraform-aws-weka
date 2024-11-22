@@ -345,7 +345,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "5f53a22a99629b40d3f8be9dd00a0226"
+  default     = "871ba1d14342e39e37ce7f0466aecd4c"
 }
 
 variable "lambdas_dist" {
