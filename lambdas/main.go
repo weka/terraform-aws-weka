@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/weka/go-cloud-lib/lib/weka"
 	"os"
 	"strconv"
 	"strings"
@@ -13,8 +14,10 @@ import (
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/common"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/connectors"
 	lambdas "github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/fetch"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/management"
 	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/terminate"
-	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/management"
+	"github.com/weka/aws-tf/modules/deploy_weka/lambdas/functions/weka_api"
+
 	"github.com/weka/go-cloud-lib/logging"
 	"github.com/weka/go-cloud-lib/scale_down"
 
@@ -315,55 +318,17 @@ func getClusterStatus(ctx context.Context, stateTable, stateTableHashKey, stateK
 		return clusterStatus, nil
 	}
 
-	clusterName := os.Getenv("CLUSTER_NAME")
-	if clusterName == "" {
-		return protocol.ClusterStatus{}, fmt.Errorf("CLUSTER_NAME is not set")
-	}
-	ips, err := common.GetBackendsPrivateIps(clusterName, "backend")
-	if err != nil {
-		return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > GetBackendsPrivateIps: %w", err)
-	}
-	log.Info().Msgf("GetClusterStatus > Backend private IPs: %v", ips)
-
-	managementLambdaName := os.Getenv("MANAGEMENT_LAMBDA")
-	if managementLambdaName == "" {
-		return protocol.ClusterStatus{}, fmt.Errorf("MANAGEMENT_LAMBDA is not set")
-	}
-
-	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
-	if err != nil {
-		log.Warn().Msg("Failed to parse USE_SECRETMANAGER_ENDPOINT, assuming false")
-	}
-	var username, password string
-	if !useSecretManagerEndpoint {
-		log.Info().Msg("Secret manager endpoint not in use, sending credentials in body")
-		usernameId := os.Getenv("USERNAME_ID")
-		deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
-		adminPasswordId := os.Getenv("ADMIN_PASSWORD_ID")
-		creds, err := common.GetDeploymentOrAdminUsernameAndPassword(usernameId, deploymentPasswordId, adminPasswordId)
-		if err != nil {
-			return protocol.ClusterStatus{}, fmt.Errorf("getClusterStatus > GetDeploymentOrAdminUsernameAndPassword: %w", err)
-		}
-
-		username = creds.Username
-		password = creds.Password
-	}
-
-	managementRequest := management.ManagementRequest{
-		Type: "status",
-		WekaStatusRequest: management.WekaStatusRequest{
-			BackendPrivateIps: ips,
-			Username:          username,
-			Password:          password, // empty string is interpreted as no credentials
-		},
+	wekaApiRequest := management.WekaApiRequest{
+		Method: weka.JrpcStatus,
 	}
 	var wekaStatus *protocol.WekaStatus
-	wekaStatus, err = common.InvokeLambdaFunction[protocol.WekaStatus](managementLambdaName, managementRequest)
+	wekaStatus, err = weka_api.MakeWekaApiRequest[protocol.WekaStatus](ctx, &wekaApiRequest)
 	if err != nil {
-		wrappedError := fmt.Errorf("getClusterStatus > InvokeLambdaFunction: %w", err)
+		wrappedError := fmt.Errorf("getClusterStatus > MakeWekaApiRequest: %w", err)
 		log.Error().Err(wrappedError).Send()
 		wekaStatus = &protocol.WekaStatus{}
 	}
+
 	clusterStatus.WekaStatus = *wekaStatus
 
 	return clusterStatus, nil
@@ -423,30 +388,28 @@ func scaleDownHandler(ctx context.Context, info protocol.HostGroupInfoResponse) 
 	return scale_down.ScaleDown(ctx, info)
 }
 
-func managementHandler(ctx context.Context, req management.ManagementRequest) (protocol.WekaStatus, error) {
-	switch req.Type {
-	case "status":
-		useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
-		if err != nil {
-			log.Warn().Msg("Failed to parse USE_SECRETMANAGER_ENDPOINT, assuming false")
-		}
-		if useSecretManagerEndpoint && req.Password == "" {
-			usernameId := os.Getenv("USERNAME_ID")
-			deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
-			adminPasswordId := os.Getenv("ADMIN_PASSWORD_ID")
-			creds, err := common.GetDeploymentOrAdminUsernameAndPassword(usernameId, deploymentPasswordId, adminPasswordId)
-			if err != nil {
-				log.Error().Err(err).Send()
-				return protocol.WekaStatus{}, err
-			}
-			req.Username = creds.Username
-			req.Password = creds.Password
-		}
-		return management.GetWekaStatus(ctx, req.WekaStatusRequest)
-	default:
-		log.Error().Msgf("Invalid management type: %s", req.Type)
-		return protocol.WekaStatus{}, fmt.Errorf("invalid management type: %s", req.Type)
+func managementHandler(ctx context.Context, req management.ManagementRequest) (interface{}, error) {
+	useSecretManagerEndpoint, err := strconv.ParseBool(os.Getenv("USE_SECRETMANAGER_ENDPOINT"))
+	if err != nil {
+		log.Warn().Msg("Failed to parse USE_SECRETMANAGER_ENDPOINT, assuming false")
 	}
+	if useSecretManagerEndpoint && req.Password == "" {
+		usernameId := os.Getenv("USERNAME_ID")
+		deploymentPasswordId := os.Getenv("DEPLOYMENT_PASSWORD_ID")
+		adminPasswordId := os.Getenv("ADMIN_PASSWORD_ID")
+		creds, err := common.GetDeploymentOrAdminUsernameAndPassword(usernameId, deploymentPasswordId, adminPasswordId)
+		if err != nil {
+			log.Error().Err(err).Send()
+			return nil, err
+		}
+		req.Username = creds.Username
+		req.Password = creds.Password
+	}
+	return management.CallJRPC(ctx, req)
+}
+
+func wekaApiHandler(ctx context.Context, req management.WekaApiRequest) (interface{}, error) {
+	return weka_api.MakeWekaApiRequest[interface{}](ctx, &req)
 }
 
 func main() {
@@ -473,6 +436,8 @@ func main() {
 		lambda.Start(transientHandler)
 	case "management":
 		lambda.Start(managementHandler)
+	case "weka-api":
+		lambda.Start(wekaApiHandler)
 	default:
 		lambda.Start(func() error { return fmt.Errorf("unsupported lambda command") })
 	}

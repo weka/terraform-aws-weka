@@ -97,6 +97,14 @@ aws lambda invoke \
   --region ${local.region} \
   --cli-binary-format raw-in-base64-out /dev/stdout
 EOT
+
+    "weka_api" = <<EOT
+aws lambda invoke \
+  --function-name ${aws_lambda_function.weka_api.function_name} \
+  --payload '{"Method": "status"}' \
+  --region ${local.region} \
+  --cli-binary-format raw-in-base64-out /dev/stdout
+EOT
   }
 }
 
@@ -151,6 +159,10 @@ output "nfs_protocol_gateways_name" {
 
 output "deploy_lambda_name" {
   value = aws_lambda_function.deploy_lambda.function_name
+}
+
+output "weka_api_name" {
+  value = aws_lambda_function.weka_api.function_name
 }
 
 output "pre_terraform_destroy_command" {

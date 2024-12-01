@@ -801,6 +801,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | [aws_lambda_function.status_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.terminate_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_function.transient_lambda](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
+| [aws_lambda_function.weka_api](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_function) | resource |
 | [aws_lambda_permission.invoke_lambda_permission](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lambda_permission) | resource |
 | [aws_launch_template.launch_template](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/launch_template) | resource |
 | [aws_lb.alb](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/lb) | resource |
@@ -887,8 +888,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambda_iam_role_arn"></a> [lambda\_iam\_role\_arn](#input\_lambda\_iam\_role\_arn) | IAM Role that will be used by AWS Lambdas, if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
 | <a name="input_lambdas_custom_s3_bucket"></a> [lambdas\_custom\_s3\_bucket](#input\_lambdas\_custom\_s3\_bucket) | S3 bucket name for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_custom_s3_key"></a> [lambdas\_custom\_s3\_key](#input\_lambdas\_custom\_s3\_key) | S3 key for lambdas | `string` | `null` | no |
-| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"release"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"871ba1d14342e39e37ce7f0466aecd4c"` | no |
+| <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"3efb652a45b2118f03e32766190d5c73"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
@@ -987,5 +988,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_smb_protocol_gateways_name"></a> [smb\_protocol\_gateways\_name](#output\_smb\_protocol\_gateways\_name) | Name of SMB protocol gateway instances |
 | <a name="output_subnet_ids"></a> [subnet\_ids](#output\_subnet\_ids) | Subnet ids of backends |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC id |
+| <a name="output_weka_api_name"></a> [weka\_api\_name](#output\_weka\_api\_name) | n/a |
 | <a name="output_weka_cluster_admin_password_secret_id"></a> [weka\_cluster\_admin\_password\_secret\_id](#output\_weka\_cluster\_admin\_password\_secret\_id) | Secret id of weka admin password |
 <!-- END_TF_DOCS -->
