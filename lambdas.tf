@@ -5,7 +5,7 @@ locals {
   s3_key       = var.lambdas_custom_s3_key != null ? var.lambdas_custom_s3_key : "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions = toset([
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
-    "transient", "join-nfs-finalization"
+    "transient", "join-nfs-finalization", "weka-api"
   ])
   enable_lambda_vpc = var.enable_lambda_vpc_config ? 1 : 0
   obs_prefix        = lookup(var.custom_prefix, "obs", var.prefix)
@@ -291,6 +291,7 @@ resource "aws_lambda_function" "status_lambda" {
       STATE_KEY                  = local.state_key
       NFS_STATE_KEY              = local.nfs_state_key
       CLUSTER_NAME               = var.cluster_name
+      WEKA_API_LAMBDA            = aws_lambda_function.weka_api.function_name
       MANAGEMENT_LAMBDA          = aws_lambda_function.management.function_name
       USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
       DEPLOYMENT_PASSWORD_ID     = aws_secretsmanager_secret.weka_deployment_password.id
@@ -301,6 +302,39 @@ resource "aws_lambda_function" "status_lambda" {
   tags       = var.tags_map
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
+
+resource "aws_lambda_function" "weka_api" {
+  function_name = "${var.prefix}-${var.cluster_name}-weka-api-lambda"
+  s3_bucket     = local.s3_bucket
+  s3_key        = local.s3_key
+  handler       = local.handler_name
+  role          = local.lambda_iam_role_arn
+  memory_size   = 128
+  timeout       = 20
+  runtime       = "provided.al2"
+  architectures = ["arm64"]
+  dynamic "vpc_config" {
+    for_each = range(0, local.enable_lambda_vpc)
+    content {
+      security_group_ids = local.sg_ids
+      subnet_ids         = local.subnet_ids
+    }
+  }
+  environment {
+    variables = {
+      LAMBDA                     = "weka-api"
+      CLUSTER_NAME               = var.cluster_name
+      MANAGEMENT_LAMBDA          = aws_lambda_function.management.function_name
+      USERNAME_ID                = aws_secretsmanager_secret.weka_username.id
+      DEPLOYMENT_PASSWORD_ID     = aws_secretsmanager_secret.weka_deployment_password.id
+      ADMIN_PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
+      USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
+    }
+  }
+  tags       = var.tags_map
+  depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
+}
+
 
 resource "aws_lambda_function" "fetch_lambda" {
   function_name = "${local.lambda_prefix}-${var.cluster_name}-fetch-lambda"
