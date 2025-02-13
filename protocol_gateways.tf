@@ -1,7 +1,7 @@
 module "smb_protocol_gateways" {
   count                               = var.smb_protocol_gateways_number > 0 ? 1 : 0
   source                              = "./modules/protocol_gateways"
-  subnet_id                           = local.subnet_ids[0]
+  subnet_id                           = var.smb_protocol_gateway_subnet_id != null ? var.smb_protocol_gateway_subnet_id : local.subnet_ids[0]
   setup_protocol                      = var.smb_setup_protocol
   gateways_number                     = var.smb_protocol_gateways_number
   gateways_name                       = "${local.ec2_prefix}-${var.cluster_name}-smb-protocol-gateway"
@@ -44,7 +44,7 @@ module "smb_protocol_gateways" {
 module "s3_protocol_gateways" {
   count                               = var.s3_protocol_gateways_number > 0 ? 1 : 0
   source                              = "./modules/protocol_gateways"
-  subnet_id                           = local.subnet_ids[0]
+  subnet_id                           = var.s3_protocol_gateway_subnet_id != null ? var.s3_protocol_gateway_subnet_id : local.subnet_ids[0]
   setup_protocol                      = var.s3_setup_protocol
   gateways_number                     = var.s3_protocol_gateways_number
   gateways_name                       = "${local.ec2_prefix}-${var.cluster_name}-s3-protocol-gateway"
@@ -84,7 +84,7 @@ module "s3_protocol_gateways" {
 module "nfs_protocol_gateways" {
   count                               = var.nfs_protocol_gateways_number > 0 ? 1 : 0
   source                              = "./modules/protocol_gateways"
-  subnet_id                           = local.subnet_ids[0]
+  subnet_id                           = var.nfs_protocol_gateway_subnet_id != null ? var.nfs_protocol_gateway_subnet_id : local.subnet_ids[0]
   setup_protocol                      = var.nfs_setup_protocol
   gateways_number                     = var.nfs_protocol_gateways_number
   gateways_name                       = "${local.ec2_prefix}-${var.cluster_name}-nfs-protocol-gateway"
