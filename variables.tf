@@ -641,6 +641,12 @@ variable "nfs_protocol_gateway_instance_ami_id" {
   default     = null
 }
 
+variable "nfs_protocol_gateway_subnet_id" {
+  type        = string
+  description = "NFS protocol gateway subnet id."
+  default     = null
+}
+
 ############################################### SMB protocol gateways variables ###################################################
 variable "smb_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -725,6 +731,12 @@ variable "smb_protocol_gateway_instance_ami_id" {
   default     = null
 }
 
+variable "smb_protocol_gateway_subnet_id" {
+  type        = string
+  description = "SMB protocol gateway subnet id."
+  default     = null
+}
+
 ############################################### S3 protocol gateways variables ###################################################
 variable "s3_protocol_gateway_fe_cores_num" {
   type        = number
@@ -784,6 +796,12 @@ variable "weka_home_url" {
   type        = string
   description = "Weka Home url"
   default     = ""
+}
+
+variable "s3_protocol_gateway_subnet_id" {
+  type        = string
+  description = "S3 protocol gateway subnet id."
+  default     = null
 }
 
 ############################### vpc endpoint services ############################
