@@ -345,7 +345,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "8cf77d5d7c12f7d1ca732ebe8aad0bfd"
+  default     = "e53eadcc6a8b702a9ac66f60218cc04f"
 }
 
 variable "lambdas_dist" {
@@ -910,4 +910,51 @@ variable "post_cluster_setup_script" {
   type        = string
   description = "A script to run after the cluster is up"
   default     = ""
+}
+
+variable "data_services_instance_type" {
+  type        = string
+  description = "The data services instance type to deploy"
+  default     = "i3en.2xlarge"
+}
+variable "data_services_number" {
+  type        = number
+  description = "The number of data services instances to deploy"
+  default     = 2
+}
+
+variable "data_services_subnet_id" {
+  type        = string
+  description = "Data services subnet id."
+  default     = null
+}
+
+variable "data_services_weka_volume_size" {
+  type        = number
+  default     = 48
+  description = "The data services' default disk size."
+}
+
+variable "data_services_instance_ami_id" {
+  type        = string
+  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  default     = null
+}
+
+variable "data_services_instance_iam_profile_arn" {
+  type        = string
+  description = "The data services instance IAM profile ARN"
+  default     = ""
+}
+
+variable "data_services_capacity_reservation_id" {
+  type        = string
+  default     = null
+  description = "The ID of the capacity reservation in which to run the data services instances"
+}
+
+variable "data_services_root_volume_size" {
+  type        = number
+  default     = null
+  description = "The data services' root volume size."
 }
