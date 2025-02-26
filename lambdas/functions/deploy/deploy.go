@@ -112,7 +112,7 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 	return
 }
 
-func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw protocol.ProtocolGW) (bashScript string, err error) {
+func GetSmbAndS3DeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw protocol.ProtocolGW) (bashScript string, err error) {
 	log.Info().Msgf("Getting %s deploy script", protocolGw)
 	funcDef := aws_functions_def.NewFuncDef()
 
@@ -143,6 +143,46 @@ func GetSmbDeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw prot
 		Protocol:                  protocolGw,
 		ProtocolGatewayFeCoresNum: protocolGatewayFeCoresNum,
 		LoadBalancerIP:            albIp,
+	}
+
+	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return "", err
+	}
+
+	deployScriptGenerator := deploy.DeployScriptGenerator{
+		FuncDef:       funcDef,
+		Params:        deploymentParams,
+		DeviceNameCmd: GetDeviceName(ebsVolumeId),
+	}
+	bashScript = deployScriptGenerator.GetDeployScript()
+
+	return
+}
+
+func GetDataServicesDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript string, err error) {
+	log.Info().Msgf("Getting data services deploy script")
+	funcDef := aws_functions_def.NewFuncDef()
+
+	albIp, err := common.GetALBIp(awsDeploymentParams.AlbArnSuffix)
+	if err != nil {
+		log.Error().Err(err).Send()
+	}
+
+	var token string
+	token, err = common.GetWekaIoToken(awsDeploymentParams.TokenId)
+	if err != nil {
+		return
+	}
+
+	deploymentParams := deploy.DeploymentParams{
+		VMName:         awsDeploymentParams.InstanceName,
+		WekaInstallUrl: awsDeploymentParams.InstallUrl,
+		WekaToken:      token,
+		ProxyUrl:       awsDeploymentParams.ProxyUrl,
+		LoadBalancerIP: albIp,
+		Protocol:       protocol.DATA,
 	}
 
 	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)

@@ -2,8 +2,8 @@ echo "$(date -u): running init protocol gateway script"
 
 weka local ps
 
-filesystem_name="default"
-function wait_for_weka_fs(){
+filesystem_name=".config_fs"
+function wait_for_config_fs(){
   max_retries=30 # 30 * 10 = 5 minutes
   for (( i=0; i < max_retries; i++ )); do
     if [ "$(weka fs | grep -c $filesystem_name)" -ge 1 ]; then
@@ -16,41 +16,6 @@ function wait_for_weka_fs(){
   if (( i > max_retries )); then
       echo "$(date -u): timeout: weka filesystem $filesystem_name is not up after $max_retries attempts."
       return 1
-  fi
-}
-
-function create_config_fs(){
-  config_filesystem_name=".config_fs"
-  size="10GB"
-
-  if [ "$(weka fs | grep -c $config_filesystem_name)" -ge 1 ]; then
-    echo "$(date -u): weka filesystem $config_filesystem_name exists"
-    return 0
-  fi
-
-  echo "$(date -u): trying to create filesystem $config_filesystem_name"
-  output=$(weka fs create $config_filesystem_name default $size 2>&1)
-  # possiible outputs:
-  # FSId: 1 (means success)
-  # error: The given filesystem ".config_fs" already exists.
-  # error: Not enough available drive capacity for filesystem. requested "10.00 GB", but only "0 B" are free
-  if [ $? -eq 0 ]; then
-    echo "$(date -u): weka filesystem $config_filesystem_name is created"
-    return 0
-  fi
-
-  if [[ $output == *"already exists"* ]]; then
-    echo "$(date -u): weka filesystem $config_filesystem_name already exists"
-    break
-  elif [[ $output == *"Not enough available drive capacity for filesystem"* ]]; then
-    err_msg="Not enough available drive capacity for filesystem $config_filesystem_name for size $size"
-    echo "$(date -u): $err_msg"
-    report "{\"hostname\": \"$HOSTNAME\", \"type\": \"error\", \"message\": \"$err_msg\"}"
-    return 1
-  else
-    echo "$(date -u): output: $output"
-    report "{\"hostname\": \"$HOSTNAME\", \"type\": \"error\", \"message\": \"cannot create weka filesystem $config_filesystem_name\"}"
-    return 1
   fi
 }
 
@@ -127,8 +92,7 @@ if (( retry > max_retries )); then
 fi
 
 if [[ ( ${smbw_enabled} == true && "${protocol}" == "SMB" ) || "${protocol}" == "S3" ]]; then
-    wait_for_weka_fs || exit 1
-    create_config_fs || exit 1
+    wait_for_config_fs || exit 1
 fi
 
 sleep 30s
