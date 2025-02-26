@@ -149,6 +149,13 @@ output "nfs_protocol_gateways_name" {
   description = "Name of NFS protocol gateway instances"
 }
 
+output "data_services_ips" {
+  value       = var.data_services_number == 0 ? null : <<EOT
+ echo $(aws ec2 describe-instances --region ${local.region} --filters "Name=tag:Name,Values=${module.data_services[0].data_services_name}" "Name=instance-state-name,Values=running" --query 'Reservations[*].Instances[*].{Instance:InstanceId,PrivateIpAddress:PrivateIpAddress,PublicIpAddress:PublicIpAddress}')
+EOT
+  description = "Ips of the data services instances"
+}
+
 output "deploy_lambda_name" {
   value = aws_lambda_function.deploy_lambda.function_name
 }

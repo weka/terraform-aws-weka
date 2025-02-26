@@ -134,7 +134,6 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	tieringStartDemote, _ := strconv.Atoi(os.Getenv("TIERING_START_DEMOTE"))
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("FRONTEND_CONTAINER_CORES_NUM"))
 	proxyUrl := os.Getenv("PROXY_URL")
-	createConfigFs, _ := strconv.ParseBool(os.Getenv("CREATE_CONFIG_FS"))
 	wekaHomeUrl := os.Getenv("WEKA_HOME_URL")
 	interfaceGroupName := os.Getenv("NFS_INTERFACE_GROUP_NAME")
 	nfsProtocolgwsNum, _ := strconv.Atoi(os.Getenv("NFS_PROTOCOL_GATEWAYS_NUM"))
@@ -167,7 +166,6 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 			Prefix:               prefix,
 			SetObs:               setObs,
 			InstallDpdk:          installDpdk,
-			CreateConfigFs:       createConfigFs,
 			DataProtection: clusterizeCommon.DataProtectionParams{
 				StripeWidth:     stripeWidth,
 				ProtectionLevel: protectionLevel,
@@ -218,7 +216,11 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 
-	log.Info().Msgf("generating deploy script for vm: %s", vm.Name)
+	msg := fmt.Sprintf("generating deploy script for vm: %s", vm.Name)
+	if vm.Protocol != "" {
+		msg += fmt.Sprintf(", protocol: %s", vm.Protocol)
+	}
+	log.Info().Msg(msg)
 
 	awsDeploymentParams := deploy.AWSDeploymentParams{
 		Ctx:                          ctx,
@@ -249,7 +251,9 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	if vm.Protocol == protocol.NFS {
 		return deploy.GetNfsDeployScript(awsDeploymentParams)
 	} else if vm.Protocol == protocol.SMB || vm.Protocol == protocol.SMBW || vm.Protocol == protocol.S3 {
-		return deploy.GetSmbDeployScript(awsDeploymentParams, vm.Protocol)
+		return deploy.GetSmbAndS3DeployScript(awsDeploymentParams, vm.Protocol)
+	} else if vm.Protocol == protocol.DATA {
+		return deploy.GetDataServicesDeployScript(awsDeploymentParams)
 	}
 	return deploy.GetDeployScript(awsDeploymentParams)
 }
