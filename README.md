@@ -765,6 +765,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | Name | Source | Version |
 |------|--------|---------|
 | <a name="module_clients"></a> [clients](#module\_clients) | ./modules/clients | n/a |
+| <a name="module_data_services"></a> [data\_services](#module\_data\_services) | ./modules/data_services | n/a |
 | <a name="module_iam"></a> [iam](#module\_iam) | ./modules/iam | n/a |
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_nfs_protocol_gateways"></a> [nfs\_protocol\_gateways](#module\_nfs\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
@@ -868,6 +869,14 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway) | NAT needs to be created when no public ip is assigned to the backend, to allow internet access | `bool` | `false` | no |
 | <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data to pass to instances. | `string` | `""` | no |
 | <a name="input_custom_prefix"></a> [custom\_prefix](#input\_custom\_prefix) | Custom prefix for resources. The supported keys are: lb, db, kms, cloudwatch, sfn, lambda, secrets, ec2, iam, obs | `map(string)` | `{}` | no |
+| <a name="input_data_services_capacity_reservation_id"></a> [data\_services\_capacity\_reservation\_id](#input\_data\_services\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the data services instances | `string` | `null` | no |
+| <a name="input_data_services_instance_ami_id"></a> [data\_services\_instance\_ami\_id](#input\_data\_services\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
+| <a name="input_data_services_instance_iam_profile_arn"></a> [data\_services\_instance\_iam\_profile\_arn](#input\_data\_services\_instance\_iam\_profile\_arn) | The data services instance IAM profile ARN | `string` | `""` | no |
+| <a name="input_data_services_instance_type"></a> [data\_services\_instance\_type](#input\_data\_services\_instance\_type) | The data services instance type to deploy | `string` | `"i3en.2xlarge"` | no |
+| <a name="input_data_services_number"></a> [data\_services\_number](#input\_data\_services\_number) | The number of data services instances to deploy | `number` | `2` | no |
+| <a name="input_data_services_root_volume_size"></a> [data\_services\_root\_volume\_size](#input\_data\_services\_root\_volume\_size) | The data services' root volume size. | `number` | `null` | no |
+| <a name="input_data_services_subnet_id"></a> [data\_services\_subnet\_id](#input\_data\_services\_subnet\_id) | Data services subnet id. | `string` | `null` | no |
+| <a name="input_data_services_weka_volume_size"></a> [data\_services\_weka\_volume\_size](#input\_data\_services\_weka\_volume\_size) | The data services' default disk size. | `number` | `48` | no |
 | <a name="input_debug_down_backends_removal_timeout"></a> [debug\_down\_backends\_removal\_timeout](#input\_debug\_down\_backends\_removal\_timeout) | Don't change this value without consulting weka support team. Timeout for removing down backends. Valid time units are ns, us (or µs), ms, s, m, h. | `string` | `"3h"` | no |
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default). This key will be used if dynamodb table will be created automatically, by not setting `dynamodb_table_name` param. In case `dynamodb_table_name` parameter is set, `dynamodb_hash_key_name` should match the key that should be used by us within pre-created table | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
@@ -888,7 +897,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambdas_custom_s3_bucket"></a> [lambdas\_custom\_s3\_bucket](#input\_lambdas\_custom\_s3\_bucket) | S3 bucket name for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_custom_s3_key"></a> [lambdas\_custom\_s3\_key](#input\_lambdas\_custom\_s3\_key) | S3 key for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"8cf77d5d7c12f7d1ca732ebe8aad0bfd"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"e53eadcc6a8b702a9ac66f60218cc04f"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
@@ -975,6 +984,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_client_ips"></a> [client\_ips](#output\_client\_ips) | Ips of clients |
 | <a name="output_cluster_helper_commands"></a> [cluster\_helper\_commands](#output\_cluster\_helper\_commands) | n/a |
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The cluster name |
+| <a name="output_data_services_ips"></a> [data\_services\_ips](#output\_data\_services\_ips) | Ips of the data services instances |
 | <a name="output_deploy_lambda_name"></a> [deploy\_lambda\_name](#output\_deploy\_lambda\_name) | n/a |
 | <a name="output_ips_type"></a> [ips\_type](#output\_ips\_type) | If 'assign\_public\_ip' is set to true, it will output the public ips, If no it will output the private ips |
 | <a name="output_lambda_status_name"></a> [lambda\_status\_name](#output\_lambda\_status\_name) | Name of lambda status |
