@@ -2,19 +2,19 @@ echo "$(date -u): running init protocol gateway script"
 
 weka local ps
 
-filesystem_name=".config_fs"
+config_filesystem_name=".config_fs"
 function wait_for_config_fs(){
   max_retries=30 # 30 * 10 = 5 minutes
   for (( i=0; i < max_retries; i++ )); do
-    if [ "$(weka fs | grep -c $filesystem_name)" -ge 1 ]; then
-      echo "$(date -u): weka filesystem $filesystem_name is up"
+    if [ "$(weka fs | grep -c $config_filesystem_name)" -ge 1 ]; then
+      echo "$(date -u): weka filesystem $config_filesystem_name is up"
       break
     fi
-    echo "$(date -u): waiting for weka filesystem $filesystem_name to be up"
+    echo "$(date -u): waiting for weka filesystem $config_filesystem_name to be up"
     sleep 10
   done
   if (( i > max_retries )); then
-      echo "$(date -u): timeout: weka filesystem $filesystem_name is not up after $max_retries attempts."
+      echo "$(date -u): timeout: weka filesystem $config_filesystem_name is not up after $max_retries attempts."
       return 1
   fi
 }
