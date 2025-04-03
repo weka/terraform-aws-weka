@@ -283,12 +283,6 @@ variable "additional_instance_iam_policy_statement" {
   description = "Additional IAM policy statement to be added to the instance IAM role."
 }
 
-variable "vpc_id" {
-  type        = string
-  description = "VPC ID, required only for security group creation"
-  default     = ""
-}
-
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block of the vpc"
