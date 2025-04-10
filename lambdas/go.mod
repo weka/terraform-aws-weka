@@ -1,6 +1,7 @@
 module github.com/weka/aws-tf/modules/deploy_weka/lambdas
 
 go 1.21.1
+toolchain go1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
@@ -19,9 +20,9 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/rs/xid v1.5.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
