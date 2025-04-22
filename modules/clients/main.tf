@@ -36,10 +36,6 @@ locals {
 
   preparation_script = templatefile("${path.module}/init.sh", {
     proxy               = var.proxy_url
-    additional_nics_num = var.frontend_container_cores_num
-    subnet_id           = var.subnet_id
-    region              = local.region
-    groups              = join(" ", var.sg_ids)
     weka_log_group_name = "/wekaio/clients/${var.clients_name}"
   })
 

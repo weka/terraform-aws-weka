@@ -54,34 +54,3 @@ function setup_aws_logs_agent() {
 }
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
-
-yum -y install pip || true
-apt update && apt install -y net-tools && apt install -y python3-pip || true
-pip install --upgrade awscli || true
-
-region=${region}
-subnet_id=${subnet_id}
-additional_nics_num=${additional_nics_num}
-
-instance_type=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -v http://169.254.169.254/latest/meta-data/instance-type)
-max_network_cards=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.MaximumNetworkCards" --output text)
-
-counter=0
-interface_index=1
-for (( card_index=0; card_index<$max_network_cards ; card_index++)); do
-  max_device=$(aws ec2 describe-instance-types --region $region --instance-types $instance_type --query "InstanceTypes[0].NetworkInfo.NetworkCards[$card_index].MaximumNetworkInterfaces")
-  if [[ $card_index -gt 0 ]];then
-    interface_index=0
-  fi
-  for (( interface_index=$interface_index; interface_index<$max_device; interface_index++ )); do
-      if [[  $counter -eq $additional_nics_num ]]; then
-          break
-      fi
-      eni=$(aws ec2 create-network-interface --region "$region" --subnet-id "$subnet_id" --groups ${groups}) # groups should not be in quotes it needs to be a list
-      network_interface_id=$(echo "$eni" | python3 -c "import sys, json; print(json.load(sys.stdin)['NetworkInterface']['NetworkInterfaceId'])")
-      attachment=$(aws ec2 attach-network-interface --region "$region" --network-card-index "$card_index" --device-index "$interface_index" --instance-id "$instance_id" --network-interface-id "$network_interface_id")
-      attachment_id=$(echo "$attachment" | python3 -c "import sys, json; print(json.load(sys.stdin)['AttachmentId'])")
-      aws ec2 modify-network-interface-attribute --region "$region" --attachment AttachmentId="$attachment_id",DeleteOnTermination=true --network-interface-id "$network_interface_id"
-      counter=$(($counter+1))
-  done
-done
