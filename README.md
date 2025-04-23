@@ -872,7 +872,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_data_services_capacity_reservation_id"></a> [data\_services\_capacity\_reservation\_id](#input\_data\_services\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the data services instances | `string` | `null` | no |
 | <a name="input_data_services_instance_ami_id"></a> [data\_services\_instance\_ami\_id](#input\_data\_services\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
 | <a name="input_data_services_instance_iam_profile_arn"></a> [data\_services\_instance\_iam\_profile\_arn](#input\_data\_services\_instance\_iam\_profile\_arn) | The data services instance IAM profile ARN | `string` | `""` | no |
-| <a name="input_data_services_instance_type"></a> [data\_services\_instance\_type](#input\_data\_services\_instance\_type) | The data services instance type to deploy | `string` | `"i3en.2xlarge"` | no |
+| <a name="input_data_services_instance_type"></a> [data\_services\_instance\_type](#input\_data\_services\_instance\_type) | The data services instance type to deploy | `string` | `"m6i.xlarge"` | no |
 | <a name="input_data_services_number"></a> [data\_services\_number](#input\_data\_services\_number) | The number of data services instances to deploy | `number` | `2` | no |
 | <a name="input_data_services_root_volume_size"></a> [data\_services\_root\_volume\_size](#input\_data\_services\_root\_volume\_size) | The data services' root volume size. | `number` | `null` | no |
 | <a name="input_data_services_subnet_id"></a> [data\_services\_subnet\_id](#input\_data\_services\_subnet\_id) | Data services subnet id. | `string` | `null` | no |
