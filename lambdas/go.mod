@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.45.16
 	github.com/lithammer/dedent v1.1.0
 	github.com/rs/zerolog v1.31.0
-	github.com/weka/go-cloud-lib v0.0.0-20250411061157-d79793c705e7
+	github.com/weka/go-cloud-lib v0.0.0-20250423093745-f689be3e27d1
 	golang.org/x/sync v0.3.0
 )
 
@@ -19,9 +19,9 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/rs/xid v1.5.0 // indirect
-	golang.org/x/net v0.36.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.6.0 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
