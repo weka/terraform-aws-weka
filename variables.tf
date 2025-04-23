@@ -909,7 +909,7 @@ variable "post_cluster_setup_script" {
 variable "data_services_instance_type" {
   type        = string
   description = "The data services instance type to deploy"
-  default     = "i3en.2xlarge"
+  default     = "m6i.xlarge"
 }
 variable "data_services_number" {
   type        = number
