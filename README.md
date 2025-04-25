@@ -387,7 +387,8 @@ tiering_ssd_percent = VALUE
           "ec2:ModifyNetworkInterfaceAttribute",
           "ec2:DeleteNetworkInterface",
           "ec2:DescribeInstances",
-          "ec2:DescribeInstanceTypes"
+          "ec2:DescribeInstanceTypes",
+          "ec2:CreateTags"
         ],
         "Effect": "Allow",
         "Resource": "*"
