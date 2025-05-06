@@ -842,6 +842,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_alb_cert_arn"></a> [alb\_cert\_arn](#input\_alb\_cert\_arn) | HTTPS certificate ARN for ALB | `string` | `null` | no |
 | <a name="input_alb_route53_zone_id"></a> [alb\_route53\_zone\_id](#input\_alb\_route53\_zone\_id) | Route53 zone id | `string` | `""` | no |
 | <a name="input_alb_sg_ids"></a> [alb\_sg\_ids](#input\_alb\_sg\_ids) | Security group ids for ALB | `list(string)` | `[]` | no |
+| <a name="input_alb_subnet_id"></a> [alb\_subnet\_id](#input\_alb\_subnet\_id) | Subnet id for ALB. If not specified, will use the cluster subnet id | `string` | `""` | no |
 | <a name="input_allow_ssh_cidrs"></a> [allow\_ssh\_cidrs](#input\_allow\_ssh\_cidrs) | Allow port 22, if not provided, i.e leaving the default empty list, the rule will not be included in the SG | `list(string)` | `[]` | no |
 | <a name="input_allow_weka_api_cidrs"></a> [allow\_weka\_api\_cidrs](#input\_allow\_weka\_api\_cidrs) | Allow connection to port 14000 on weka backends and ALB(if exists and not provided with dedicated SG)  from specified CIDRs, by default no CIDRs are allowed. All ports (including 14000) are allowed within VPC | `list(string)` | `[]` | no |
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | AMI ID to use, Amazon Linux 2 is the supported OS. | `string` | `null` | no |
