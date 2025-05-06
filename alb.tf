@@ -9,7 +9,7 @@ resource "aws_lb" "alb" {
   internal                         = true
   load_balancer_type               = "application"
   security_groups                  = local.alb_sg_ids
-  subnets                          = concat(local.subnet_ids, [local.additional_subnet_id])
+  subnets                          = [local.alb_subnet_id, local.additional_subnet_id]
   enable_cross_zone_load_balancing = false
   enable_deletion_protection       = false
   tags = merge(var.tags_map, {
