@@ -402,6 +402,12 @@ variable "create_alb" {
   description = "Create ALB for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends"
 }
 
+variable "alb_subnet_id" {
+  type        = string
+  default     = ""
+  description = "Subnet id for ALB. If not specified, will use the cluster subnet id"
+}
+
 variable "alb_additional_subnet_id" {
   type        = string
   default     = ""
