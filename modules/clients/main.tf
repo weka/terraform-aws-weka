@@ -37,6 +37,7 @@ locals {
   preparation_script = templatefile("${path.module}/init.sh", {
     proxy               = var.proxy_url
     weka_log_group_name = "/wekaio/clients/${var.clients_name}"
+    custom_data         = var.custom_data
   })
 
   mount_wekafs_script = templatefile("${path.module}/mount_wekafs.sh", {
@@ -48,7 +49,7 @@ locals {
     protocol                     = var.alb_listener_protocol == "" ? "http" : var.alb_listener_protocol
   })
 
-  custom_data_parts = [local.preparation_script, local.mount_wekafs_script, "${var.custom_data}\n"]
+  custom_data_parts = [local.preparation_script, "${local.mount_wekafs_script}\n"]
   custom_data       = base64encode(join("\n", local.custom_data_parts))
   arm_instances     = ["c7gd.2xlarge", "c7gd.4xlarge", "c7gd.8xlarge", "c7gd.12xlarge", "c7gd.16xlarge", "c7g.2xlarge", "c7g.4xlarge", "c7g.8xlarge", "c7g.12xlarge", "c7g.16xlarge", "m7gd.xlarge", "m7gd.2xlarge", "m7gd.4xlarge", "m7gd.8xlarge", "m7gd.12xlarge", "m7gd.16xlarge", "m7g.xlarge", "m7g.2xlarge", "m7g.4xlarge", "m7g.8xlarge", "m7g.12xlarge", "m7g.16xlarge", "c6gn.2xlarge", "c6gn.4xlarge", "c6gn.8xlarge", "c6gn.12xlarge", "c6gn.16xlarge", "c6gd.2xlarge", "c6gd.4xlarge", "c6gd.8xlarge", "c6gd.12xlarge", "c6gd.16xlarge", "c6g.2xlarge", "c6g.4xlarge", "c6g.8xlarge", "c6g.12xlarge", "c6g.16xlarge", "m6gd.xlarge", "m6gd.2xlarge", "m6gd.4xlarge", "m6gd.8xlarge", "m6gd.12xlarge", "m6gd.16xlarge", "m6g.xlarge", "m6g.2xlarge", "m6g.4xlarge", "m6g.8xlarge", "m6g.12xlarge", "m6g.16xlarge", "g5g.2xlarge", "g5g.4xlarge", "g5g.8xlarge", "g5g.16xlarge"]
   default_arch      = contains(local.arm_instances, var.instance_type) ? "arm64" : "x86_64"
