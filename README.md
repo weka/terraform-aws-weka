@@ -249,10 +249,6 @@ output "deploy_weka_output" {
   value = module.deploy_weka
 }
 ```
-### Using existing vpc:
-```hcl
-vpc_id                            = "..."
-```
 ### Using existing subnet:
 ```hcl
 subnet_ids                        = ["..."]
