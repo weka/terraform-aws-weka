@@ -124,11 +124,10 @@ resource "aws_launch_template" "this" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = merge(var.tags_map, {
+      tags = merge({ user = data.aws_caller_identity.current.user_id }, var.tags_map, {
         Name                = var.data_services_name
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "data-services"
-        user                = data.aws_caller_identity.current.user_id
       })
     }
   }
