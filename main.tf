@@ -16,9 +16,8 @@ locals {
     custom_data         = var.custom_data
   })
   backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
-  create_kms_key                = var.ebs_encrypted && var.ebs_kms_key_id == null
-  kms_key_id                    = local.create_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
-  kms_prefix                    = lookup(var.custom_prefix, "kms", var.prefix)
+  create_ebs_kms_key            = var.ebs_encrypted && var.ebs_kms_key_id == null
+  ebs_kms_key_id                = local.create_ebs_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
   iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
   root_device_name              = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
 }
@@ -89,7 +88,7 @@ resource "aws_placement_group" "placement_group" {
 }
 
 resource "aws_kms_key" "kms_key" {
-  count                   = local.create_kms_key ? 1 : 0
+  count                   = local.create_ebs_kms_key ? 1 : 0
   enable_key_rotation     = true
   deletion_window_in_days = 20
   is_enabled              = true
@@ -99,14 +98,14 @@ resource "aws_kms_key" "kms_key" {
 }
 
 resource "aws_kms_alias" "kms_alias" {
-  count         = local.create_kms_key ? 1 : 0
+  count         = local.create_ebs_kms_key ? 1 : 0
   name          = "alias/${local.kms_prefix}-${var.cluster_name}"
   target_key_id = aws_kms_key.kms_key[0].key_id
   depends_on    = [aws_kms_key.kms_key]
 }
 
 resource "aws_kms_key_policy" "kms_key_policy" {
-  count  = local.create_kms_key ? 1 : 0
+  count  = local.create_ebs_kms_key ? 1 : 0
   key_id = aws_kms_key.kms_key[0].id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -158,6 +157,7 @@ resource "aws_kms_key_policy" "kms_key_policy" {
   depends_on = [aws_kms_key.kms_key]
 }
 
+
 resource "aws_launch_template" "launch_template" {
   name_prefix                          = "${local.ec2_prefix}-${var.cluster_name}-backend"
   disable_api_termination              = true
@@ -174,7 +174,7 @@ resource "aws_launch_template" "launch_template" {
       volume_size           = local.weka_volume_size
       volume_type           = "gp3"
       delete_on_termination = true
-      kms_key_id            = local.kms_key_id
+      kms_key_id            = local.ebs_kms_key_id
       encrypted             = var.ebs_encrypted
     }
   }
@@ -183,7 +183,7 @@ resource "aws_launch_template" "launch_template" {
     ebs {
       volume_size = var.backends_root_volume_size
       encrypted   = var.ebs_encrypted
-      kms_key_id  = local.kms_key_id
+      kms_key_id  = local.ebs_kms_key_id
     }
   }
 

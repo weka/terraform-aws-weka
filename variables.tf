@@ -383,6 +383,18 @@ variable "secretmanager_sg_ids" {
   description = "Secret manager endpoint security groups ids"
 }
 
+variable "secretmanager_kms_key_id" {
+  type        = string
+  default     = null
+  description = "The ARN of the AWS Key Management Service (KMS) key to use for secretmanager encryption."
+}
+
+variable "secretmanager_enable_encryption" {
+  type        = bool
+  default     = false
+  description = "Enables EBS encryption on the volume"
+}
+
 variable "backends_weka_volume_size" {
   type        = number
   default     = 48
@@ -868,7 +880,7 @@ variable "install_cluster_dpdk" {
 variable "ebs_kms_key_id" {
   type        = string
   default     = null
-  description = "The ARN of the AWS Key Management Service"
+  description = "The ARN of the AWS Key Management Service (KMS) key to use for EBS encryption. If not specified, will be automatically created."
 }
 
 variable "ebs_encrypted" {
