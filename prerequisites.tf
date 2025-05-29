@@ -1,7 +1,9 @@
 data "aws_region" "current" {}
 
 locals {
-  region = data.aws_region.current.name
+  region                 = data.aws_region.current.name
+  create_secrets_kms_key = var.secretmanager_enable_encryption && var.secretmanager_kms_key_id == null
+  kms_prefix             = lookup(var.custom_prefix, "kms", var.prefix)
 }
 
 module "network" {
@@ -63,6 +65,25 @@ module "vpc_endpoint" {
   subnet_id                            = local.subnet_ids[0]
   tags_map                             = var.tags_map
   depends_on                           = [module.network, module.security_group]
+}
+
+# We should move the ebs kms key creation to be handled by the kms module, but it will cause re-creation of the kms key
+# For now keeping the old ebs kms setup
+# module "ebs_kms" {
+#   count     = local.create_ebs_kms_key ? 1 : 0
+#   source    = "./modules/kms"
+#   name      = "${local.kms_prefix}-${var.cluster_name}"
+#   principal = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+#   tags_map  = var.tags_map
+# }
+
+module "secrets_kms" {
+  count      = local.create_secrets_kms_key ? 1 : 0
+  source     = "./modules/kms"
+  name       = "${local.kms_prefix}-${var.cluster_name}-secrets"
+  principal  = local.lambda_iam_role_arn
+  tags_map   = var.tags_map
+  depends_on = [module.iam]
 }
 
 locals {

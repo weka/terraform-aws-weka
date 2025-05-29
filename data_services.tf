@@ -20,7 +20,7 @@ module "data_services" {
   proxy_url                = var.proxy_url
   secret_prefix            = local.secret_prefix
   ebs_encrypted            = var.ebs_encrypted
-  ebs_kms_key_id           = local.kms_key_id
+  ebs_kms_key_id           = local.ebs_kms_key_id
   deploy_lambda_name       = aws_lambda_function.deploy_lambda.function_name
   report_lambda_name       = aws_lambda_function.report_lambda.function_name
   fetch_lambda_name        = aws_lambda_function.fetch_lambda.function_name
