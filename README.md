@@ -767,6 +767,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="module_network"></a> [network](#module\_network) | ./modules/network | n/a |
 | <a name="module_nfs_protocol_gateways"></a> [nfs\_protocol\_gateways](#module\_nfs\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 | <a name="module_s3_protocol_gateways"></a> [s3\_protocol\_gateways](#module\_s3\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
+| <a name="module_secrets_kms"></a> [secrets\_kms](#module\_secrets\_kms) | ./modules/kms | n/a |
 | <a name="module_security_group"></a> [security\_group](#module\_security\_group) | ./modules/security_group | n/a |
 | <a name="module_smb_protocol_gateways"></a> [smb\_protocol\_gateways](#module\_smb\_protocol\_gateways) | ./modules/protocol_gateways | n/a |
 | <a name="module_vpc_endpoint"></a> [vpc\_endpoint](#module\_vpc\_endpoint) | ./modules/endpoint | n/a |
@@ -879,7 +880,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_dynamodb_hash_key_name"></a> [dynamodb\_hash\_key\_name](#input\_dynamodb\_hash\_key\_name) | DynamoDB hash key name (optional configuration, will use 'Key' by default). This key will be used if dynamodb table will be created automatically, by not setting `dynamodb_table_name` param. In case `dynamodb_table_name` parameter is set, `dynamodb_hash_key_name` should match the key that should be used by us within pre-created table | `string` | `"Key"` | no |
 | <a name="input_dynamodb_table_name"></a> [dynamodb\_table\_name](#input\_dynamodb\_table\_name) | DynamoDB table name, if not supplied a new table will be created | `string` | `""` | no |
 | <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | Enables EBS encryption on the volume | `bool` | `true` | no |
-| <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service | `string` | `null` | no |
+| <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service (KMS) key to use for EBS encryption. If not specified, will be automatically created. | `string` | `null` | no |
 | <a name="input_enable_key_pair"></a> [enable\_key\_pair](#input\_enable\_key\_pair) | create / use key pair for instance template | `bool` | `true` | no |
 | <a name="input_enable_lambda_vpc_config"></a> [enable\_lambda\_vpc\_config](#input\_enable\_lambda\_vpc\_config) | Config lambda to run inside vpc | `bool` | `false` | no |
 | <a name="input_event_iam_role_arn"></a> [event\_iam\_role\_arn](#input\_event\_iam\_role\_arn) | IAM Role that will be used by cloudwatch rule(event), if not specified will be created automatically. If pre-created should match policy described in readme | `string` | `""` | no |
@@ -926,6 +927,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_s3_protocol_gateways_number"></a> [s3\_protocol\_gateways\_number](#input\_s3\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
 | <a name="input_secretmanager_create_vpc_endpoint"></a> [secretmanager\_create\_vpc\_endpoint](#input\_secretmanager\_create\_vpc\_endpoint) | Enable secret manager VPC endpoint | `bool` | `true` | no |
+| <a name="input_secretmanager_enable_encryption"></a> [secretmanager\_enable\_encryption](#input\_secretmanager\_enable\_encryption) | Enables EBS encryption on the volume | `bool` | `false` | no |
+| <a name="input_secretmanager_kms_key_id"></a> [secretmanager\_kms\_key\_id](#input\_secretmanager\_kms\_key\_id) | The ARN of the AWS Key Management Service (KMS) key to use for secretmanager encryption. | `string` | `null` | no |
 | <a name="input_secretmanager_sg_ids"></a> [secretmanager\_sg\_ids](#input\_secretmanager\_sg\_ids) | Secret manager endpoint security groups ids | `list(string)` | `[]` | no |
 | <a name="input_secretmanager_use_vpc_endpoint"></a> [secretmanager\_use\_vpc\_endpoint](#input\_secretmanager\_use\_vpc\_endpoint) | Use of secret manager is optional, if not used secrets will be passed between lambdas over step function. If secret manager is used, all lambdas will fetch secret directly when needed. | `bool` | `true` | no |
 | <a name="input_set_dedicated_fe_container"></a> [set\_dedicated\_fe\_container](#input\_set\_dedicated\_fe\_container) | Create cluster with FE containers | `bool` | `false` | no |
