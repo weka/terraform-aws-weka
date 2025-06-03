@@ -386,13 +386,13 @@ variable "secretmanager_sg_ids" {
 variable "secretmanager_kms_key_id" {
   type        = string
   default     = null
-  description = "The ARN of the AWS Key Management Service (KMS) key to use for secretmanager encryption."
+  description = "ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret."
 }
 
 variable "secretmanager_enable_encryption" {
   type        = bool
   default     = false
-  description = "Enables EBS encryption on the volume"
+  description = "Enable KMS encryption for secrets manager and create CMK."
 }
 
 variable "backends_weka_volume_size" {
