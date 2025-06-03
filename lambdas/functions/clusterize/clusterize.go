@@ -64,7 +64,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 
 	if p.Cluster.SetObs {
 		if p.Obs.Name == "" {
-			p.Obs.Name = strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-")
+			p.Obs.Name = strings.ToLower(strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-"))
 			err = common.CreateBucket(p.Obs.Name)
 			if err != nil {
 				log.Error().Err(err).Send()
