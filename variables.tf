@@ -493,6 +493,12 @@ variable "tiering_obs_start_demote" {
   default     = 10
 }
 
+variable "tiering_obs_iam_bucket_prefix" {
+  type        = string
+  description = "The prefix for the IAM policy that will be created for the OBS bucket. This prefix will be used to create a unique policy rule."
+  default     = ""
+}
+
 ################################################## clients variables ###################################################
 variable "clients_number" {
   type        = number

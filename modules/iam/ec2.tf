@@ -40,7 +40,7 @@ resource "aws_iam_policy" "backend_obs_iam_policy" {
           "s3:ListBucket",
           "s3:PutObject"
         ]
-        Resource = ["arn:aws:s3:::${local.obs_name}/*"]
+        Resource = ["arn:aws:s3:::${local.obs_name}*"]
       }
     ]
   })
