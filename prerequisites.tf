@@ -44,7 +44,7 @@ module "iam" {
   cluster_name                    = var.cluster_name
   tags_map                        = var.tags_map
   state_table_name                = local.dynamodb_table_name
-  tiering_obs_name                = var.tiering_obs_name
+  tiering_obs_name                = var.tiering_obs_iam_bucket_prefix != "" ? var.tiering_obs_iam_bucket_prefix : var.tiering_obs_name
   secret_prefix                   = local.secret_prefix
   tiering_enable_obs_integration  = var.tiering_enable_obs_integration
   additional_iam_policy_statement = var.additional_instance_iam_policy_statement

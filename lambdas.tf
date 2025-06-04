@@ -86,6 +86,10 @@ resource "aws_lambda_function" "deploy_lambda" {
       condition     = var.install_weka_url != "" || var.weka_version != ""
       error_message = "Please provide either 'install_weka_url' or 'weka_version' variables."
     }
+    precondition {
+      condition     = (var.tiering_obs_name != "" && startswith(var.tiering_obs_name, var.tiering_obs_iam_bucket_prefix)) || (var.tiering_obs_name == "" && (startswith("${local.obs_prefix}-${var.cluster_name}-obs", var.tiering_obs_iam_bucket_prefix)))
+      error_message = "'tiering_obs_name' must start with 'tiering_obs_iam_bucket_prefix' if 'tiering_obs_iam_bucket_prefix' is set."
+    }
   }
 }
 
