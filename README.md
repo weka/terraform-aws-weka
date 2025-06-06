@@ -292,6 +292,38 @@ subnet_autocreate_as_private = true
 assign_public_ip   = false
 ```
 
+## Required endpoints for Weka deployment using a VPC with no internet access:
+In case you want to deploy a weka cluster inside a vpc with no internet access, you will need to set the following endpoints:
+### vpc endpoint proxy
+We need an endpoint to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services.
+<br>To use weka vpc endpoint service, set:
+```hcl
+vpc_endpoint_proxy_create = true
+```
+Alternatively appropriate customer-managed proxy can be provided by `proxy_url` variable:
+```hcl
+proxy_url = "..."
+```
+
+### vpc endpoint ec2
+Weka deployment requires access to EC2 services.
+<br>To let terraform create ec2 endpoint, set:
+```hcl
+vpc_endpoint_ec2_create = true
+```
+### vpc endpoint s3 gateway
+Weka deployment requires access to S3 services.
+<br>To let terraform create s3 gateway, set:
+```hcl
+vpc_endpoint_s3_gateway_create = true
+```
+### vpc endpoint lambda
+Weka deployment requires access to lambda services.
+<br>To let terraform create lambda endpoint, set:
+```hcl
+vpc_endpoint_lambda_create = true
+```
+
 ## Ssh keys
 The username for ssh into vms is `ec2-user`.
 If `ami_id` is provided by the user, the default ssh username will be accordingly.
@@ -675,22 +707,6 @@ secretmanager_use_vpc_endpoint = false
 secretmanager_create_vpc_endpoint = false
 ```
 
-### Run lambdas inside vpc:
-To enable vpc config for lambdas, set:
-```hcl
-enable_lambda_vpc_config = true
-```
-
-If network VPC is not configured with a NAT gateway, the following needs to be set:
-```hcl
-vpc_endpoint_ec2_create              = true
-vpc_endpoint_lambda_create           = true
-vpc_endpoint_dynamodb_gateway_create = true
-vpc_endpoint_autoscaling_create      = true
-```
-
-
-
 #### Further explanation:
 We use the secret manager to store the weka username, password (and get.weka.io token).
 <br>We need to be able to use them on `scale down` lambda which runs inside the provided vpc.
@@ -699,37 +715,24 @@ We use the secret manager to store the weka username, password (and get.weka.io 
 <br> In this case the weka password will be shown as plain text on the state machine, since it will need to be sent
 from the fetch lambda to the scale down lambda.
 
-
-# Endpoints
-In case you want to deploy a weka cluster inside a vpc with no internet access, you will need to set the following endpoints:
-## vpc endpoint proxy
-We need an endpoint to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services.
-<br>To use weka vpc endpoint service, set:
+## Run lambdas inside a vpc:
+To enable vpc config for lambdas, set:
 ```hcl
-vpc_endpoint_proxy_create = true
-```
-Alternatively appropriate customer-managed proxy can be provided by `proxy_url` variable:
-```hcl
-proxy_url = "..."
+enable_lambda_vpc_config = true
 ```
 
-## vpc endpoint ec2
-Weka deployment requires access to EC2 services.
-<br>To let terraform create ec2 endpoint, set:
+If a network VPC is not configured with a NAT gateway, we will need to following endpoints:
+- EC2 endpoint
+- Lambda endpoint
+- DynamoDB gateway endpoint
+- Autoscaling endpoint
+
+Our Terraform module can create these endpoints for you, by providing the following variables:
 ```hcl
-vpc_endpoint_ec2_create = true
-```
-## vpc endpoint s3 gateway
-Weka deployment requires access to S3 services.
-<br>To let terraform create s3 gateway, set:
-```hcl
-vpc_endpoint_s3_gateway_create = true
-```
-## vpc endpoint lambda
-Weka deployment requires access to lambda services.
-<br>To let terraform create lambda endpoint, set:
-```hcl
-vpc_endpoint_s3_gateway_create = true
+vpc_endpoint_ec2_create              = true
+vpc_endpoint_lambda_create           = true
+vpc_endpoint_dynamodb_gateway_create = true
+vpc_endpoint_autoscaling_create      = true
 ```
 
 # Terraform output
