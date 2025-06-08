@@ -44,8 +44,8 @@ resource "aws_lb_listener" "lb_weka_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
   port              = 14000
-  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
-  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = var.alb_cert_arn
 
   default_action {
@@ -60,9 +60,9 @@ resource "aws_lb_listener" "lb_weka_listener" {
 resource "aws_lb_listener" "lb_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
-  port              = var.alb_cert_arn == null ? 80 : 443
-  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
-  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
   certificate_arn   = var.alb_cert_arn
 
   default_action {
