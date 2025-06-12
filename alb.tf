@@ -1,5 +1,6 @@
 locals {
-  lb_prefix = lookup(var.custom_prefix, "lb", var.prefix)
+  lb_prefix    = lookup(var.custom_prefix, "lb", var.prefix)
+  alb_cert_arn = var.create_alb ? (var.alb_cert_arn != null ? var.alb_cert_arn : module.self_signed_certificate[0].cert_arn) : null
 }
 
 
@@ -44,9 +45,9 @@ resource "aws_lb_listener" "lb_weka_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
   port              = 14000
-  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
-  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = var.alb_cert_arn
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = local.alb_cert_arn
 
   default_action {
     target_group_arn = aws_lb_target_group.alb_target_group[0].id
@@ -60,10 +61,10 @@ resource "aws_lb_listener" "lb_weka_listener" {
 resource "aws_lb_listener" "lb_listener" {
   count             = var.create_alb ? 1 : 0
   load_balancer_arn = aws_lb.alb[0].id
-  port              = var.alb_cert_arn == null ? 80 : 443
-  protocol          = var.alb_cert_arn == null ? "HTTP" : "HTTPS"
-  ssl_policy        = var.alb_cert_arn == null ? null : "ELBSecurityPolicy-TLS13-1-2-2021-06"
-  certificate_arn   = var.alb_cert_arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-TLS13-1-2-2021-06"
+  certificate_arn   = local.alb_cert_arn
 
   default_action {
     target_group_arn = aws_lb_target_group.alb_target_group[0].id

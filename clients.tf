@@ -12,7 +12,6 @@ module "clients" {
   instance_type                = var.client_instance_type
   backends_asg_name            = aws_autoscaling_group.autoscaling_group.name
   alb_dns_name                 = var.create_alb ? var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : aws_lb.alb[0].dns_name : null
-  alb_listener_protocol        = var.alb_cert_arn == null ? "http" : "https"
   key_pair_name                = var.enable_key_pair ? var.key_pair_name == null ? aws_key_pair.generated_key[0].key_name : var.key_pair_name : null
   assign_public_ip             = local.assign_public_ip
   placement_group_name         = var.client_placement_group_name != null || !var.client_use_backends_placement_group ? var.client_placement_group_name : local.backends_placement_group_name
@@ -29,5 +28,6 @@ module "clients" {
   capacity_reservation_id      = var.client_capacity_reservation_id
   metadata_http_tokens         = var.metadata_http_tokens
   root_volume_size             = var.clients_root_volume_size
+  insecure                     = var.alb_cert_arn == null
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }
