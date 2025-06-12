@@ -128,16 +128,6 @@ variable "ebs_encrypted" {
   description = "Enables EBS encryption on the volume"
 }
 
-variable "alb_listener_protocol" {
-  type        = string
-  description = "ALB listener protocol can be HTTP / HTTPS or empty if no ALB is used"
-  default     = ""
-  validation {
-    condition     = var.alb_listener_protocol == "https" || var.alb_listener_protocol == "http" || var.alb_listener_protocol == ""
-    error_message = "Allowed ALB protocol values: [\"http\", \"https\"]."
-  }
-}
-
 variable "use_placement_group" {
   type        = bool
   default     = true
@@ -166,4 +156,10 @@ variable "root_volume_size" {
   type        = number
   default     = 48
   description = "root disk size."
+}
+
+variable "insecure" {
+  type        = bool
+  default     = true
+  description = "Should be set to False if the ALB is using signed certificate"
 }

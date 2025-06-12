@@ -86,6 +86,14 @@ module "secrets_kms" {
   depends_on = [module.iam]
 }
 
+module "self_signed_certificate" {
+  count        = var.create_alb && var.alb_cert_arn == null ? 1 : 0
+  source       = "./modules/self_signed_certificate"
+  common_name  = "${var.cluster_name}.weka.local"
+  organization = "Weka Cluster Self-signed CA"
+  tags         = var.tags_map
+}
+
 locals {
   subnet_ids                    = length(var.subnet_ids) == 0 && length(module.network) > 0 ? module.network[0].subnet_ids : var.subnet_ids
   alb_subnet_id                 = var.alb_subnet_id != "" ? var.alb_subnet_id : length(var.subnet_ids) == 0 && length(module.network) > 0 ? module.network[0].subnet_ids[0] : var.subnet_ids[0]

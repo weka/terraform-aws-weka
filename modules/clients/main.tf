@@ -46,7 +46,7 @@ locals {
     clients_use_dpdk             = var.clients_use_dpdk
     region                       = local.region
     alb_dns_name                 = var.alb_dns_name != null ? var.alb_dns_name : ""
-    protocol                     = var.alb_listener_protocol == "" ? "http" : var.alb_listener_protocol
+    insecure                     = var.insecure ? "--insecure" : ""
   })
 
   custom_data_parts = [local.preparation_script, "${local.mount_wekafs_script}\n"]
