@@ -259,6 +259,10 @@ variable "hotspare" {
   type        = number
   default     = 1
   description = "Number of hotspares to set on weka cluster. Refer to https://docs.weka.io/overview/ssd-capacity-management#hot-spare"
+  validation {
+    condition     = var.hotspare >= 1
+    error_message = "hotspare minimum value is 1"
+  }
 }
 
 variable "instance_iam_profile_arn" {
