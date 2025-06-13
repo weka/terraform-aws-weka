@@ -636,8 +636,8 @@ variable "nfs_protocol_gateway_root_volume_size" {
 
 variable "nfs_setup_protocol" {
   type        = bool
-  description = "Setup protocol, default if false"
-  default     = false
+  description = "Configure NFS protocol"
+  default     = true
 }
 
 variable "nfs_interface_group_name" {
@@ -714,8 +714,8 @@ variable "smb_protocol_gateway_root_volume_size" {
 
 variable "smb_setup_protocol" {
   type        = bool
-  description = "Config protocol, default if false"
-  default     = false
+  description = "Configure SMB protocol"
+  default     = true
 }
 
 variable "smbw_enabled" {
@@ -798,8 +798,8 @@ variable "s3_protocol_gateway_root_volume_size" {
 
 variable "s3_setup_protocol" {
   type        = bool
-  description = "Config protocol, default if false"
-  default     = false
+  description = "Configure S3 protocol"
+  default     = true
 }
 
 variable "s3_capacity_reservation_id" {
