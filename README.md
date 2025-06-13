@@ -913,7 +913,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_nfs_protocol_gateway_subnet_id"></a> [nfs\_protocol\_gateway\_subnet\_id](#input\_nfs\_protocol\_gateway\_subnet\_id) | NFS protocol gateway subnet id. | `string` | `null` | no |
 | <a name="input_nfs_protocol_gateway_weka_volume_size"></a> [nfs\_protocol\_gateway\_weka\_volume\_size](#input\_nfs\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateways_number"></a> [nfs\_protocol\_gateways\_number](#input\_nfs\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
-| <a name="input_nfs_setup_protocol"></a> [nfs\_setup\_protocol](#input\_nfs\_setup\_protocol) | Setup protocol, default if false | `bool` | `false` | no |
+| <a name="input_nfs_setup_protocol"></a> [nfs\_setup\_protocol](#input\_nfs\_setup\_protocol) | Configure NFS protocol | `bool` | `true` | no |
 | <a name="input_placement_group_name"></a> [placement\_group\_name](#input\_placement\_group\_name) | n/a | `string` | `null` | no |
 | <a name="input_post_cluster_setup_script"></a> [post\_cluster\_setup\_script](#input\_post\_cluster\_setup\_script) | A script to run after the cluster is up | `string` | `""` | no |
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
@@ -928,7 +928,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_s3_protocol_gateway_subnet_id"></a> [s3\_protocol\_gateway\_subnet\_id](#input\_s3\_protocol\_gateway\_subnet\_id) | S3 protocol gateway subnet id. | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_weka_volume_size"></a> [s3\_protocol\_gateway\_weka\_volume\_size](#input\_s3\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_s3_protocol_gateways_number"></a> [s3\_protocol\_gateways\_number](#input\_s3\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
-| <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
+| <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Configure S3 protocol | `bool` | `true` | no |
 | <a name="input_secretmanager_create_vpc_endpoint"></a> [secretmanager\_create\_vpc\_endpoint](#input\_secretmanager\_create\_vpc\_endpoint) | Enable secret manager VPC endpoint | `bool` | `true` | no |
 | <a name="input_secretmanager_enable_encryption"></a> [secretmanager\_enable\_encryption](#input\_secretmanager\_enable\_encryption) | Enable KMS encryption for secrets manager and create CMK. | `bool` | `false` | no |
 | <a name="input_secretmanager_kms_key_id"></a> [secretmanager\_kms\_key\_id](#input\_secretmanager\_kms\_key\_id) | ARN or Id of the AWS KMS key to be used to encrypt the secret values in the versions stored in this secret. | `string` | `null` | no |
@@ -951,7 +951,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_smb_protocol_gateway_subnet_id"></a> [smb\_protocol\_gateway\_subnet\_id](#input\_smb\_protocol\_gateway\_subnet\_id) | SMB protocol gateway subnet id. | `string` | `null` | no |
 | <a name="input_smb_protocol_gateway_weka_volume_size"></a> [smb\_protocol\_gateway\_weka\_volume\_size](#input\_smb\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_smb_protocol_gateways_number"></a> [smb\_protocol\_gateways\_number](#input\_smb\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
-| <a name="input_smb_setup_protocol"></a> [smb\_setup\_protocol](#input\_smb\_setup\_protocol) | Config protocol, default if false | `bool` | `false` | no |
+| <a name="input_smb_setup_protocol"></a> [smb\_setup\_protocol](#input\_smb\_setup\_protocol) | Configure SMB protocol | `bool` | `true` | no |
 | <a name="input_smbw_enabled"></a> [smbw\_enabled](#input\_smbw\_enabled) | Enable SMBW protocol. This option should be provided before cluster is created to leave extra capacity for SMBW setup. | `bool` | `true` | no |
 | <a name="input_ssh_public_key"></a> [ssh\_public\_key](#input\_ssh\_public\_key) | Ssh public key to pass to the instances. | `string` | `null` | no |
 | <a name="input_stripe_width"></a> [stripe\_width](#input\_stripe\_width) | Stripe width = cluster\_size - protection\_level - 1 (by default). | `number` | `-1` | no |
