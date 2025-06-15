@@ -451,7 +451,7 @@ variable "alb_cert_arn" {
 variable "alb_alias_name" {
   type        = string
   default     = ""
-  description = "Set ALB alias name"
+  description = "Set ALB alias name in the given alb_route53_zone_id"
 }
 
 variable "alb_sg_ids" {
@@ -464,6 +464,12 @@ variable "alb_route53_zone_id" {
   type        = string
   default     = ""
   description = "Route53 zone id"
+}
+
+variable "alb_dns_name" {
+  type        = string
+  default     = null
+  description = "ALB DNS name. Must support HTTPS. Should provide the DNS name without 'https://' prefix. You can either specify it or use the `alb_alias_name` and `alb_route53_zone_id` to create a Route53 record for the ALB."
 }
 
 ################################################## obs variables ###################################################
