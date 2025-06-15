@@ -36,13 +36,8 @@ output "weka_cluster_admin_password_secret_id" {
 }
 
 output "alb_dns_name" {
-  value       = var.create_alb ? aws_lb.alb[0].dns_name : null
+  value       = local.alb_dns_name
   description = "If 'create_alb` set to true, it will output dns name of the ALB"
-}
-
-output "alb_alias_record" {
-  value       = var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : null
-  description = "If 'alb_alias_name` not null, it will output fqdn of the ALB"
 }
 
 output "asg_name" {
