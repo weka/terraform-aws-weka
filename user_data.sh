@@ -38,7 +38,7 @@ EOF
 
   cat > /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml <<EOF
     [proxy]
-    https_proxy="${proxy}"
+    https_proxy="${proxy_url}"
 EOF
 }
 
@@ -48,14 +48,14 @@ function setup_aws_logs_agent() {
     echo " Setting up AWS logs agent "
     echo "---------------------------"
 
-    no_proxy=".amazonaws.com" https_proxy="${proxy}" yum install -y amazon-cloudwatch-agent.x86_64 || return 1
+    no_proxy=".amazonaws.com" https_proxy="${proxy_url}" yum install -y amazon-cloudwatch-agent.x86_64 || return 1
     configure_aws_logs_agent || return 1
     service amazon-cloudwatch-agent restart || return 1
 }
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
-yum install -y jq
+no_proxy=".amazonaws.com" https_proxy="${proxy_url}" yum install -y jq
 
 ${custom_data}
 

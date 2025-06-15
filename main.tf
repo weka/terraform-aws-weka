@@ -7,7 +7,7 @@ locals {
   weka_volume_size = var.backends_weka_volume_size + 10 * (local.nics - 1)
   user_data = templatefile("${path.module}/user_data.sh", {
     region              = local.region
-    proxy               = var.proxy_url
+    proxy_url           = var.proxy_url
     subnet_id           = local.subnet_ids[0]
     groups              = join(" ", local.sg_ids)
     nics_num            = local.nics

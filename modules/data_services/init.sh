@@ -55,7 +55,7 @@ function setup_aws_logs_agent() {
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
 
-yum install -y jq
+no_proxy=".amazonaws.com" https_proxy="${proxy_url}" yum install -y jq
 
 aws_version=$(aws --version)
 cli_binary_format=""
