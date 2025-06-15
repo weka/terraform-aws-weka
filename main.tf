@@ -20,6 +20,7 @@ locals {
   ebs_kms_key_id                = local.create_ebs_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
   iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
   root_device_name              = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
+  alb_dns_name                  = var.create_alb ? (var.alb_dns_name != null ? var.alb_dns_name : (var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : aws_lb.alb[0].dns_name)) : null
 }
 
 data "aws_caller_identity" "current" {}
