@@ -35,7 +35,7 @@ locals {
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
 
   preparation_script = templatefile("${path.module}/init.sh", {
-    proxy               = var.proxy_url
+    proxy_url           = var.proxy_url
     weka_log_group_name = "/wekaio/clients/${var.clients_name}"
     custom_data         = var.custom_data
   })
