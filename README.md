@@ -838,9 +838,10 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_alb_additional_subnet_cidr_block"></a> [alb\_additional\_subnet\_cidr\_block](#input\_alb\_additional\_subnet\_cidr\_block) | Additional CIDR block for public subnet | `string` | `"10.0.3.0/24"` | no |
 | <a name="input_alb_additional_subnet_id"></a> [alb\_additional\_subnet\_id](#input\_alb\_additional\_subnet\_id) | Required to specify if subnet\_ids were used to specify pre-defined subnets for weka. ALB requires an additional subnet, and in the case of pre-defined networking this one also should be pre-defined | `string` | `""` | no |
 | <a name="input_alb_additional_subnet_zone"></a> [alb\_additional\_subnet\_zone](#input\_alb\_additional\_subnet\_zone) | Zone for the ALB additional subnet | `string` | `""` | no |
-| <a name="input_alb_alias_name"></a> [alb\_alias\_name](#input\_alb\_alias\_name) | Set ALB alias name | `string` | `""` | no |
+| <a name="input_alb_alias_name"></a> [alb\_alias\_name](#input\_alb\_alias\_name) | Set ALB alias name in the given alb\_route53\_zone\_id | `string` | `""` | no |
 | <a name="input_alb_allow_https_cidrs"></a> [alb\_allow\_https\_cidrs](#input\_alb\_allow\_https\_cidrs) | CIDRs to allow connecting to ALB over 443 port, by default 443 is not opened, and port 14000 used for connection, inheriting setting from  allow\_weka\_api\_ranges | `list(string)` | `[]` | no |
 | <a name="input_alb_cert_arn"></a> [alb\_cert\_arn](#input\_alb\_cert\_arn) | HTTPS certificate ARN for ALB | `string` | `null` | no |
+| <a name="input_alb_dns_name"></a> [alb\_dns\_name](#input\_alb\_dns\_name) | ALB DNS name. Must support HTTPS. Should provide the DNS name without 'https://' prefix. You can either specify it or use the `alb_alias_name` and `alb_route53_zone_id` to create a Route53 record for the ALB. | `string` | `null` | no |
 | <a name="input_alb_route53_zone_id"></a> [alb\_route53\_zone\_id](#input\_alb\_route53\_zone\_id) | Route53 zone id | `string` | `""` | no |
 | <a name="input_alb_sg_ids"></a> [alb\_sg\_ids](#input\_alb\_sg\_ids) | Security group ids for ALB | `list(string)` | `[]` | no |
 | <a name="input_alb_subnet_id"></a> [alb\_subnet\_id](#input\_alb\_subnet\_id) | Subnet id for ALB. If not specified, will use the cluster subnet id | `string` | `""` | no |
@@ -981,7 +982,6 @@ The `helper_commands` part in the output provides lambda call that can be used t
 
 | Name | Description |
 |------|-------------|
-| <a name="output_alb_alias_record"></a> [alb\_alias\_record](#output\_alb\_alias\_record) | If 'alb\_alias\_name` not null, it will output fqdn of the ALB` |
 | <a name="output_alb_dns_name"></a> [alb\_dns\_name](#output\_alb\_dns\_name) | If 'create\_alb` set to true, it will output dns name of the ALB` |
 | <a name="output_asg_name"></a> [asg\_name](#output\_asg\_name) | Name of ASG |
 | <a name="output_client_asg_name"></a> [client\_asg\_name](#output\_client\_asg\_name) | n/a |
