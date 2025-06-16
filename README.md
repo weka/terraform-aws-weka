@@ -355,28 +355,38 @@ custom_data = "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-window
 ```
 
 ## Create ALB
-We support ALB creation for backend UI, and joining weka clients will use this ALB to join a cluster, allowing for better distribution of load amongst backends.
-mandatory variables you must provide are:
+We support ALB creation for backend UI, API, protocol gateways setup and joining weka clients to the cluster, allowing better distribution of load amongst backends.
+
+By default, ALB will be created.
+To disable ALB creation (not recommended), set:
 ```hcl
-create_alb                       = true
-alb_additional_subnet_cidr_block = ADDITIONAL_SUBNET_CIDR_BLOCK
+create_alb = false
 ```
-To use existing additional subnet, you must supply the following variables:
-```hcl
-additional_alb_subnet_id = SUBNET_ID
-alb_sg_ids               = ALB_SG_IDS
-```
-To add ALB dns name to zone record, you must supply the following variables:
-```hcl
-alb_alias_name      = ALB_ALIAS_NAME
-alb_route53_zone_id = ROUTE53_ZONE_ID
-```
-TO create and use HTTPS ALB listener a certificate and DNS zone Id are mandatory. You must provide the following variables:
-```hcl
-alb_cert_arn        = ALB_CERT_ARN
-alb_alias_name      = ALB_ALIAS_NAME
-alb_route53_zone_id = ROUTE53_ZONE_ID
-```
+
+### mandatory variables when creating ALB:
+- When using existing network:
+  ```hcl
+  additional_alb_subnet_id = SUBNET_ID
+  alb_sg_ids               = ALB_SG_IDS
+  ```
+- When letting terraform also create the network (vpc/subnets):
+  ```hcl
+  alb_additional_subnet_cidr_block = ADDITIONAL_SUBNET_CIDR_BLOCK
+  ```
+We support 3 options for setting ALB HTTPS listener:
+1. **Self-signed certificate**: by default, when `alb_cert_arn` isn't set, we will create a self-signed certificate for you.
+<br>**note:** This certificate will have a 1-year expiration and early renewal of 2 weeks before expiration. You must manually rotate the self-signed cert. Reapplying the module withing the early renewal period will create a new self-signed certificate.
+2. **Customer provided singed certificate ARN + dns zone id + alias name**: we will create a record pointing to the ALB dns name for you.
+    ```hcl
+    alb_cert_arn        = ALB_CERT_ARN
+    alb_alias_name      = ALB_ALIAS_NAME
+    alb_route53_zone_id = ROUTE53_ZONE_ID
+    ```
+3. **Customer provided singed certificate ARN + custom dns name**: the dns should point to the ALB dns name.
+    ```hcl
+    alb_cert_arn        = ALB_CERT_ARN
+    alb_dns_name        = ALB_DNS_NAME
+    ```
 
 ## OBS
 We support tiering to s3.
