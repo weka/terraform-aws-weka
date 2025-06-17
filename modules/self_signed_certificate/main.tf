@@ -6,8 +6,7 @@ resource "tls_private_key" "this" {
 resource "tls_self_signed_cert" "this" {
   private_key_pem = tls_private_key.this.private_key_pem
 
-  validity_period_hours = 8760 # 1 year
-  early_renewal_hours   = 336  # 2 weeks
+  validity_period_hours = 1 # 1 year
   is_ca_certificate     = false
 
   # Subject information is required for ACM
