@@ -823,10 +823,12 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | [aws_placement_group.placement_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/placement_group) | resource |
 | [aws_route53_record.lb_record](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_secretsmanager_secret.get_weka_io_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
+| [aws_secretsmanager_secret.self_signed_certificate_private_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.weka_deployment_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.weka_password](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret.weka_username](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret) | resource |
 | [aws_secretsmanager_secret_version.get_weka_io_token](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
+| [aws_secretsmanager_secret_version.self_signed_certificate_private_key](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_secretsmanager_secret_version.weka_username](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/secretsmanager_secret_version) | resource |
 | [aws_sfn_state_machine.scale_down_state_machine](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/sfn_state_machine) | resource |
 | [aws_vpc_endpoint.secretmanager_endpoint](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint) | resource |
@@ -1001,6 +1003,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="output_cluster_name"></a> [cluster\_name](#output\_cluster\_name) | The cluster name |
 | <a name="output_data_services_ips"></a> [data\_services\_ips](#output\_data\_services\_ips) | Ips of the data services instances |
 | <a name="output_deploy_lambda_name"></a> [deploy\_lambda\_name](#output\_deploy\_lambda\_name) | n/a |
+| <a name="output_get_cert_private_key"></a> [get\_cert\_private\_key](#output\_get\_cert\_private\_key) | Command to get the self-signed certificate private key |
 | <a name="output_ips_type"></a> [ips\_type](#output\_ips\_type) | If 'assign\_public\_ip' is set to true, it will output the public ips, If no it will output the private ips |
 | <a name="output_lambda_status_name"></a> [lambda\_status\_name](#output\_lambda\_status\_name) | Name of lambda status |
 | <a name="output_local_ssh_private_key"></a> [local\_ssh\_private\_key](#output\_local\_ssh\_private\_key) | If 'ssh\_public\_key' is set to null and no key\_pair\_name provided, it will output the private ssh key location. |

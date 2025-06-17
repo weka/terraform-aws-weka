@@ -39,4 +39,5 @@ No modules.
 | Name | Description |
 |------|-------------|
 | <a name="output_cert_arn"></a> [cert\_arn](#output\_cert\_arn) | The ARN of the ACM certificate |
+| <a name="output_cert_pem"></a> [cert\_pem](#output\_cert\_pem) | The PEM-encoded certificate |
 <!-- END_TF_DOCS -->
