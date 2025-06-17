@@ -28,6 +28,6 @@ module "clients" {
   capacity_reservation_id      = var.client_capacity_reservation_id
   metadata_http_tokens         = var.metadata_http_tokens
   root_volume_size             = var.clients_root_volume_size
-  insecure                     = var.alb_cert_arn == null
+  cert_pem                     = local.create_self_signed_certificate ? module.self_signed_certificate[0].cert_pem : null
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }
