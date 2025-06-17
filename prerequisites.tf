@@ -1,9 +1,10 @@
 data "aws_region" "current" {}
 
 locals {
-  region                 = data.aws_region.current.name
-  create_secrets_kms_key = var.secretmanager_enable_encryption && var.secretmanager_kms_key_id == null
-  kms_prefix             = lookup(var.custom_prefix, "kms", var.prefix)
+  region                         = data.aws_region.current.name
+  create_secrets_kms_key         = var.secretmanager_enable_encryption && var.secretmanager_kms_key_id == null
+  kms_prefix                     = lookup(var.custom_prefix, "kms", var.prefix)
+  create_self_signed_certificate = var.create_alb && var.alb_cert_arn == null
 }
 
 module "network" {
@@ -87,9 +88,9 @@ module "secrets_kms" {
 }
 
 module "self_signed_certificate" {
-  count        = var.create_alb && var.alb_cert_arn == null ? 1 : 0
+  count        = local.create_self_signed_certificate ? 1 : 0
   source       = "./modules/self_signed_certificate"
-  common_name  = "${var.cluster_name}.weka.local"
+  common_name  = "*.${local.region}.elb.amazonaws.com"
   organization = "Weka Cluster Self-signed CA"
   tags         = var.tags_map
 }

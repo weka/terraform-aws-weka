@@ -2,11 +2,19 @@ locals {
   ips_type                          = local.assign_public_ip ? "PublicIpAddress" : "PrivateIpAddress"
   asg_name                          = aws_autoscaling_group.autoscaling_group.name
   weka_admin_password_secret_id     = aws_secretsmanager_secret.weka_password.id
+  cert_pem_secret_id                = local.create_self_signed_certificate ? aws_secretsmanager_secret.self_signed_certificate_private_key[0].id : ""
   smb_pre_terraform_destroy_command = var.smb_protocol_gateways_number == 0 ? "" : <<EOT
  echo ${join(" ", module.smb_protocol_gateways[0].instance_ids)} | xargs -n 1 aws ec2 modify-instance-attribute --region ${local.region} --no-disable-api-stop --instance-id
 EOT
   s3_pre_terraform_destroy_command  = var.s3_protocol_gateways_number == 0 ? "" : <<EOT
  echo ${join(" ", module.s3_protocol_gateways[0].instance_ids)} | xargs -n 1 aws ec2 modify-instance-attribute --region ${local.region} --no-disable-api-stop --instance-id
+EOT
+  get_cert_private_key              = <<EOT
+aws secretsmanager get-secret-value \
+  --secret-id ${local.cert_pem_secret_id} \
+  --region ${local.region} \
+  --query SecretString \
+  --output text
 EOT
 }
 
@@ -158,4 +166,9 @@ output "deploy_lambda_name" {
 output "pre_terraform_destroy_command" {
   value       = var.smb_protocol_gateways_number == 0 && var.s3_protocol_gateways_number == 0 ? "" : "${local.smb_pre_terraform_destroy_command}${local.s3_pre_terraform_destroy_command}"
   description = "Mandatory pre-destroy steps only when S3/SMB protocol gateways are crated. Terraform doesn't handle protection removal."
+}
+
+output "get_cert_private_key" {
+  value       = local.create_self_signed_certificate ? local.get_cert_private_key : null
+  description = "Command to get the self-signed certificate private key"
 }

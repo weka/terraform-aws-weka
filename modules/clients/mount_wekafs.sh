@@ -5,8 +5,10 @@ mkdir -p $INSTALLATION_PATH
 cd $INSTALLATION_PATH
 
 # if alb_dns_name if not empty string, then use alb_dns_name as ips
+insecure_flag=""
 if [ -z "${alb_dns_name}" ]; then
   # Function to get the private IPs of instances in Auto Scaling Group
+  insecure_flag="--insecure"
   get_private_ips() {
     instance_ids=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${backends_asg_name}" --query "AutoScalingGroups[].Instances[].InstanceId" --output text --region ${region})
     cluster_min_size=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-name "${backends_asg_name}" --query "AutoScalingGroups[].MinSize" --output text --region ${region})
@@ -35,13 +37,22 @@ fi
 
 backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
 # install weka using random backend ip from ips list
+
+# check if cert_pem is not empty
+cert_flag=""
+if [[ -n "${cert_pem}" ]]; then
+  echo "$(date -u): Using provided certificate for secure connection"
+  echo "${cert_pem}" > /tmp/cert.pem
+  cert_flag="--cacert /tmp/cert.pem"
+fi
+
 function retry_weka_install {
   retry_max=60
   retry_sleep=30
   count=$retry_max
 
   while [ $count -gt 0 ]; do
-      curl --fail ${insecure} -o install_script.sh https://$backend_ip:14000/dist/v1/install && break
+      curl --fail $insecure_flag $cert_flag -o install_script.sh https://$backend_ip:14000/dist/v1/install && break
       count=$(($count - 1))
       backend_ip="$${ips[RANDOM % $${#ips[@]}]}"
       echo "Retrying weka install from $backend_ip in $retry_sleep seconds..."

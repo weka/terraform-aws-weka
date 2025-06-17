@@ -50,3 +50,16 @@ resource "aws_secretsmanager_secret" "weka_deployment_password" {
   kms_key_id = local.secrets_kms_key_id
   tags       = var.tags_map
 }
+
+resource "aws_secretsmanager_secret" "self_signed_certificate_private_key" {
+  count      = local.create_self_signed_certificate ? 1 : 0
+  name       = "${local.secret_prefix}self-signed-cert-pem-${random_password.suffix.result}"
+  kms_key_id = local.secrets_kms_key_id
+  tags       = var.tags_map
+}
+
+resource "aws_secretsmanager_secret_version" "self_signed_certificate_private_key" {
+  count         = local.create_self_signed_certificate ? 1 : 0
+  secret_id     = aws_secretsmanager_secret.self_signed_certificate_private_key[0].id
+  secret_string = module.self_signed_certificate[0].cert_pem
+}
