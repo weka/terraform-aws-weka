@@ -158,8 +158,8 @@ variable "root_volume_size" {
   description = "root disk size."
 }
 
-variable "insecure" {
-  type        = bool
-  default     = true
-  description = "Should be set to False if the ALB is using signed certificate"
+variable "cert_pem" {
+  type        = string
+  description = "Certificate PEM to use for the ALB when using self-signed certificate."
+  default     = null
 }
