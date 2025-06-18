@@ -24,6 +24,8 @@ module "clients" {
   instance_iam_profile_arn     = var.client_instance_iam_profile_arn
   use_autoscaling_group        = var.clients_use_autoscaling_group
   custom_data                  = var.clients_custom_data
+  custom_data_pre_mount        = var.clients_custom_data_pre_mount
+  custom_data_post_mount       = var.clients_custom_data_post_mount
   arch                         = var.client_arch
   capacity_reservation_id      = var.client_capacity_reservation_id
   metadata_http_tokens         = var.metadata_http_tokens
