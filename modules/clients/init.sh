@@ -54,5 +54,3 @@ function setup_aws_logs_agent() {
 }
 
 setup_aws_logs_agent || echo "Failed to setup AWS logs agent"
-
-${custom_data}
