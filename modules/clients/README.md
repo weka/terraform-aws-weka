@@ -53,7 +53,9 @@ No modules.
 | <a name="input_clients_name"></a> [clients\_name](#input\_clients\_name) | The clients name. | `string` | n/a | yes |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of virtual machines to deploy. | `number` | `2` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
-| <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data to pass to the instances | `string` | `""` | no |
+| <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data to pass to the instances. Deprecated, use `custom_data_post_mount` instead. | `string` | `""` | no |
+| <a name="input_custom_data_post_mount"></a> [custom\_data\_post\_mount](#input\_custom\_data\_post\_mount) | Custom data to pass to the instances, will run after weka agent install and mount. | `string` | `""` | no |
+| <a name="input_custom_data_pre_mount"></a> [custom\_data\_pre\_mount](#input\_custom\_data\_pre\_mount) | Custom data to pass to the instances, will run before weka agent install and mount. | `string` | `""` | no |
 | <a name="input_ebs_encrypted"></a> [ebs\_encrypted](#input\_ebs\_encrypted) | Enables EBS encryption on the volume | `bool` | `true` | no |
 | <a name="input_ebs_kms_key_id"></a> [ebs\_kms\_key\_id](#input\_ebs\_kms\_key\_id) | The ARN of the AWS Key Management Service | `string` | `""` | no |
 | <a name="input_frontend_container_cores_num"></a> [frontend\_container\_cores\_num](#input\_frontend\_container\_cores\_num) | Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC | `number` | `1` | no |
