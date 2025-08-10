@@ -170,6 +170,12 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     version = aws_launch_template.this[0].latest_version
   }
 
+  tag {
+    key                 = "Name"
+    propagate_at_launch = false
+    value               = var.clients_name
+  }
+
   lifecycle {
     ignore_changes = [desired_capacity, min_size, max_size]
   }
