@@ -267,6 +267,12 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     value               = "${local.ec2_prefix}-${var.cluster_name}"
   }
 
+  tag {
+    key                 = "Name2"
+    propagate_at_launch = false
+    value               = "${local.ec2_prefix}-${var.cluster_name}"
+  }
+
   dynamic "tag" {
     for_each = var.tags_map
     content {
