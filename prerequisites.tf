@@ -1,7 +1,7 @@
 data "aws_region" "current" {}
 
 locals {
-  region                         = data.aws_region.current.name
+  region                         = data.aws_region.current.region
   create_secrets_kms_key         = var.secretmanager_enable_encryption && var.secretmanager_kms_key_id == null
   kms_prefix                     = lookup(var.custom_prefix, "kms", var.prefix)
   create_self_signed_certificate = var.create_alb && var.alb_cert_arn == null
@@ -54,7 +54,7 @@ module "iam" {
 module "vpc_endpoint" {
   count                                = var.vpc_endpoint_ec2_create || var.vpc_endpoint_proxy_create || var.vpc_endpoint_s3_gateway_create ? 1 : 0
   source                               = "./modules/endpoint"
-  region                               = data.aws_region.current.name
+  region                               = data.aws_region.current.region
   create_vpc_endpoint_ec2              = var.vpc_endpoint_ec2_create
   create_vpc_endpoint_s3_gateway       = var.vpc_endpoint_s3_gateway_create
   create_vpc_endpoint_proxy            = var.vpc_endpoint_proxy_create
@@ -114,7 +114,7 @@ locals {
 resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   count               = var.secretmanager_use_vpc_endpoint && var.secretmanager_create_vpc_endpoint ? 1 : 0
   vpc_id              = local.vpc_id
-  service_name        = "com.amazonaws.${data.aws_region.current.name}.secretsmanager"
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.secretsmanager"
   vpc_endpoint_type   = "Interface"
   security_group_ids  = local.secretmanager_endpoint_sg_ids
   subnet_ids          = local.subnet_ids

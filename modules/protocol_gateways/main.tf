@@ -26,7 +26,7 @@ data "aws_ami" "provided_ami" {
 }
 
 locals {
-  region    = data.aws_region.current.name
+  region    = data.aws_region.current.region
   tags_dest = ["instance", "network-interface", "volume"]
 
   instance_iam_profile_arn = var.instance_iam_profile_arn != "" ? var.instance_iam_profile_arn : aws_iam_instance_profile.this[0].arn
