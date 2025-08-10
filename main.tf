@@ -264,7 +264,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   tag {
     key                 = "Name"
     propagate_at_launch = false
-    value               = "${local.ec2_prefix}-${var.cluster_name}-instance-backend"
+    value               = "${local.ec2_prefix}-${var.cluster_name}"
   }
 
   dynamic "tag" {
