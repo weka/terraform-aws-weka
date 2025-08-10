@@ -154,6 +154,11 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     propagate_at_launch = true
     value               = var.data_services_name
   }
+  tag {
+    key                 = "Name"
+    propagate_at_launch = false
+    value               = var.data_services_name
+  }
 
   dynamic "tag" {
     for_each = var.tags_map
