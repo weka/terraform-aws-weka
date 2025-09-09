@@ -93,7 +93,7 @@ aws secretsmanager get-secret-value \
   --output text
 EOT
     "get_status"   = <<EOT
-# for nfs use: --payload '{"type": "progress", "protocl": "nfs"}'
+# for nfs use: --payload '{"type": "progress", "protocol": "nfs"}'
 aws lambda invoke \
   --function-name ${aws_lambda_function.status_lambda.function_name} \
   --payload '{"type": "progress"}' \
