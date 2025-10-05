@@ -141,6 +141,61 @@ variable "containers_config_map" {
       nics     = 15
       memory   = ["384GB", "384GB"]
     }
+    "i8ge.2xlarge" = {
+      compute  = 1,
+      drive    = 1,
+      frontend = 1,
+      nvme     = 2,
+      nics     = 4,
+      memory   = ["32.9GB", "32.64GB"]
+    },
+    "i8ge.3xlarge" = {
+      compute  = 3,
+      drive    = 1,
+      frontend = 1,
+      nvme     = 1,
+      nics     = 6,
+      memory   = ["62GB", "61.7GB"]
+    },
+    "i8ge.6xlarge" = {
+      compute  = 6,
+      drive    = 2,
+      frontend = 1,
+      nvme     = 2,
+      nics     = 10,
+      memory   = ["136.5GB", "136.2GB"]
+    },
+    "i8ge.12xlarge" = {
+      compute  = 6,
+      drive    = 4,
+      frontend = 1,
+      nvme     = 4,
+      nics     = 12,
+      memory   = ["310.7GB", "310.4GB"]
+    },
+    "i8ge.18xlarge" = {
+      compute  = 11,
+      drive    = 3,
+      frontend = 1,
+      nvme     = 6,
+      nics     = 16,
+      memory   = ["347GB", "347GB"]
+    },
+    "i8ge.24xlarge" = {
+      compute  = 10,
+      drive    = 4,
+      frontend = 1,
+      nvme     = 8,
+      nics     = 16,
+    memory = ["384GB", "384GB"] },
+    "i8ge.48xlarge" = {
+      compute  = 14,
+      drive    = 8,
+      frontend = 1,
+      nvme     = 16,
+      nics     = 24,
+      memory   = ["384GB", "384GB"]
+    }
   }
   validation {
     condition     = alltrue([for m in flatten([for i in values(var.containers_config_map) : (flatten(i.memory))]) : tonumber(trimsuffix(m, "GB")) <= 384])
@@ -343,7 +398,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "a38f5be1db78eb26448c62235e44d043"
+  default     = "fd2ed51df5cfd569d935f828d70d1ac7"
 }
 
 variable "lambdas_dist" {
@@ -607,6 +662,16 @@ variable "client_capacity_reservation_id" {
   type        = string
   default     = null
   description = "The ID of the capacity reservation in which to run the clients"
+}
+
+variable "clients_weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode, valid values are 'auto' and 'force_v2'"
+  default     = "auto"
+  validation {
+    condition     = var.clients_weka_cgroups_mode == "auto" || var.clients_weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
 }
 
 ############################################### NFS protocol gateways variables ###################################################
@@ -997,4 +1062,14 @@ variable "data_services_root_volume_size" {
   type        = number
   default     = null
   description = "The data services' root volume size."
+}
+
+variable "weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode, valid values are 'auto' and 'force_v2'"
+  default     = "auto"
+  validation {
+    condition     = var.weka_cgroups_mode == "auto" || var.weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
 }
