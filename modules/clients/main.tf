@@ -46,6 +46,7 @@ locals {
     region                       = local.region
     alb_dns_name                 = var.alb_dns_name != null ? var.alb_dns_name : ""
     cert_pem                     = var.cert_pem != null ? var.cert_pem : ""
+    weka_cgroups_mode            = var.weka_cgroups_mode
   })
 
   custom_data_parts = [local.preparation_script, var.custom_data_pre_mount, local.mount_wekafs_script, var.custom_data_post_mount, "${var.custom_data}\n"]
