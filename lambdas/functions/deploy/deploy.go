@@ -38,6 +38,7 @@ type AWSDeploymentParams struct {
 	S3ProtocolGatewayFeCoresNum  int
 	AlbArnSuffix                 string
 	NvmesNum                     int
+	CgroupsMode                  string
 }
 
 func getAWSInstanceNameCmd() string {
@@ -239,6 +240,7 @@ func GetDeployScript(params AWSDeploymentParams) (bashScript string, err error) 
 			ProxyUrl:         params.ProxyUrl,
 			NvmesNum:         params.NvmesNum,
 			FindDrivesScript: dedent.Dedent(common.FindDrivesScript),
+			CgroupsMode:      params.CgroupsMode,
 		}
 		deployScriptGenerator := deploy.DeployScriptGenerator{
 			FuncDef:       funcDef,
@@ -258,6 +260,7 @@ func GetDeployScript(params AWSDeploymentParams) (bashScript string, err error) 
 			InstallDpdk:    params.InstallDpdk,
 			InstanceParams: instanceParams,
 			ProxyUrl:       params.ProxyUrl,
+			CgroupsMode:    params.CgroupsMode,
 		}
 
 		scriptBase := `
