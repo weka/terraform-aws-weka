@@ -31,6 +31,6 @@ module "clients" {
   metadata_http_tokens         = var.metadata_http_tokens
   root_volume_size             = var.clients_root_volume_size
   cert_pem                     = local.create_self_signed_certificate ? module.self_signed_certificate[0].cert_pem : null
-  weka_cgroups_mode            = var.clients_weka_cgroups_mode
+  weka_cgroups_mode            = startswith(var.client_instance_type, "i8ge") ? "force_v2" : var.clients_weka_cgroups_mode
   depends_on                   = [aws_autoscaling_group.autoscaling_group, module.network]
 }

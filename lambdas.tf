@@ -72,7 +72,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       SMB_PROTOCOL_GATEWAY_FE_CORES_NUM = var.smb_protocol_gateway_fe_cores_num
       S3_PROTOCOL_GATEWAY_FE_CORES_NUM  = var.s3_protocol_gateway_fe_cores_num
       ALB_ARN_SUFFIX                    = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
-      CGROUPS_MODE                      = var.weka_cgroups_mode
+      CGROUPS_MODE                      = startswith(var.instance_type, "i8ge") ? "force_v2" : var.weka_cgroups_mode
     }
   }
   tags       = var.tags_map
