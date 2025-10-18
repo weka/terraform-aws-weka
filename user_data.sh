@@ -85,4 +85,4 @@ fi
 aws lambda invoke --region "$region" --function-name "${deploy_lambda_name}" $cli_binary_format --payload "{\"name\": \"$instance_id\"}" output
 printf "%b" "$(cat output | sed 's/^"//' | sed 's/"$//' | sed 's/\\\"/"/g')" > /tmp/deploy.sh
 chmod +x /tmp/deploy.sh
-/tmp/deploy.sh 2>&1 | tee /tmp/weka_deploy.log
+WEKA_CGROUPS_MODE="${weka_cgroups_mode}" /tmp/deploy.sh 2>&1 | tee /tmp/weka_deploy.log
