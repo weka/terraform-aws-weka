@@ -596,9 +596,9 @@ func GetInstancesNames(instances []protocol.Vm) (vmNames []string) {
 	return
 }
 
-func GetNfsClusterSecondaryIps(clusterName string) (secondaryIps []string, err error) {
+func GetNfsClusterSecondaryIps(clusterName string, instanceIds []*string) (secondaryIps []string, err error) {
 	svc := connectors.GetAWSSession().EC2
-	log.Debug().Msgf("Fetching cluster %s nfs secondary ips...", clusterName)
+	log.Debug().Msgf("Fetching cluster %s nfs secondary ips for instances %v...", clusterName, instanceIds)
 
 	describeOutput, err := svc.DescribeNetworkInterfaces(&ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
@@ -610,6 +610,10 @@ func GetNfsClusterSecondaryIps(clusterName string) (secondaryIps []string, err e
 				Name:   aws.String("tag:weka_hostgroup_type"),
 				Values: []*string{aws.String("gateways-protocol")},
 			},
+			{
+				Name:   aws.String("attachment.instance-id"),
+				Values: instanceIds,
+			},
 		},
 	})
 	if err != nil {
@@ -618,7 +622,9 @@ func GetNfsClusterSecondaryIps(clusterName string) (secondaryIps []string, err e
 
 	for _, networkInterface := range describeOutput.NetworkInterfaces {
 		for _, privateIp := range networkInterface.PrivateIpAddresses {
-			secondaryIps = append(secondaryIps, *privateIp.PrivateIpAddress)
+			if privateIp.Primary != nil && !*privateIp.Primary {
+				secondaryIps = append(secondaryIps, *privateIp.PrivateIpAddress)
+			}
 		}
 	}
 
