@@ -916,7 +916,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambdas_custom_s3_bucket"></a> [lambdas\_custom\_s3\_bucket](#input\_lambdas\_custom\_s3\_bucket) | S3 bucket name for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_custom_s3_key"></a> [lambdas\_custom\_s3\_key](#input\_lambdas\_custom\_s3\_key) | S3 key for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"ad5ad4bcaaf3dc0b5c9829ae8b5302de"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"6ad9c852369eeb2987d8f656d431d754"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
