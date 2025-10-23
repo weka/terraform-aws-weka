@@ -140,12 +140,14 @@ func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) 
 
 	var containersUid []string
 	var nicNames []string
+	var instanceIds []string
 	for _, instance := range state.Instances {
 		containersUid = append(containersUid, instance.ContainerUid)
 		nicNames = append(nicNames, instance.NicName)
+		instanceIds = append(instanceIds, instance.Name)
 	}
 
-	secondaryIps, err := common.GetNfsClusterSecondaryIps(p.Cluster.ClusterName)
+	secondaryIps, err := common.GetNfsClusterSecondaryIps(p.Cluster.ClusterName, cloudStrings.ListToRefList(instanceIds))
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
