@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go v1.45.16
 	github.com/lithammer/dedent v1.1.0
 	github.com/rs/zerolog v1.31.0
-	github.com/weka/go-cloud-lib v0.0.0-20251022185217-50d2433f393e
+	github.com/weka/go-cloud-lib v0.0.0-20251023053553-abf5a1cd1ea3
 	golang.org/x/sync v0.12.0
 )
 
