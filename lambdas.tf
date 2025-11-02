@@ -5,7 +5,7 @@ locals {
   s3_key       = var.lambdas_custom_s3_key != null ? var.lambdas_custom_s3_key : "${var.lambdas_dist}/${var.lambdas_version}.zip"
   functions = toset([
     "deploy", "clusterize", "report", "clusterize-finalization", "status", "scale-down", "fetch", "terminate",
-    "transient", "join-nfs-finalization"
+    "transient", "join-nfs-finalization", "management"
   ])
   enable_lambda_vpc = var.enable_lambda_vpc_config ? 1 : 0
   obs_prefix        = lookup(var.custom_prefix, "obs", var.prefix)
@@ -21,7 +21,7 @@ locals {
 
 resource "aws_cloudwatch_log_group" "lambdas_log_group" {
   count             = length(local.function_name)
-  name              = "/aws/lambda/${local.cloudwatch_prefix}/${local.function_name[count.index]}"
+  name              = "/aws/lambda/${local.function_name[count.index]}"
   retention_in_days = 30
   tags              = var.tags_map
 }
