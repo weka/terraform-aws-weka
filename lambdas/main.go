@@ -216,6 +216,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 	cgroupsMode := os.Getenv("CGROUPS_MODE")
+	dataServicesCgroupsMode := os.Getenv("DATA_SERVICES_CGROUPS_MODE")
 
 	msg := fmt.Sprintf("generating deploy script for vm: %s", vm.Name)
 	if vm.Protocol != "" {
@@ -248,6 +249,7 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		AlbArnSuffix:                 albArnSuffix,
 		NvmesNum:                     nvmesNum,
 		CgroupsMode:                  cgroupsMode,
+		DataServicesCgroupsMode:      dataServicesCgroupsMode,
 	}
 
 	if vm.Protocol == protocol.NFS {

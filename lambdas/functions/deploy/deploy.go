@@ -39,6 +39,7 @@ type AWSDeploymentParams struct {
 	AlbArnSuffix                 string
 	NvmesNum                     int
 	CgroupsMode                  string
+	DataServicesCgroupsMode      string
 }
 
 func getAWSInstanceNameCmd() string {
@@ -184,6 +185,7 @@ func GetDataServicesDeployScript(awsDeploymentParams AWSDeploymentParams) (bashS
 		ProxyUrl:       awsDeploymentParams.ProxyUrl,
 		LoadBalancerIP: albIp,
 		Protocol:       protocol.DATA,
+		CgroupsMode:    awsDeploymentParams.DataServicesCgroupsMode,
 	}
 
 	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
