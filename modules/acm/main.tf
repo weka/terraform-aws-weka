@@ -2,14 +2,24 @@ data "aws_route53_zone" "domain" {
   name = var.acm_domain_name
 }
 
+locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
+}
+
 resource "aws_acm_certificate" "acm_certificate_request" {
   domain_name               = var.acm_domain_name
   subject_alternative_names = ["*.${var.acm_domain_name}"]
   validation_method         = "DNS"
 
-  tags = {
-    Name : var.acm_domain_name
-  }
+  tags = merge(local.tags, {
+    Name = var.acm_domain_name
+  })
 
   lifecycle {
     create_before_destroy = true

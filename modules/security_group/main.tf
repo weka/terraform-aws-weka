@@ -1,3 +1,13 @@
+locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
+}
+
 # Default Security Group of VPC
 resource "aws_security_group" "sg" {
   name        = "${var.prefix}-${var.cluster_name}-sg"
@@ -52,7 +62,7 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Environment = var.prefix
     Name        = "${var.prefix}-${var.cluster_name}-sg"
   })

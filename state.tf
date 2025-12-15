@@ -17,7 +17,7 @@ resource "aws_dynamodb_table" "weka_deployment" {
     name = local.dynamodb_hash_key_name
     type = "S"
   }
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_dynamodb_table_item" "weka_deployment_state" {

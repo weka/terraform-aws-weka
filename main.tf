@@ -1,4 +1,11 @@
 locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
   ec2_prefix       = lookup(var.custom_prefix, "ec2", var.prefix)
   ssh_path         = "/tmp/${local.ec2_prefix}-${var.cluster_name}"
   nics             = var.install_cluster_dpdk ? var.containers_config_map[var.instance_type].nics : 1
@@ -14,6 +21,7 @@ locals {
     deploy_lambda_name  = aws_lambda_function.deploy_lambda.function_name
     weka_log_group_name = "/wekaio/${local.ec2_prefix}-${var.cluster_name}"
     custom_data         = var.custom_data
+    eni_tags            = jsonencode([for k, v in local.tags : { Key = k, Value = v }])
   })
   backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
   create_ebs_kms_key            = var.ebs_encrypted && var.ebs_kms_key_id == null
@@ -61,7 +69,7 @@ resource "aws_key_pair" "generated_key" {
   count      = var.enable_key_pair && var.key_pair_name == null ? 1 : 0
   key_name   = "${local.ec2_prefix}-${var.cluster_name}-ssh-key"
   public_key = local.public_ssh_key
-  tags       = var.tags_map
+  tags       = local.tags
 }
 
 resource "local_file" "public_key" {
@@ -82,7 +90,7 @@ resource "aws_placement_group" "placement_group" {
   count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${local.ec2_prefix}-${var.cluster_name}-placement-group"
   strategy = "cluster"
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     CreationDate = timestamp()
   })
   depends_on = [module.network]
@@ -93,7 +101,7 @@ resource "aws_kms_key" "kms_key" {
   enable_key_rotation     = true
   deletion_window_in_days = 20
   is_enabled              = true
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.kms_prefix}-${var.cluster_name}"
   })
 }
@@ -230,7 +238,7 @@ resource "aws_launch_template" "launch_template" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = merge({ user = data.aws_caller_identity.current.user_id }, var.tags_map, {
+      tags = merge({ user = data.aws_caller_identity.current.user_id }, local.tags, {
         Name                = "${local.ec2_prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
@@ -268,7 +276,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   }
 
   dynamic "tag" {
-    for_each = var.tags_map
+    for_each = local.tags
     content {
       key                 = tag.key
       value               = tag.value

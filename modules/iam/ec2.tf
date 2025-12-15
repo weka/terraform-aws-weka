@@ -6,7 +6,7 @@ locals {
 
 resource "aws_iam_policy" "backend_eni_iam_policy" {
   name = "${local.iam_prefix}-${var.cluster_name}-eni-policy"
-  tags = var.tags_map
+  tags = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -28,7 +28,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
 resource "aws_iam_policy" "backend_obs_iam_policy" {
   count = var.tiering_enable_obs_integration ? 1 : 0
   name  = "${local.iam_prefix}-${var.cluster_name}-obs-policy"
-  tags  = var.tags_map
+  tags  = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -53,7 +53,7 @@ resource "aws_iam_policy" "additional" {
     Version   = "2012-10-17"
     Statement = var.additional_iam_policy_statement
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_policy" "invoke_lambda_function" {
@@ -72,7 +72,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 # Create an IAM policy
@@ -97,7 +97,7 @@ resource "aws_iam_policy" "backend_log_iam_policy" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 # Create an IAM role
@@ -116,7 +116,7 @@ resource "aws_iam_role" "iam_role" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 # Attach the IAM policy to the IAM role
@@ -161,5 +161,5 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
 resource "aws_iam_instance_profile" "instance_profile" {
   name = "${local.iam_prefix}-${var.cluster_name}-instance-profile"
   role = aws_iam_role.iam_role.name
-  tags = var.tags_map
+  tags = local.tags
 }
