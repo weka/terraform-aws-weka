@@ -6,14 +6,14 @@ locals {
 resource "aws_cloudwatch_log_group" "sfn_log_group" {
   name              = "/aws/vendedlogs/states/${local.cloudwatch_prefix}/${var.cluster_name}-scale-down-sfn"
   retention_in_days = 30
-  tags              = var.tags_map
+  tags              = local.tags
 }
 
 resource "aws_cloudwatch_event_rule" "event_rule" {
   name                = "${local.cloudwatch_prefix}-${var.cluster_name}-scale-down-trigger-rule"
   schedule_expression = "rate(1 minute)"
   description         = "CloudWatch trigger scale down step function every 1 minute"
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.cloudwatch_prefix}-${var.cluster_name}-scale-down-trigger-rule"
   })
 }
@@ -89,7 +89,7 @@ EOF
     level                  = "ALL"
   }
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.sfn_prefix}-${var.cluster_name}-scale-up-sfn"
   })
   depends_on = [aws_lambda_function.scale_down_lambda, aws_lambda_function.fetch_lambda, aws_lambda_function.terminate_lambda, aws_lambda_function.transient_lambda, aws_cloudwatch_log_group.sfn_log_group]

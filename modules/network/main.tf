@@ -3,6 +3,13 @@ data "aws_availability_zones" "available" {
 }
 
 locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
   subnets_cidrs           = var.additional_subnet ? concat(var.subnets_cidrs, [var.alb_additional_subnet_cidr_block]) : var.subnets_cidrs
   availability_zones      = var.additional_subnet && var.alb_additional_subnet_zone != "" ? concat(var.availability_zones, [var.alb_additional_subnet_zone]) : var.availability_zones
   availability_zones_list = var.additional_subnet || var.create_nat_gateway ? distinct(flatten([local.availability_zones, data.aws_availability_zones.available[*].names])) : var.availability_zones
@@ -14,7 +21,7 @@ resource "aws_vpc" "vpc" {
   enable_dns_hostnames = true
   enable_dns_support   = true
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-vpc"
     Environment = var.prefix
   })
@@ -25,7 +32,7 @@ resource "aws_vpc" "vpc" {
 resource "aws_internet_gateway" "ig" {
   count  = var.subnet_autocreate_as_private ? 0 : 1
   vpc_id = aws_vpc.vpc.id
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-igw"
     Environment = var.prefix
   })
@@ -47,7 +54,7 @@ resource "aws_route_table" "ig_route_table" {
     gateway_id = aws_internet_gateway.ig[0].id
   }
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-igw-rt"
     Environment = var.prefix
   })
@@ -59,7 +66,7 @@ resource "aws_nat_gateway" "nat" {
   count         = var.create_nat_gateway ? 1 : 0
   subnet_id     = element(aws_subnet.public_subnet[*].id, 0)
   allocation_id = aws_eip.nat_eip[0].id
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-private-nat"
     Environment = var.prefix
   })
@@ -73,7 +80,7 @@ resource "aws_route_table" "nat_route_table" {
     nat_gateway_id = aws_nat_gateway.nat[0].id
   }
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-nat-rt"
     Environment = var.prefix
   })
@@ -88,7 +95,7 @@ resource "aws_subnet" "public_subnet" {
   availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = true
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-public-subnet-${count.index}"
     Environment = var.prefix
     Zone        = local.availability_zones_list[count.index]
@@ -111,7 +118,7 @@ resource "aws_subnet" "private_subnet" {
   availability_zone       = local.availability_zones_list[count.index]
   map_public_ip_on_launch = false
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-private-subnet-${count.index}"
     Environment = var.prefix
     Zone        = local.availability_zones_list[count.index]
