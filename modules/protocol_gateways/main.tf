@@ -26,6 +26,13 @@ data "aws_ami" "provided_ami" {
 }
 
 locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
   region    = data.aws_region.current.region
   tags_dest = ["instance", "network-interface", "volume"]
 
@@ -41,6 +48,7 @@ locals {
     deploy_lambda_name    = var.deploy_lambda_name
     secondary_ips_per_nic = var.secondary_ips_per_nic
     protocol              = lower(var.protocol)
+    eni_tags              = jsonencode([for k, v in local.tags : { Key = k, Value = v }])
   })
 
   setup_init_protocol_script = templatefile("${path.module}/protocol_setup.sh", {
@@ -80,7 +88,7 @@ resource "aws_placement_group" "this" {
   count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${var.gateways_name}-placement-group"
   strategy = "cluster"
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     CreationDate = timestamp()
   })
 }
@@ -222,7 +230,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   }
 
   dynamic "tag" {
-    for_each = var.tags_map
+    for_each = local.tags
     content {
       key                 = tag.key
       value               = tag.value

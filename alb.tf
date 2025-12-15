@@ -13,7 +13,7 @@ resource "aws_lb" "alb" {
   subnets                          = [local.alb_subnet_id, local.additional_subnet_id]
   enable_cross_zone_load_balancing = false
   enable_deletion_protection       = false
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name         = "${local.lb_prefix}-${var.cluster_name}-lb"
     cluster_name = var.cluster_name
   })
@@ -36,7 +36,7 @@ resource "aws_lb_target_group" "alb_target_group" {
     path                = "/api/v2/healthcheck/"
   }
 
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.lb_prefix}-${var.cluster_name}-lb-target-group"
   })
 }
@@ -53,7 +53,7 @@ resource "aws_lb_listener" "lb_weka_listener" {
     target_group_arn = aws_lb_target_group.alb_target_group[0].id
     type             = "forward"
   }
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.lb_prefix}-${var.cluster_name}-lb-weka-listener"
   })
 }
@@ -70,7 +70,7 @@ resource "aws_lb_listener" "lb_listener" {
     target_group_arn = aws_lb_target_group.alb_target_group[0].id
     type             = "forward"
   }
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = "${local.lb_prefix}-${var.cluster_name}-lb-listener"
   })
 }

@@ -12,7 +12,7 @@ resource "aws_iam_role" "sfn_iam_role" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_policy" "sfn_iam_policy" {
@@ -42,7 +42,7 @@ resource "aws_iam_policy" "sfn_iam_policy" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_role_policy_attachment" "sfn_policy_attachment" {

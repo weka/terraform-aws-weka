@@ -1,10 +1,20 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags_map,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
+}
+
 resource "aws_kms_key" "kms_key" {
   enable_key_rotation     = true
   deletion_window_in_days = 20
   is_enabled              = true
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name = var.name
   })
 }

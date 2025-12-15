@@ -1,3 +1,13 @@
+locals {
+  # Merge user-provided tags with required aws-apn-id tag
+  tags = merge(
+    var.tags,
+    {
+      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+    }
+  )
+}
+
 resource "tls_private_key" "this" {
   algorithm = "RSA"
   rsa_bits  = 2048
@@ -28,7 +38,7 @@ resource "aws_acm_certificate" "this" {
   certificate_body  = tls_self_signed_cert.this.cert_pem
   certificate_chain = null
 
-  tags = var.tags
+  tags = local.tags
 
   lifecycle {
     create_before_destroy = true

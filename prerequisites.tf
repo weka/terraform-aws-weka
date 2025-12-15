@@ -119,7 +119,7 @@ resource "aws_vpc_endpoint" "secretmanager_endpoint" {
   security_group_ids  = local.secretmanager_endpoint_sg_ids
   subnet_ids          = local.subnet_ids
   private_dns_enabled = true
-  tags = merge(var.tags_map, {
+  tags = merge(local.tags, {
     Name        = "${var.prefix}-secretmanager-endpoint"
     Environment = var.prefix
   })
