@@ -30,6 +30,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_acm_domain_name"></a> [acm\_domain\_name](#input\_acm\_domain\_name) | ACM domain name | `string` | n/a | yes |
+| <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign to resources | `map(string)` | `{}` | no |
 
 ## Outputs
 
