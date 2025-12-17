@@ -18,6 +18,7 @@ resource "aws_iam_policy" "backend_eni_iam_policy" {
           "ec2:CreateNetworkInterface",
           "ec2:ModifyNetworkInterfaceAttribute",
           "ec2:DeleteNetworkInterface",
+          "ec2:CreateTags",
         ]
         Resource = "*"
       }
