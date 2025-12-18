@@ -43,7 +43,8 @@ AWS terraform weka deployment module.
                 "ec2:AttachNetworkInterface",
                 "ec2:CreateNetworkInterface",
                 "ec2:ModifyNetworkInterfaceAttribute",
-                "ec2:DeleteNetworkInterface"
+                "ec2:DeleteNetworkInterface",
+                "ec2:CreateTags"
             ],
             "Effect": "Allow",
             "Resource": "*"
@@ -104,7 +105,6 @@ AWS terraform weka deployment module.
         },
         {
             "Action": [
-                "logs:CreateLogGroup",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
@@ -513,9 +513,10 @@ nfs_setup_protocol = true
       "ec2:DeleteNetworkInterface",
       "ec2:DescribeInstances",
       "ec2:DescribeTags",
-      "ec2:AssignPrivateIpAddresses"
+      "ec2:AssignPrivateIpAddresses",
+      "ec2:CreateTags"
     ],
-    "Resource":  "*",
+    "Resource":  "*"
     },
     {
       "Effect": "Allow",
@@ -644,9 +645,11 @@ To join an SMB cluster in Active Directory, need to run manually command:
       "ec2:ModifyNetworkInterfaceAttribute",
       "ec2:DeleteNetworkInterface",
       "ec2:DescribeInstances",
-      "ec2:DescribeTags"
+      "ec2:DescribeTags",
+      "ec2:AssignPrivateIpAddresses",
+      "ec2:CreateTags"
     ],
-    "Resource":  "*",
+    "Resource":  "*"
     },
     {
       "Effect": "Allow",
