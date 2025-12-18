@@ -73,6 +73,7 @@ resource "aws_lambda_function" "deploy_lambda" {
       S3_PROTOCOL_GATEWAY_FE_CORES_NUM  = var.s3_protocol_gateway_fe_cores_num
       ALB_ARN_SUFFIX                    = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
       CGROUPS_MODE                      = var.weka_cgroups_mode
+      DATA_SERVICES_CGROUPS_MODE         = var.data_services_weka_cgroups_mode
     }
   }
   tags       = local.tags

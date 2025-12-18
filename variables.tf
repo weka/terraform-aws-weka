@@ -398,13 +398,13 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "6ad9c852369eeb2987d8f656d431d754"
+  default     = "af475536ab2d9d694da22c1f2a9e4f94"
 }
 
 variable "lambdas_dist" {
   type        = string
   description = "Lambdas code dist"
-  default     = "release"
+  default     = "dev"
 
   validation {
     condition     = contains(["dev", "release"], var.lambdas_dist)
@@ -1062,6 +1062,16 @@ variable "data_services_root_volume_size" {
   type        = number
   default     = null
   description = "The data services' root volume size."
+}
+
+variable "data_services_weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode, valid values are 'auto' and 'force_v2'"
+  default     = "auto"
+  validation {
+    condition     = var.data_services_weka_cgroups_mode == "auto" || var.data_services_weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
 }
 
 variable "weka_cgroups_mode" {
