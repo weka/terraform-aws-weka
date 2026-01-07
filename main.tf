@@ -228,9 +228,14 @@ resource "aws_launch_template" "launch_template" {
     group_name        = local.backends_placement_group_name
   }
 
-  capacity_reservation_specification {
-    capacity_reservation_target {
-      capacity_reservation_id = var.capacity_reservation_id
+  # Use dynamic block to prevent drift when capacity_reservation_id is null/empty
+  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual ID
+  dynamic "capacity_reservation_specification" {
+    for_each = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? [1] : []
+    content {
+      capacity_reservation_target {
+        capacity_reservation_id = var.capacity_reservation_id
+      }
     }
   }
 
@@ -245,7 +250,8 @@ resource "aws_launch_template" "launch_template" {
       })
     }
   }
-  user_data  = base64encode(local.user_data)
+  user_data = base64encode(local.user_data)
+
   depends_on = [aws_placement_group.placement_group, aws_kms_key.kms_key]
 }
 
