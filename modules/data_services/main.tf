@@ -121,9 +121,14 @@ resource "aws_launch_template" "this" {
     group_name        = local.placement_group_name
   }
 
-  capacity_reservation_specification {
-    capacity_reservation_target {
-      capacity_reservation_id = var.capacity_reservation_id
+  # Use dynamic block to prevent drift when capacity_reservation_id is null/empty
+  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual ID
+  dynamic "capacity_reservation_specification" {
+    for_each = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? [1] : []
+    content {
+      capacity_reservation_target {
+        capacity_reservation_id = var.capacity_reservation_id
+      }
     }
   }
 
