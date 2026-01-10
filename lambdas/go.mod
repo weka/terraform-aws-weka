@@ -1,13 +1,13 @@
 module github.com/weka/aws-tf/modules/deploy_weka/lambdas
 
-go 1.24.1
+go 1.25.4
 
 require (
 	github.com/aws/aws-lambda-go v1.41.0
 	github.com/aws/aws-sdk-go v1.45.16
 	github.com/lithammer/dedent v1.1.0
 	github.com/rs/zerolog v1.31.0
-	github.com/weka/go-cloud-lib v0.0.0-20251023132428-c547b07bfddc
+	github.com/weka/go-cloud-lib v0.0.0-20251119134949-f64860431a54
 	golang.org/x/sync v0.12.0
 )
 
