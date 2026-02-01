@@ -1,7 +1,5 @@
 data "aws_region" "current" {}
 
-data "aws_caller_identity" "current" {}
-
 data "aws_subnet" "selected" {
   id = var.subnet_id
 }
@@ -53,9 +51,7 @@ resource "aws_placement_group" "this" {
   count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
   name     = "${var.data_services_name}-placement-group"
   strategy = "cluster"
-  tags = merge(local.tags, {
-    CreationDate = timestamp()
-  })
+  tags     = local.tags
 }
 
 resource "aws_launch_template" "this" {
@@ -136,7 +132,7 @@ resource "aws_launch_template" "this" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = merge({ user = data.aws_caller_identity.current.user_id }, local.tags, {
+      tags = merge(local.tags, {
         Name                = var.data_services_name
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "data-services"
