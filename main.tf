@@ -87,12 +87,10 @@ resource "local_file" "private_key" {
 }
 
 resource "aws_placement_group" "placement_group" {
-  count    = var.use_placement_group && var.placement_group_name == null ? 1 : 0
-  name     = "${local.ec2_prefix}-${var.cluster_name}-placement-group"
-  strategy = "cluster"
-  tags = merge(local.tags, {
-    CreationDate = timestamp()
-  })
+  count      = var.use_placement_group && var.placement_group_name == null ? 1 : 0
+  name       = "${local.ec2_prefix}-${var.cluster_name}-placement-group"
+  strategy   = "cluster"
+  tags       = local.tags
   depends_on = [module.network]
 }
 
@@ -243,7 +241,7 @@ resource "aws_launch_template" "launch_template" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = merge({ user = data.aws_caller_identity.current.user_id }, local.tags, {
+      tags = merge(local.tags, {
         Name                = "${local.ec2_prefix}-${var.cluster_name}-${tag_specifications.value}-backend"
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "backend"
