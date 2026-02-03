@@ -26,7 +26,7 @@ resource "aws_iam_policy" "lambda_iam_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Resource = ["arn:aws:logs:*:*:log-group:/aws/lambda/${local.lambda_prefix}-${var.cluster_name}*:*"]
+        Resource = ["arn:aws:logs:*:*:log-group:/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}*:*"]
         }, {
         Effect = "Allow"
         Action = [

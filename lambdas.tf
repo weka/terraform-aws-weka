@@ -21,7 +21,7 @@ locals {
 
 resource "aws_cloudwatch_log_group" "lambdas_log_group" {
   count             = length(local.function_name)
-  name              = "/aws/lambda/${local.function_name[count.index]}"
+  name              = "/aws/lambda/${local.cloudwatch_prefix}/${local.function_name[count.index]}"
   retention_in_days = 30
   tags              = local.tags
 }
@@ -75,6 +75,10 @@ resource "aws_lambda_function" "deploy_lambda" {
       CGROUPS_MODE                      = local.backend_cgroups_mode
       DATA_SERVICES_CGROUPS_MODE        = var.data_services_weka_cgroups_mode
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-deploy-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -149,6 +153,10 @@ resource "aws_lambda_function" "clusterize_lambda" {
       ALB_ARN_SUFFIX                      = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
     }
   }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-clusterize-lambda"
+  }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
@@ -179,6 +187,10 @@ resource "aws_lambda_function" "clusterize_finalization_lambda" {
       NFS_STATE_KEY        = local.nfs_state_key
     }
   }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${substr("${local.lambda_prefix}-${var.cluster_name}-clusterize-finalization-lambda", 0, 64)}"
+  }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
@@ -204,6 +216,10 @@ resource "aws_lambda_function" "join_nfs_finalization_lambda" {
     variables = {
       LAMBDA = "joinNfsFinalization"
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${substr("${local.lambda_prefix}-${var.cluster_name}-join-nfs-finalization-lambda", 0, 64)}"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -234,6 +250,10 @@ resource "aws_lambda_function" "management" {
       ADMIN_PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
       USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-management-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -266,6 +286,10 @@ resource "aws_lambda_function" "report_lambda" {
       STATE_KEY            = local.state_key
       NFS_STATE_KEY        = local.nfs_state_key
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-report-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -302,6 +326,10 @@ resource "aws_lambda_function" "status_lambda" {
       ADMIN_PASSWORD_ID          = aws_secretsmanager_secret.weka_password.id
       USE_SECRETMANAGER_ENDPOINT = var.secretmanager_use_vpc_endpoint
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-status-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -340,6 +368,10 @@ resource "aws_lambda_function" "fetch_lambda" {
       USE_SECRETMANAGER_ENDPOINT    = var.secretmanager_use_vpc_endpoint
     }
   }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-fetch-lambda"
+  }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
@@ -368,6 +400,10 @@ resource "aws_lambda_function" "scale_down_lambda" {
       ADMIN_PASSWORD_ID      = aws_secretsmanager_secret.weka_password.id
     }
   }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-scale-down-lambda"
+  }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
 }
@@ -395,6 +431,10 @@ resource "aws_lambda_function" "transient_lambda" {
       REGION       = local.region
       CLUSTER_NAME = var.cluster_name
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-transient-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
@@ -425,6 +465,10 @@ resource "aws_lambda_function" "terminate_lambda" {
       ASG_NAME     = "${local.ec2_prefix}-${var.cluster_name}-autoscaling-group"
       NFS_ASG_NAME = "${local.ec2_prefix}-${var.cluster_name}-nfs-protocol-gateway"
     }
+  }
+  logging_config {
+    log_format = "Text"
+    log_group  = "/aws/lambda/${local.cloudwatch_prefix}/${local.lambda_prefix}-${var.cluster_name}-terminate-lambda"
   }
   tags       = local.tags
   depends_on = [aws_cloudwatch_log_group.lambdas_log_group]
