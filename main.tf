@@ -29,6 +29,16 @@ locals {
   iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
   root_device_name              = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
   alb_dns_name                  = var.create_alb ? (var.alb_dns_name != null ? var.alb_dns_name : (var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : aws_lb.alb[0].dns_name)) : null
+
+  # Instance family detection for i8ge vs i3en
+  instance_family = split(".", var.instance_type)[0] # Extracts "i3en" or "i8ge"
+  is_i8ge_family  = startswith(local.instance_family, "i8ge")
+
+  # Dynamic AMI selection based on instance family
+  ami_name_pattern = local.is_i8ge_family ? "al2023-ami-2023*-kernel-6.1-arm64" : "amzn2-ami-kernel-5.*-x86_64-gp2"
+
+  # Dynamic cgroups mode - use instance-family-specific defaults if not explicitly provided
+  backend_cgroups_mode = var.weka_cgroups_mode != null ? var.weka_cgroups_mode : (local.is_i8ge_family ? "force_v2" : "auto")
 }
 
 data "aws_caller_identity" "current" {}
@@ -46,7 +56,7 @@ data "aws_ami" "amzn_ami" {
 
   filter {
     name   = "name"
-    values = ["amzn2-ami-kernel-5.*-x86_64-gp2"]
+    values = [local.ami_name_pattern]
   }
 }
 
