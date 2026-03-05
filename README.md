@@ -110,7 +110,7 @@ AWS terraform weka deployment module.
             ],
             "Effect": "Allow",
             "Resource": [
-              "arn:aws:logs:*:*:log-group:/aws/lambda/prefix-cluster_name*:*"
+              "arn:aws:logs:*:*:log-group:/aws/lambda/*/prefix-cluster_name*:*"
             ]
         },
         {
@@ -523,7 +523,7 @@ nfs_setup_protocol = true
       "Action":
     [
       "secretsmanager:GetSecretValue"
-    ]
+    ],
     "Resource":
     [
       "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
@@ -541,7 +541,7 @@ nfs_setup_protocol = true
     ],
     "Resource":
     [
-      "arn:aws:logs:*:*:log-group:/wekaio/clients/gateways_name*"
+      "arn:aws:logs:*:*:log-group:/wekaio/gateways_name*"
     ]
     },
     {
@@ -563,7 +563,7 @@ nfs_setup_protocol = true
       "Resource": [
         "arn:aws:lambda:*:*:function:prefix-cluster_name*"
       ]
-    },
+    }
   ]
 }
 
@@ -656,7 +656,7 @@ To join an SMB cluster in Active Directory, need to run manually command:
       "Action":
     [
       "secretsmanager:GetSecretValue"
-    ]
+    ],
     "Resource":
     [
       "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
@@ -671,10 +671,10 @@ To join an SMB cluster in Active Directory, need to run manually command:
       "logs:PutLogEvents",
       "logs:DescribeLogStreams",
       "logs:PutRetentionPolicy"
-    ]
+    ],
     "Resource":
     [
-      "arn:aws:logs:*:*:log-group:/wekaio/clients/gateways_name*"
+      "arn:aws:logs:*:*:log-group:/wekaio/gateways_name*"
     ]
     },
     {
@@ -701,6 +701,75 @@ To join an SMB cluster in Active Directory, need to run manually command:
 }
 ```
 </details>
+
+## Data Services
+Data services instances are optional instances that can be deployed alongside the Weka cluster for handling data-related operations.
+
+### prerequisites:
+- data_services_instance_iam_profile_arn
+<details>
+<summary>Data Services iam policy (replace *prefix* and *cluster_name* with relevant values)</summary>
+
+```json
+{
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:AttachNetworkInterface",
+        "ec2:CreateNetworkInterface",
+        "ec2:ModifyNetworkInterfaceAttribute",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeInstances",
+        "ec2:DescribeTags",
+        "ec2:AssignPrivateIpAddresses"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:*:*:secret:weka/prefix-cluster_name/*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams",
+        "logs:PutRetentionPolicy"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/wekaio/data-services*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:lambda:*:*:function:prefix-cluster_name*"
+      ]
+    }
+  ]
+}
+```</details>
 
 ## Secret manager
 By default, if not provided explicitly to the module, we will set:
