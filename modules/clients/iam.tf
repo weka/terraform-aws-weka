@@ -26,7 +26,7 @@ resource "aws_iam_policy" "ec2" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_policy" "logging" {
@@ -52,7 +52,7 @@ resource "aws_iam_policy" "logging" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_policy" "autoscaling" {
@@ -74,7 +74,7 @@ resource "aws_iam_policy" "autoscaling" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 resource "aws_iam_role" "this" {
@@ -94,7 +94,7 @@ resource "aws_iam_role" "this" {
       }
     ]
   })
-  tags = var.tags_map
+  tags = local.tags
 }
 
 # Attach the IAM policy to the IAM role
@@ -134,5 +134,5 @@ resource "aws_iam_instance_profile" "this" {
 
   name = "${local.base_name}-instance-profile"
   role = aws_iam_role.this[0].name
-  tags = var.tags_map
+  tags = local.tags
 }
