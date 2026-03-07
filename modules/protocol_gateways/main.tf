@@ -167,7 +167,7 @@ resource "aws_launch_template" "this" {
     for_each = local.tags_dest
     content {
       resource_type = tag_specifications.value
-      tags = merge(var.tags_map, {
+      tags = merge(local.tags, {
         Name                = var.gateways_name
         weka_cluster_name   = var.cluster_name
         weka_hostgroup_type = "gateways-protocol"
