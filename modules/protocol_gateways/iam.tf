@@ -6,7 +6,7 @@ resource "aws_iam_policy" "ec2" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
   name = "${local.base_name}-ec2-policy"
-  tags = var.tags_map
+  tags = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -40,7 +40,7 @@ resource "aws_iam_policy" "logging" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
   name = "${local.base_name}-send-log-to-cloud-watch-policy"
-  tags = var.tags_map
+  tags = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -65,7 +65,7 @@ resource "aws_iam_policy" "autoscaling" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
   name = "${local.base_name}-autoscaling-policy"
-  tags = var.tags_map
+  tags = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -86,7 +86,7 @@ resource "aws_iam_policy" "invoke_lambda_function" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
   name = "${local.base_name}-invoke-lambda-function"
-  tags = var.tags_map
+  tags = local.tags
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -113,7 +113,7 @@ resource "aws_iam_role" "this" {
   count = var.instance_iam_profile_arn == "" ? 1 : 0
 
   name = "${local.base_name}-role"
-  tags = var.tags_map
+  tags = local.tags
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -173,6 +173,6 @@ resource "aws_iam_instance_profile" "this" {
 
   name       = "${local.base_name}-instance-profile"
   role       = aws_iam_role.this[0].name
-  tags       = var.tags_map
+  tags       = local.tags
   depends_on = [aws_iam_role.this]
 }
