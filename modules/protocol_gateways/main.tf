@@ -230,6 +230,18 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     value               = var.gateways_name
   }
 
+  tag {
+    key                 = "weka_cluster_name"
+    propagate_at_launch = false
+    value               = var.cluster_name
+  }
+
+  tag {
+    key                 = "weka_hostgroup_type"
+    propagate_at_launch = false
+    value               = "gateways-protocol"
+  }
+
   dynamic "tag" {
     for_each = local.tags
     content {
