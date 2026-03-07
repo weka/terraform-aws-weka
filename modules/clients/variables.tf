@@ -185,3 +185,8 @@ variable "weka_cgroups_mode" {
     error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
   }
 }
+
+variable "cluster_name" {
+  type        = string
+  description = "The cluster name"
+}
