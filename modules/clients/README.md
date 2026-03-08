@@ -52,6 +52,7 @@ No modules.
 | <a name="input_clients_name"></a> [clients\_name](#input\_clients\_name) | The clients name. | `string` | n/a | yes |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of virtual machines to deploy. | `number` | `2` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
+| <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name | `string` | n/a | yes |
 | <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data to pass to the instances. Deprecated, use `custom_data_post_mount` instead. | `string` | `""` | no |
 | <a name="input_custom_data_post_mount"></a> [custom\_data\_post\_mount](#input\_custom\_data\_post\_mount) | Custom data to pass to the instances, will run after weka agent install and mount. | `string` | `""` | no |
 | <a name="input_custom_data_pre_mount"></a> [custom\_data\_pre\_mount](#input\_custom\_data\_pre\_mount) | Custom data to pass to the instances, will run before weka agent install and mount. | `string` | `""` | no |
