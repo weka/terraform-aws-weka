@@ -201,7 +201,7 @@ resource "aws_instance" "this" {
       error_message = "The number of secondary IPs per single NIC per protocol gateway virtual machine must be at most 3 for SMB."
     }
   }
-  tags       = var.tags_map
+  tags       = local.tags
   depends_on = [aws_placement_group.this, aws_iam_instance_profile.this, aws_iam_role.this]
 }
 

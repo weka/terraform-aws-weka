@@ -1,9 +1,10 @@
 locals {
+  aws_apn_id = "pc:epkj0ftddjwa38m3oq9umjjlm"
   # Merge user-provided tags with required aws-apn-id tag
   tags = merge(
     var.tags_map,
     {
-      aws-apn-id = "pc:epkj0ftddjwa38m3oq9umjjlm"
+      aws-apn-id = local.aws_apn_id
     }
   )
   ec2_prefix       = lookup(var.custom_prefix, "ec2", var.prefix)

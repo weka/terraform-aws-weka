@@ -144,6 +144,7 @@ resource "aws_lambda_function" "clusterize_lambda" {
       PROXY_URL                    = var.proxy_url
       WEKA_HOME_URL                = var.weka_home_url
       INSTALL_DPDK                 = var.install_cluster_dpdk
+      AWS_APN_ID                   = local.aws_apn_id
       # pass lambda function names
       CLUSTERIZE_FINALIZATION_LAMBDA_NAME = aws_lambda_function.clusterize_finalization_lambda.function_name
       REPORT_LAMBDA_NAME                  = aws_lambda_function.report_lambda.function_name

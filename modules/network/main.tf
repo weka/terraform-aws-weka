@@ -42,7 +42,7 @@ resource "aws_internet_gateway" "ig" {
 resource "aws_eip" "nat_eip" {
   count      = var.create_nat_gateway ? 1 : 0
   domain     = "vpc"
-  tags       = var.tags_map
+  tags       = local.tags
   depends_on = [aws_internet_gateway.ig]
 }
 

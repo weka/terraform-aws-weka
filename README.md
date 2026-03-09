@@ -96,7 +96,8 @@ AWS terraform weka deployment module.
         "Statement": [
         {
             "Action": [
-              "s3:CreateBucket"
+              "s3:CreateBucket",
+              "s3:PutBucketTagging"
             ],
             "Effect": "Allow",
             "Resource": [

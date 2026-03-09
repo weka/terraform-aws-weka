@@ -90,6 +90,7 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
         Effect = "Allow"
         Action = [
           "s3:CreateBucket",
+          "s3:PutBucketTagging",
         ]
         Resource = ["arn:aws:s3:::${local.obs_name}"]
       }
