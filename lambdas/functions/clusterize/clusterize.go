@@ -65,7 +65,11 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	if p.Cluster.SetObs {
 		if p.Obs.Name == "" {
 			p.Obs.Name = strings.ToLower(strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-"))
-			err = common.CreateBucket(p.Obs.Name)
+			bucketTags := map[string]string{
+				"aws-apn-id":      os.Getenv("AWS_APN_ID"),
+				"weka_cluster_name": p.Cluster.ClusterName,
+			}
+			err = common.CreateBucket(p.Obs.Name, bucketTags)
 			if err != nil {
 				log.Error().Err(err).Send()
 				err = report.Report(
