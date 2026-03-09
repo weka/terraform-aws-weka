@@ -468,11 +468,32 @@ func GetASGInstances(asgNames []string) (asgInstances map[string][]*autoscaling.
 	return
 }
 
-func CreateBucket(bucketName string) (err error) {
+func CreateBucket(bucketName string, tags map[string]string) (err error) {
 	svc := connectors.GetAWSSession().S3
 	_, err = svc.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucketName),
 	})
+	if err != nil {
+		return
+	}
+
+	// Apply tags to the bucket
+	if len(tags) > 0 {
+		tagSet := make([]*s3.Tag, 0, len(tags))
+		for k, v := range tags {
+			tagSet = append(tagSet, &s3.Tag{
+				Key:   aws.String(k),
+				Value: aws.String(v),
+			})
+		}
+
+		_, err = svc.PutBucketTagging(&s3.PutBucketTaggingInput{
+			Bucket: aws.String(bucketName),
+			Tagging: &s3.Tagging{
+				TagSet: tagSet,
+			},
+		})
+	}
 	return
 }
 
