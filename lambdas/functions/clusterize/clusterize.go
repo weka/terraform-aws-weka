@@ -66,7 +66,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 		if p.Obs.Name == "" {
 			p.Obs.Name = strings.ToLower(strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-"))
 			bucketTags := map[string]string{
-				"aws-apn-id":      os.Getenv("AWS_APN_ID"),
+				"aws-apn-id":        os.Getenv("AWS_APN_ID"),
 				"weka_cluster_name": p.Cluster.ClusterName,
 			}
 			err = common.CreateBucket(p.Obs.Name, bucketTags)
@@ -189,8 +189,6 @@ func GetObsScript(obsParams protocol.ObsParams) string {
 
 	weka fs tier s3 add aws-bucket --hostname s3.$REGION.amazonaws.com --port 443 --bucket "$OBS_NAME" --protocol https --auth-method AWSSignature4 --region $REGION --site local || return 1
 	weka fs tier s3 attach default aws-bucket || return 1
-	tiering_percent=$(echo "$full_capacity * 100 / $OBS_TIERING_SSD_PERCENT" | bc) || return 1
-	weka fs update default --total-capacity "$tiering_percent"B || return 1
 	`
 	return fmt.Sprintf(
 		dedent.Dedent(template), obsParams.TieringSsdPercent, obsParams.Name, os.Getenv("REGION"),
