@@ -22,7 +22,7 @@ variable "frontend_container_cores_num" {
 
 variable "client_instance_ami_id" {
   type        = string
-  description = "The default AMI ID is set to Amazon Linux 2. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system"
+  description = "The default AMI ID is set to Amazon Linux 2023. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system"
   default     = null
 }
 
@@ -179,7 +179,7 @@ variable "cert_pem" {
 variable "weka_cgroups_mode" {
   type        = string
   description = "Weka cgroups mode, valid values are 'auto' and 'force_v2'"
-  default     = "auto"
+  default     = "force_v2"
   validation {
     condition     = var.weka_cgroups_mode == "auto" || var.weka_cgroups_mode == "force_v2"
     error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
