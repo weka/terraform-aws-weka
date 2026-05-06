@@ -80,7 +80,7 @@ variable "instance_type" {
 
 variable "ami_id" {
   type        = string
-  description = "AMI ID to use for backend instances. If not specified, automatically selects: Amazon Linux 2 x86_64 for i3en instances, Amazon Linux 2023 ARM for i8ge instances."
+  description = "AMI ID to use for backend instances. If not specified, automatically selects: Amazon Linux 2023 x86_64 for i3en instances, Amazon Linux 2023 ARM for i8ge instances."
   default     = null
 }
 
@@ -398,7 +398,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "cbd1636c5689b56d7df00952c9ca699f"
+  default     = "6a678cf0bbc3b330f9d1f50ef5237bab"
 }
 
 variable "lambdas_dist" {
@@ -585,7 +585,7 @@ variable "client_instance_iam_profile_arn" {
 
 variable "client_instance_ami_id" {
   type        = string
-  description = "The default AMI ID is set to Amazon Linux 2. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system"
+  description = "The default AMI ID is set to Amazon Linux 2023. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system"
   default     = null
 }
 
@@ -667,7 +667,7 @@ variable "client_capacity_reservation_id" {
 variable "clients_weka_cgroups_mode" {
   type        = string
   description = "Weka cgroups mode for client instances. Valid values are 'auto' and 'force_v2'."
-  default     = "auto"
+  default     = "force_v2"
   validation {
     condition     = var.clients_weka_cgroups_mode == "auto" || var.clients_weka_cgroups_mode == "force_v2"
     error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
@@ -742,7 +742,7 @@ variable "nfs_capacity_reservation_id" {
 
 variable "nfs_protocol_gateway_instance_ami_id" {
   type        = string
-  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  description = "AMI ID to use, Amazon Linux 2023 is the supported OS."
   default     = null
 }
 
@@ -832,7 +832,7 @@ variable "smb_capacity_reservation_id" {
 
 variable "smb_protocol_gateway_instance_ami_id" {
   type        = string
-  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  description = "AMI ID to use, Amazon Linux 2023 is the supported OS."
   default     = null
 }
 
@@ -893,7 +893,7 @@ variable "s3_capacity_reservation_id" {
 
 variable "s3_protocol_gateway_instance_ami_id" {
   type        = string
-  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  description = "AMI ID to use, Amazon Linux 2023 is the supported OS."
   default     = null
 }
 
@@ -1042,7 +1042,7 @@ variable "data_services_weka_volume_size" {
 
 variable "data_services_instance_ami_id" {
   type        = string
-  description = "AMI ID to use, Amazon Linux 2 is the supported OS."
+  description = "AMI ID to use, Amazon Linux 2023 is the supported OS."
   default     = null
 }
 
@@ -1067,7 +1067,7 @@ variable "data_services_root_volume_size" {
 variable "data_services_weka_cgroups_mode" {
   type        = string
   description = "Weka cgroups mode, valid values are 'auto' and 'force_v2'"
-  default     = "auto"
+  default     = "force_v2"
   validation {
     condition     = var.data_services_weka_cgroups_mode == "auto" || var.data_services_weka_cgroups_mode == "force_v2"
     error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
@@ -1076,7 +1076,7 @@ variable "data_services_weka_cgroups_mode" {
 
 variable "weka_cgroups_mode" {
   type        = string
-  description = "Weka cgroups mode for backend instances. Valid values are 'auto' and 'force_v2'. If not specified, defaults to 'auto' for i3en instances and 'force_v2' for i8ge instances."
+  description = "Weka cgroups mode for backend instances. Valid values are 'auto' and 'force_v2'. Defaults to 'force_v2'."
   default     = null
   validation {
     condition     = var.weka_cgroups_mode == null || var.weka_cgroups_mode == "auto" || var.weka_cgroups_mode == "force_v2"
