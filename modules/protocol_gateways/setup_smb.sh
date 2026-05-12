@@ -1,5 +1,15 @@
 echo "$(date -u): running smb script"
 
+# Replace resolv.conf symlink with a real file, preserving its current content.
+# The SMB container cannot follow the symlink to /run/systemd/resolve/resolv.conf,
+# so it needs a real file. Disable systemd-resolved to prevent it from recreating
+# the symlink on reboot.
+if [ -L /etc/resolv.conf ]; then
+    resolved_content=$(cat /etc/resolv.conf)
+    systemctl disable --now systemd-resolved
+    rm -f /etc/resolv.conf
+    printf '%s\n' "$resolved_content" > /etc/resolv.conf
+fi
 
 # wait for weka smb cluster to be ready in case it was created by another host
 weka smb cluster wait
