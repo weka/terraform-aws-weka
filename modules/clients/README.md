@@ -48,7 +48,7 @@ No modules.
 | <a name="input_backends_asg_name"></a> [backends\_asg\_name](#input\_backends\_asg\_name) | Name of the backends autoscaling group | `string` | n/a | yes |
 | <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients | `string` | `null` | no |
 | <a name="input_cert_pem"></a> [cert\_pem](#input\_cert\_pem) | Certificate PEM to use for the ALB when using self-signed certificate. | `string` | `null` | no |
-| <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | The default AMI ID is set to Amazon Linux 2. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system | `string` | `null` | no |
+| <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | The default AMI ID is set to Amazon Linux 2023. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system | `string` | `null` | no |
 | <a name="input_clients_name"></a> [clients\_name](#input\_clients\_name) | The clients name. | `string` | n/a | yes |
 | <a name="input_clients_number"></a> [clients\_number](#input\_clients\_number) | The number of virtual machines to deploy. | `number` | `2` | no |
 | <a name="input_clients_use_dpdk"></a> [clients\_use\_dpdk](#input\_clients\_use\_dpdk) | Install weka cluster with DPDK | `bool` | `true` | no |
@@ -72,7 +72,7 @@ No modules.
 | <a name="input_tags_map"></a> [tags\_map](#input\_tags\_map) | A map of tags to assign the same metadata to all resources in the environment. Format: key:value. Note: Manually tagged resources will be overridden by Terraform apply. | `map(string)` | `{}` | no |
 | <a name="input_use_autoscaling_group"></a> [use\_autoscaling\_group](#input\_use\_autoscaling\_group) | Use autoscaling group | `bool` | `false` | no |
 | <a name="input_use_placement_group"></a> [use\_placement\_group](#input\_use\_placement\_group) | Use cluster placement group for clients. Note: If not using a cluster placement group, the instances will most likely be spread out across the underlying AWS infrastructure, resulting in not getting the maximum performance from the WEKA cluster | `bool` | `true` | no |
-| <a name="input_weka_cgroups_mode"></a> [weka\_cgroups\_mode](#input\_weka\_cgroups\_mode) | Weka cgroups mode, valid values are 'auto' and 'force\_v2' | `string` | `"auto"` | no |
+| <a name="input_weka_cgroups_mode"></a> [weka\_cgroups\_mode](#input\_weka\_cgroups\_mode) | Weka cgroups mode, valid values are 'auto' and 'force\_v2' | `string` | `"force_v2"` | no |
 | <a name="input_weka_cluster_size"></a> [weka\_cluster\_size](#input\_weka\_cluster\_size) | [Deprecated] Number of backends in the weka cluster | `number` | `0` | no |
 
 ## Outputs
