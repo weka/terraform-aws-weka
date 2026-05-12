@@ -26,28 +26,13 @@ echo "$(date -u): weka SMB cluster does not exist, creating it"
 # get all protocol gateways fromtend container ids separated by comma
 all_container_ids_str=$(echo "$all_container_ids" | tr '\n' ',' | sed 's/,$//')
 
-# if smbw_enabled is true, enable SMBW by adding --smbw flag
-smbw_cmd_extention=""
-if [[ ${smbw_enabled} == true ]]; then
-    smbw_cmd_extention="--smbw --config-fs-name .config_fs"
-fi
-
-# new smbw config, where smbw is the default
-smb_cmd_extention=""
-if [[ ${smbw_enabled} == false ]]; then
-    smb_cmd_extention="--smb"
-fi
-
 function retry_create_smb_cluster {
   retry_max=60
   retry_sleep=30
   count=$retry_max
 
   while [ $count -gt 0 ]; do
-      # old smb config, where smb is the default
-      weka smb cluster create ${cluster_name} ${domain_name} $smbw_cmd_extention --container-ids $all_container_ids_str && break
-      # new smb config, where smbw is the default
-      weka smb cluster create ${cluster_name} ${domain_name} .config_fs --container-ids $all_container_ids_str $smb_cmd_extention && break
+      weka smb cluster create ${cluster_name} ${domain_name} .config_fs --container-ids $all_container_ids_str && break
       count=$(($count - 1))
       echo "Retrying create SMB cluster in $retry_sleep seconds..."
       sleep $retry_sleep
