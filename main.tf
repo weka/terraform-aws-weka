@@ -37,9 +37,6 @@ locals {
 
   # Dynamic AMI selection based on instance family
   ami_name_pattern = local.is_i8ge_family ? "al2023-ami-2023*-kernel-6.1-arm64" : "al2023-ami-2023*-kernel-6.1-x86_64"
-
-  # Dynamic cgroups mode - use instance-family-specific defaults if not explicitly provided
-  backend_cgroups_mode = var.weka_cgroups_mode != null ? var.weka_cgroups_mode : "force_v2"
 }
 
 data "aws_caller_identity" "current" {}
