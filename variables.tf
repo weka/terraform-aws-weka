@@ -1077,9 +1077,9 @@ variable "data_services_weka_cgroups_mode" {
 variable "weka_cgroups_mode" {
   type        = string
   description = "Weka cgroups mode for backend instances. Valid values are 'auto' and 'force_v2'. Defaults to 'force_v2'."
-  default     = null
+  default     = "force_v2"
   validation {
-    condition     = var.weka_cgroups_mode == null || var.weka_cgroups_mode == "auto" || var.weka_cgroups_mode == "force_v2"
-    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\", null]."
+    condition     = var.weka_cgroups_mode == "auto" || var.weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
   }
 }
