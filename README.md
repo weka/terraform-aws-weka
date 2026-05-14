@@ -1064,7 +1064,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_vpc_endpoint_lambda_create"></a> [vpc\_endpoint\_lambda\_create](#input\_vpc\_endpoint\_lambda\_create) | Create Ec2 VPC endpoint | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_proxy_create"></a> [vpc\_endpoint\_proxy\_create](#input\_vpc\_endpoint\_proxy\_create) | creates VPC endpoint to weka-provided VPC Endpoint services that enable managed proxy to reach home.weka.io, get.weka.io, and AWS EC2/cloudwatch services”. Alternatively appropriate customer-managed proxy can be provided by proxy\_url variable | `bool` | `false` | no |
 | <a name="input_vpc_endpoint_s3_gateway_create"></a> [vpc\_endpoint\_s3\_gateway\_create](#input\_vpc\_endpoint\_s3\_gateway\_create) | Create S3 gateway VPC endpoint | `bool` | `false` | no |
-| <a name="input_weka_cgroups_mode"></a> [weka\_cgroups\_mode](#input\_weka\_cgroups\_mode) | Weka cgroups mode for backend instances. Valid values are 'auto' and 'force\_v2'. Defaults to 'force\_v2'. | `string` | `null` | no |
+| <a name="input_weka_cgroups_mode"></a> [weka\_cgroups\_mode](#input\_weka\_cgroups\_mode) | Weka cgroups mode for backend instances. Valid values are 'auto' and 'force\_v2'. Defaults to 'force\_v2'. | `string` | `"force_v2"` | no |
 | <a name="input_weka_home_url"></a> [weka\_home\_url](#input\_weka\_home\_url) | Weka Home url | `string` | `""` | no |
 | <a name="input_weka_version"></a> [weka\_version](#input\_weka\_version) | The Weka version to deploy. | `string` | `""` | no |
 
