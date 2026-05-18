@@ -398,7 +398,7 @@ variable "dynamodb_hash_key_name" {
 variable "lambdas_version" {
   type        = string
   description = "Lambdas code version (hash)"
-  default     = "6a678cf0bbc3b330f9d1f50ef5237bab"
+  default     = "1e7c889bb7da05ec52459e179a11b514"
 }
 
 variable "lambdas_dist" {
@@ -752,6 +752,16 @@ variable "nfs_protocol_gateway_subnet_id" {
   default     = null
 }
 
+variable "nfs_protocol_gateway_weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode for NFS protocol gateway instances. Valid values are 'auto' and 'force_v2'."
+  default     = "force_v2"
+  validation {
+    condition     = var.nfs_protocol_gateway_weka_cgroups_mode == "auto" || var.nfs_protocol_gateway_weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
+}
+
 ############################################### SMB protocol gateways variables ###################################################
 variable "smb_protocol_gateway_instance_iam_profile_arn" {
   type        = string
@@ -842,6 +852,16 @@ variable "smb_protocol_gateway_subnet_id" {
   default     = null
 }
 
+variable "smb_protocol_gateway_weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode for SMB protocol gateway instances. Valid values are 'auto' and 'force_v2'."
+  default     = "force_v2"
+  validation {
+    condition     = var.smb_protocol_gateway_weka_cgroups_mode == "auto" || var.smb_protocol_gateway_weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
+}
+
 ############################################### S3 protocol gateways variables ###################################################
 variable "s3_protocol_gateway_fe_cores_num" {
   type        = number
@@ -907,6 +927,16 @@ variable "s3_protocol_gateway_subnet_id" {
   type        = string
   description = "S3 protocol gateway subnet id."
   default     = null
+}
+
+variable "s3_protocol_gateway_weka_cgroups_mode" {
+  type        = string
+  description = "Weka cgroups mode for S3 protocol gateway instances. Valid values are 'auto' and 'force_v2'."
+  default     = "force_v2"
+  validation {
+    condition     = var.s3_protocol_gateway_weka_cgroups_mode == "auto" || var.s3_protocol_gateway_weka_cgroups_mode == "force_v2"
+    error_message = "Allowed weka_cgroups_mode values: [\"auto\", \"force_v2\"]."
+  }
 }
 
 ############################### vpc endpoint services ############################

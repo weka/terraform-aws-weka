@@ -15,31 +15,34 @@ import (
 )
 
 type AWSDeploymentParams struct {
-	Ctx                          context.Context
-	TokenId                      string
-	ClusterName                  string
-	StateTable                   string
-	StateTableHashKey            string
-	StateKey                     string
-	NfsStateKey                  string
-	InstanceName                 string
-	NicsNumStr                   string
-	ComputeMemory                string
-	ProxyUrl                     string
-	InstallUrl                   string
-	InstallDpdk                  bool
-	ComputeContainerNum          int
-	FrontendContainerNum         int
-	DriveContainerNum            int
-	NFSInterfaceGroupName        string
-	NFSSecondaryIpsNum           int
-	NFSProtocolGatewayFeCoresNum int
-	SMBProtocolGatewayFeCoresNum int
-	S3ProtocolGatewayFeCoresNum  int
-	AlbArnSuffix                 string
-	NvmesNum                     int
-	CgroupsMode                  string
-	DataServicesCgroupsMode      string
+	Ctx                           context.Context
+	TokenId                       string
+	ClusterName                   string
+	StateTable                    string
+	StateTableHashKey             string
+	StateKey                      string
+	NfsStateKey                   string
+	InstanceName                  string
+	NicsNumStr                    string
+	ComputeMemory                 string
+	ProxyUrl                      string
+	InstallUrl                    string
+	InstallDpdk                   bool
+	ComputeContainerNum           int
+	FrontendContainerNum          int
+	DriveContainerNum             int
+	NFSInterfaceGroupName         string
+	NFSSecondaryIpsNum            int
+	NFSProtocolGatewayFeCoresNum  int
+	SMBProtocolGatewayFeCoresNum  int
+	S3ProtocolGatewayFeCoresNum   int
+	AlbArnSuffix                  string
+	NvmesNum                      int
+	CgroupsMode                   string
+	DataServicesCgroupsMode       string
+	NFSProtocolGatewayCgroupsMode string
+	SMBProtocolGatewayCgroupsMode string
+	S3ProtocolGatewayCgroupsMode  string
 }
 
 func getAWSInstanceNameCmd() string {
@@ -85,6 +88,7 @@ func GetNfsDeployScript(awsDeploymentParams AWSDeploymentParams) (bashScript str
 		NFSSecondaryIpsNum:        awsDeploymentParams.NFSSecondaryIpsNum,
 		ProtocolGatewayFeCoresNum: awsDeploymentParams.NFSProtocolGatewayFeCoresNum,
 		LoadBalancerIP:            albIp,
+		CgroupsMode:               awsDeploymentParams.NFSProtocolGatewayCgroupsMode,
 	}
 
 	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
@@ -129,10 +133,13 @@ func GetSmbAndS3DeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw
 		return
 	}
 	var protocolGatewayFeCoresNum int
+	var cgroupsMode string
 	if protocolGw == protocol.SMB || protocolGw == protocol.SMBW {
 		protocolGatewayFeCoresNum = awsDeploymentParams.SMBProtocolGatewayFeCoresNum
+		cgroupsMode = awsDeploymentParams.SMBProtocolGatewayCgroupsMode
 	} else if protocolGw == protocol.S3 {
 		protocolGatewayFeCoresNum = awsDeploymentParams.S3ProtocolGatewayFeCoresNum
+		cgroupsMode = awsDeploymentParams.S3ProtocolGatewayCgroupsMode
 	}
 
 	deploymentParams := deploy.DeploymentParams{
@@ -145,6 +152,7 @@ func GetSmbAndS3DeployScript(awsDeploymentParams AWSDeploymentParams, protocolGw
 		Protocol:                  protocolGw,
 		ProtocolGatewayFeCoresNum: protocolGatewayFeCoresNum,
 		LoadBalancerIP:            albIp,
+		CgroupsMode:               cgroupsMode,
 	}
 
 	ebsVolumeId, err := common.GetBackendWekaVolumeId(awsDeploymentParams.InstanceName)
