@@ -74,6 +74,9 @@ resource "aws_lambda_function" "deploy_lambda" {
       ALB_ARN_SUFFIX                    = var.create_alb ? aws_lb.alb[0].arn_suffix : ""
       CGROUPS_MODE                      = var.weka_cgroups_mode
       DATA_SERVICES_CGROUPS_MODE        = var.data_services_weka_cgroups_mode
+      NFS_PROTOCOL_GATEWAY_CGROUPS_MODE = var.nfs_protocol_gateway_weka_cgroups_mode
+      SMB_PROTOCOL_GATEWAY_CGROUPS_MODE = var.smb_protocol_gateway_weka_cgroups_mode
+      S3_PROTOCOL_GATEWAY_CGROUPS_MODE  = var.s3_protocol_gateway_weka_cgroups_mode
     }
   }
   logging_config {

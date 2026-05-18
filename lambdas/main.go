@@ -217,6 +217,9 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 	cgroupsMode := os.Getenv("CGROUPS_MODE")
 	dataServicesCgroupsMode := os.Getenv("DATA_SERVICES_CGROUPS_MODE")
+	nfsProtocolGatewayCgroupsMode := os.Getenv("NFS_PROTOCOL_GATEWAY_CGROUPS_MODE")
+	smbProtocolGatewayCgroupsMode := os.Getenv("SMB_PROTOCOL_GATEWAY_CGROUPS_MODE")
+	s3ProtocolGatewayCgroupsMode := os.Getenv("S3_PROTOCOL_GATEWAY_CGROUPS_MODE")
 
 	msg := fmt.Sprintf("generating deploy script for vm: %s", vm.Name)
 	if vm.Protocol != "" {
@@ -225,31 +228,34 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	log.Info().Msg(msg)
 
 	awsDeploymentParams := deploy.AWSDeploymentParams{
-		Ctx:                          ctx,
-		TokenId:                      tokenId,
-		ClusterName:                  clusterName,
-		StateTable:                   stateTable,
-		StateTableHashKey:            stateTableHashKey,
-		StateKey:                     stateKey,
-		NfsStateKey:                  nfsStateKey,
-		InstanceName:                 vm.Name,
-		NicsNumStr:                   nicsNumStr,
-		ComputeMemory:                computeMemory,
-		ProxyUrl:                     proxyUrl,
-		InstallUrl:                   installUrl,
-		InstallDpdk:                  installDpdk,
-		ComputeContainerNum:          computeContainerNum,
-		FrontendContainerNum:         frontendContainerNum,
-		DriveContainerNum:            driveContainerNum,
-		NFSInterfaceGroupName:        nfsInterfaceGroupName,
-		NFSSecondaryIpsNum:           nfsSecondaryIpsNum,
-		NFSProtocolGatewayFeCoresNum: nfsProtocolGatewayFeCoresNum,
-		SMBProtocolGatewayFeCoresNum: smbProtocolGatewayFeCoresNum,
-		S3ProtocolGatewayFeCoresNum:  s3ProtocolGatewayFeCoresNum,
-		AlbArnSuffix:                 albArnSuffix,
-		NvmesNum:                     nvmesNum,
-		CgroupsMode:                  cgroupsMode,
-		DataServicesCgroupsMode:      dataServicesCgroupsMode,
+		Ctx:                           ctx,
+		TokenId:                       tokenId,
+		ClusterName:                   clusterName,
+		StateTable:                    stateTable,
+		StateTableHashKey:             stateTableHashKey,
+		StateKey:                      stateKey,
+		NfsStateKey:                   nfsStateKey,
+		InstanceName:                  vm.Name,
+		NicsNumStr:                    nicsNumStr,
+		ComputeMemory:                 computeMemory,
+		ProxyUrl:                      proxyUrl,
+		InstallUrl:                    installUrl,
+		InstallDpdk:                   installDpdk,
+		ComputeContainerNum:           computeContainerNum,
+		FrontendContainerNum:          frontendContainerNum,
+		DriveContainerNum:             driveContainerNum,
+		NFSInterfaceGroupName:         nfsInterfaceGroupName,
+		NFSSecondaryIpsNum:            nfsSecondaryIpsNum,
+		NFSProtocolGatewayFeCoresNum:  nfsProtocolGatewayFeCoresNum,
+		SMBProtocolGatewayFeCoresNum:  smbProtocolGatewayFeCoresNum,
+		S3ProtocolGatewayFeCoresNum:   s3ProtocolGatewayFeCoresNum,
+		AlbArnSuffix:                  albArnSuffix,
+		NvmesNum:                      nvmesNum,
+		CgroupsMode:                   cgroupsMode,
+		DataServicesCgroupsMode:       dataServicesCgroupsMode,
+		NFSProtocolGatewayCgroupsMode: nfsProtocolGatewayCgroupsMode,
+		SMBProtocolGatewayCgroupsMode: smbProtocolGatewayCgroupsMode,
+		S3ProtocolGatewayCgroupsMode:  s3ProtocolGatewayCgroupsMode,
 	}
 
 	if vm.Protocol == protocol.NFS {
