@@ -990,7 +990,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambdas_custom_s3_bucket"></a> [lambdas\_custom\_s3\_bucket](#input\_lambdas\_custom\_s3\_bucket) | S3 bucket name for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_custom_s3_key"></a> [lambdas\_custom\_s3\_key](#input\_lambdas\_custom\_s3\_key) | S3 key for lambdas | `string` | `null` | no |
 | <a name="input_lambdas_dist"></a> [lambdas\_dist](#input\_lambdas\_dist) | Lambdas code dist | `string` | `"dev"` | no |
-| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"6a678cf0bbc3b330f9d1f50ef5237bab"` | no |
+| <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"1e7c889bb7da05ec52459e179a11b514"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
 | <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
@@ -1002,6 +1002,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_nfs_protocol_gateway_root_volume_size"></a> [nfs\_protocol\_gateway\_root\_volume\_size](#input\_nfs\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_nfs_protocol_gateway_secondary_ips_per_nic"></a> [nfs\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_nfs\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `3` | no |
 | <a name="input_nfs_protocol_gateway_subnet_id"></a> [nfs\_protocol\_gateway\_subnet\_id](#input\_nfs\_protocol\_gateway\_subnet\_id) | NFS protocol gateway subnet id. | `string` | `null` | no |
+| <a name="input_nfs_protocol_gateway_weka_cgroups_mode"></a> [nfs\_protocol\_gateway\_weka\_cgroups\_mode](#input\_nfs\_protocol\_gateway\_weka\_cgroups\_mode) | Weka cgroups mode for NFS protocol gateway instances. Valid values are 'auto' and 'force\_v2'. | `string` | `"force_v2"` | no |
 | <a name="input_nfs_protocol_gateway_weka_volume_size"></a> [nfs\_protocol\_gateway\_weka\_volume\_size](#input\_nfs\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_nfs_protocol_gateways_number"></a> [nfs\_protocol\_gateways\_number](#input\_nfs\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_nfs_setup_protocol"></a> [nfs\_setup\_protocol](#input\_nfs\_setup\_protocol) | Configure NFS protocol | `bool` | `true` | no |
@@ -1017,6 +1018,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_s3_protocol_gateway_instance_type"></a> [s3\_protocol\_gateway\_instance\_type](#input\_s3\_protocol\_gateway\_instance\_type) | The protocol gateways' virtual machine type (sku) to deploy. | `string` | `"c5n.2xlarge"` | no |
 | <a name="input_s3_protocol_gateway_root_volume_size"></a> [s3\_protocol\_gateway\_root\_volume\_size](#input\_s3\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_s3_protocol_gateway_subnet_id"></a> [s3\_protocol\_gateway\_subnet\_id](#input\_s3\_protocol\_gateway\_subnet\_id) | S3 protocol gateway subnet id. | `string` | `null` | no |
+| <a name="input_s3_protocol_gateway_weka_cgroups_mode"></a> [s3\_protocol\_gateway\_weka\_cgroups\_mode](#input\_s3\_protocol\_gateway\_weka\_cgroups\_mode) | Weka cgroups mode for S3 protocol gateway instances. Valid values are 'auto' and 'force\_v2'. | `string` | `"force_v2"` | no |
 | <a name="input_s3_protocol_gateway_weka_volume_size"></a> [s3\_protocol\_gateway\_weka\_volume\_size](#input\_s3\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_s3_protocol_gateways_number"></a> [s3\_protocol\_gateways\_number](#input\_s3\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_s3_setup_protocol"></a> [s3\_setup\_protocol](#input\_s3\_setup\_protocol) | Configure S3 protocol | `bool` | `true` | no |
@@ -1040,6 +1042,7 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_smb_protocol_gateway_root_volume_size"></a> [smb\_protocol\_gateway\_root\_volume\_size](#input\_smb\_protocol\_gateway\_root\_volume\_size) | The protocol gateways' root volume size. | `number` | `null` | no |
 | <a name="input_smb_protocol_gateway_secondary_ips_per_nic"></a> [smb\_protocol\_gateway\_secondary\_ips\_per\_nic](#input\_smb\_protocol\_gateway\_secondary\_ips\_per\_nic) | Number of secondary IPs per single NIC per protocol gateway virtual machine. | `number` | `0` | no |
 | <a name="input_smb_protocol_gateway_subnet_id"></a> [smb\_protocol\_gateway\_subnet\_id](#input\_smb\_protocol\_gateway\_subnet\_id) | SMB protocol gateway subnet id. | `string` | `null` | no |
+| <a name="input_smb_protocol_gateway_weka_cgroups_mode"></a> [smb\_protocol\_gateway\_weka\_cgroups\_mode](#input\_smb\_protocol\_gateway\_weka\_cgroups\_mode) | Weka cgroups mode for SMB protocol gateway instances. Valid values are 'auto' and 'force\_v2'. | `string` | `"force_v2"` | no |
 | <a name="input_smb_protocol_gateway_weka_volume_size"></a> [smb\_protocol\_gateway\_weka\_volume\_size](#input\_smb\_protocol\_gateway\_weka\_volume\_size) | The protocol gateways' default disk size. | `number` | `48` | no |
 | <a name="input_smb_protocol_gateways_number"></a> [smb\_protocol\_gateways\_number](#input\_smb\_protocol\_gateways\_number) | The number of protocol gateway virtual machines to deploy. | `number` | `0` | no |
 | <a name="input_smb_setup_protocol"></a> [smb\_setup\_protocol](#input\_smb\_setup\_protocol) | Configure SMB protocol | `bool` | `true` | no |
