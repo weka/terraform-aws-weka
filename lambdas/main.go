@@ -129,7 +129,7 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	hotspare, _ := strconv.Atoi(os.Getenv("HOTSPARE"))
 	setObs, _ := strconv.ParseBool(os.Getenv("SET_OBS"))
 	obsName := os.Getenv("OBS_NAME")
-	tieringSsdPercent := os.Getenv("OBS_TIERING_SSD_PERCENT")
+	tieringSsdPercent, _ := strconv.Atoi(os.Getenv("OBS_TIERING_SSD_PERCENT"))
 	tieringTargetSsdRetention, _ := strconv.Atoi(os.Getenv("TIERING_TARGET_SSD_RETENTION"))
 	tieringStartDemote, _ := strconv.Atoi(os.Getenv("TIERING_START_DEMOTE"))
 	addFrontendNum, _ := strconv.Atoi(os.Getenv("FRONTEND_CONTAINER_CORES_NUM"))
@@ -176,13 +176,11 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 			WekaHomeUrl:               wekaHomeUrl,
 			TieringTargetSSDRetention: tieringTargetSsdRetention,
 			TieringStartDemote:        tieringStartDemote,
+			TieringSSDPercent:         tieringSsdPercent,
 			SetDefaultFs:              setDefaultFs,
 			PostClusterSetupScript:    postClusterSetupScript,
 		},
-		Obs: protocol.ObsParams{
-			Name:              obsName,
-			TieringSsdPercent: tieringSsdPercent,
-		},
+		ObsName: obsName,
 		NFSParams: protocol.NFSParams{
 			InterfaceGroupName: interfaceGroupName,
 			HostsNum:           nfsProtocolgwsNum,
