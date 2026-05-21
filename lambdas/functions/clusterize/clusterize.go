@@ -30,7 +30,7 @@ type ClusterizationParams struct {
 	Vm                   protocol.Vm
 	Cluster              clusterize.ClusterParams
 	NFSParams            protocol.NFSParams
-	Obs                  protocol.ObsParams
+	ObsName              string
 	AlbArnSuffix         string
 }
 
@@ -63,27 +63,27 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	}
 
 	if p.Cluster.SetObs {
-		if p.Obs.Name == "" {
-			p.Obs.Name = strings.ToLower(strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-"))
+		if p.ObsName == "" {
+			p.ObsName = strings.ToLower(strings.Join([]string{p.Cluster.Prefix, p.Cluster.ClusterName, "obs"}, "-"))
 			bucketTags := map[string]string{
 				"aws-apn-id":        os.Getenv("AWS_APN_ID"),
 				"weka_cluster_name": p.Cluster.ClusterName,
 			}
-			err = common.CreateBucket(p.Obs.Name, bucketTags)
+			err = common.CreateBucket(p.ObsName, bucketTags)
 			if err != nil {
 				log.Error().Err(err).Send()
 				err = report.Report(
 					protocol.Report{
 						Type:     "error",
 						Hostname: p.Vm.Name,
-						Message:  fmt.Sprintf("Failed creating obs bucket %s: %s", p.Obs.Name, err),
+						Message:  fmt.Sprintf("Failed creating obs bucket %s: %s", p.ObsName, err),
 					}, p.StateTable, p.StateTableHashKey, p.StateKey)
 				if err != nil {
 					log.Error().Err(err).Send()
 				}
 			}
 		} else {
-			log.Info().Msgf("Using existing obs bucket %s", p.Obs.Name)
+			log.Info().Msgf("Using existing obs bucket %s", p.ObsName)
 		}
 	}
 
@@ -115,7 +115,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	clusterParams.IPs = ips
 	clusterParams.InstallDpdk = p.InstallDpdk
 	clusterParams.FindDrivesScript = common.FindDrivesScript
-	clusterParams.ObsScript = GetObsScript(p.Obs)
+	clusterParams.ObsScript = GetObsScript(p.ObsName)
 
 	scriptGenerator := clusterize.ClusterizeScriptGenerator{
 		Params:  clusterParams,
@@ -181,9 +181,8 @@ func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) 
 	return
 }
 
-func GetObsScript(obsParams protocol.ObsParams) string {
+func GetObsScript(obsName string) string {
 	template := `
-	OBS_TIERING_SSD_PERCENT=%s
 	OBS_NAME="%s"
 	REGION=%s
 
@@ -191,6 +190,6 @@ func GetObsScript(obsParams protocol.ObsParams) string {
 	weka fs tier s3 attach default aws-bucket || return 1
 	`
 	return fmt.Sprintf(
-		dedent.Dedent(template), obsParams.TieringSsdPercent, obsParams.Name, os.Getenv("REGION"),
+		dedent.Dedent(template), obsName, os.Getenv("REGION"),
 	)
 }
