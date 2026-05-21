@@ -106,8 +106,8 @@ if [[ ${clients_use_dpdk} == true ]]; then
     mount_command="mount -t wekafs -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$first_interface_ip $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
-retry 60 45 $mount_command
-echo "$(date -u): wekafs mount complete"
+#retry 60 45 $mount_command
+#echo "$(date -u): wekafs mount complete"
 
 
 rm -rf $INSTALLATION_PATH
