@@ -106,8 +106,13 @@ if [[ ${clients_use_dpdk} == true ]]; then
     mount_command="mount -t wekafs -o num_cores=$FRONTEND_CONTAINER_CORES_NUM -o mgmt_ip=$first_interface_ip $backend_ip/$FILESYSTEM_NAME $MOUNT_POINT"
 fi
 
-#retry 60 45 $mount_command
-#echo "$(date -u): wekafs mount complete"
+echo "$mount_command"
+grubby --update-kernel=ALL --remove-args="amd_iommu=on iommu=pt"
+grubby --update-kernel=ALL --args="amd_iommu=off"
+reboot
+
+retry 60 45 $mount_command
+echo "$(date -u): wekafs mount complete"
 
 
 rm -rf $INSTALLATION_PATH
