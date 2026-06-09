@@ -11,6 +11,8 @@ weka-deployment
 
 .DS_Store
 
+.claude/settings.local.json
+
 .tf-function-app/
 lambdas/lambdas
 lambdas/lambdas.zip
