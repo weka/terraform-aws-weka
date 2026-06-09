@@ -80,7 +80,7 @@ variable "instance_type" {
 
 variable "ami_id" {
   type        = string
-  description = "AMI ID to use for backend instances. If not specified, automatically selects: Amazon Linux 2023 x86_64 for i3en instances, Amazon Linux 2023 ARM for i8ge instances."
+  description = "AMI ID to use for backend instances. If not specified, automatically selects: Amazon Linux 2023 x86_64 for i3en/i7ie instances, Amazon Linux 2023 ARM for i8ge instances."
   default     = null
 }
 
@@ -140,7 +140,63 @@ variable "containers_config_map" {
       nvme     = 8
       nics     = 15
       memory   = ["384GB", "384GB"]
-    }
+    },
+    "i7ie.2xlarge" = {
+      compute  = 1
+      drive    = 1
+      frontend = 1
+      nvme     = 2
+      nics     = 4
+      memory   = ["32.9GB", "32.64GB"]
+    },
+    "i7ie.3xlarge" = {
+      compute  = 1
+      drive    = 1
+      frontend = 1
+      nvme     = 1
+      nics     = 4
+      memory   = ["62GB", "61.7GB"]
+    },
+    "i7ie.6xlarge" = {
+      compute  = 4
+      drive    = 2
+      frontend = 1
+      nvme     = 2
+      nics     = 8
+      memory   = ["136.5GB", "136.2GB"]
+    },
+    "i7ie.12xlarge" = {
+      compute  = 4
+      drive    = 2
+      frontend = 1
+      nvme     = 4
+      nics     = 8
+      memory   = ["310.7GB", "310.4GB"]
+    },
+    "i7ie.18xlarge" = {
+      compute  = 4
+      drive    = 2
+      frontend = 1
+      nvme     = 4
+      nics     = 8
+      memory   = ["310.7GB", "310.4GB"]
+    },
+    "i7ie.24xlarge" = {
+      compute  = 9
+      drive    = 4
+      frontend = 1
+      nvme     = 8
+      nics     = 15
+      memory   = ["384GB", "384GB"]
+    },
+    "i7ie.48xlarge" = {
+      compute  = 14,
+      drive    = 8,
+      frontend = 1,
+      nvme     = 16,
+      nics     = 24,
+      memory   = ["384GB", "384GB"]
+    },
     "i8ge.2xlarge" = {
       compute  = 1,
       drive    = 1,

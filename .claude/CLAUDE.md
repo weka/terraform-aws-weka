@@ -73,7 +73,7 @@ terraform-aws-weka/
 
 ## Key Technical Details
 
-- **Instance types**: i3en and i8ge families (NVMe-optimized)
+- **Instance types**: i3en, i7ie, and i8ge families (NVMe-optimized)
 - **Min cluster size**: 6 nodes
 - **Default instance**: i3en.2xlarge
 - **Orchestration**: Lambda + Step Functions + CloudWatch (1-min interval)
