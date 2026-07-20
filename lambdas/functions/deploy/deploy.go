@@ -37,7 +37,6 @@ type AWSDeploymentParams struct {
 	SMBProtocolGatewayFeCoresNum  int
 	S3ProtocolGatewayFeCoresNum   int
 	AlbArnSuffix                  string
-	NvmesNum                      int
 	CgroupsMode                   string
 	DataServicesCgroupsMode       string
 	NFSProtocolGatewayCgroupsMode string
@@ -248,7 +247,6 @@ func GetDeployScript(params AWSDeploymentParams) (bashScript string, err error) 
 			NicsNum:          params.NicsNumStr,
 			InstallDpdk:      params.InstallDpdk,
 			ProxyUrl:         params.ProxyUrl,
-			NvmesNum:         params.NvmesNum,
 			FindDrivesScript: dedent.Dedent(common.FindDrivesScript),
 			CgroupsMode:      params.CgroupsMode,
 		}

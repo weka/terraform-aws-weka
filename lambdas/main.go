@@ -212,7 +212,6 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 	s3ProtocolGatewayFeCoresNum, _ := strconv.Atoi(os.Getenv("S3_PROTOCOL_GATEWAY_FE_CORES_NUM"))
 	albArnSuffix := os.Getenv("ALB_ARN_SUFFIX")
 	installDpdk, _ := strconv.ParseBool(os.Getenv("INSTALL_DPDK"))
-	nvmesNum, _ := strconv.Atoi(os.Getenv("NVMES_NUM"))
 	cgroupsMode := os.Getenv("CGROUPS_MODE")
 	dataServicesCgroupsMode := os.Getenv("DATA_SERVICES_CGROUPS_MODE")
 	nfsProtocolGatewayCgroupsMode := os.Getenv("NFS_PROTOCOL_GATEWAY_CGROUPS_MODE")
@@ -248,7 +247,6 @@ func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		SMBProtocolGatewayFeCoresNum:  smbProtocolGatewayFeCoresNum,
 		S3ProtocolGatewayFeCoresNum:   s3ProtocolGatewayFeCoresNum,
 		AlbArnSuffix:                  albArnSuffix,
-		NvmesNum:                      nvmesNum,
 		CgroupsMode:                   cgroupsMode,
 		DataServicesCgroupsMode:       dataServicesCgroupsMode,
 		NFSProtocolGatewayCgroupsMode: nfsProtocolGatewayCgroupsMode,
