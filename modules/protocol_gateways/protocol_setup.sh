@@ -10,11 +10,14 @@ gw_instance_ids=($(aws ec2 describe-instances \
 max_retries=60
 for (( retry=1; retry<=max_retries; retry++ )); do
     # UP frontend containers running on the gateway instances
+    # tolerate CLI schema differences across weka versions:
+    #   container name field: .container_name (older) or .name (newer)
+    #   container id field:    .host_id "HostId<N>" (older) or .id (newer)
     all_container_ids=$(weka cluster container -J | jq -r '
         .[]
-        | select(.name == "frontend0" and .status == "UP"
+        | select((.container_name // .name) == "frontend0" and .status == "UP"
                  and (.cloud.instance_id | IN($ARGS.positional[])))
-        | .id' --args "$${gw_instance_ids[@]}")
+        | (.id // (.host_id | ltrimstr("HostId<") | rtrimstr(">")))' --args "$${gw_instance_ids[@]}")
 
     all_container_ids_number=$(echo "$all_container_ids" | grep -c .)
     if (( all_container_ids_number < cluster_size )); then
