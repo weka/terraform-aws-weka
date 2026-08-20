@@ -121,40 +121,35 @@ resource "aws_iam_role" "iam_role" {
 }
 
 # Attach the IAM policy to the IAM role
-resource "aws_iam_policy_attachment" "backend_eni_role_attachment" {
-  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
+resource "aws_iam_role_policy_attachment" "backend_eni_role_attachment" {
   policy_arn = aws_iam_policy.backend_eni_iam_policy.arn
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
-resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
+resource "aws_iam_role_policy_attachment" "backend_obs_role_attachment" {
   count      = var.tiering_enable_obs_integration ? 1 : 0
-  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
-resource "aws_iam_policy_attachment" "additional" {
+resource "aws_iam_role_policy_attachment" "additional" {
   count      = var.additional_iam_policy_statement != null ? 1 : 0
-  name       = "${aws_iam_policy.additional[0].name}-attachment"
   policy_arn = aws_iam_policy.additional[0].arn
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
-resource "aws_iam_policy_attachment" "backend_log_role_attachment" {
-  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
+resource "aws_iam_role_policy_attachment" "backend_log_role_attachment" {
   policy_arn = aws_iam_policy.backend_log_iam_policy.arn
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
-resource "aws_iam_policy_attachment" "invoke_lambda_function_attachment" {
-  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
+resource "aws_iam_role_policy_attachment" "invoke_lambda_function_attachment" {
   policy_arn = aws_iam_policy.invoke_lambda_function.arn
-  roles      = [aws_iam_role.iam_role.name]
+  role       = aws_iam_role.iam_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.iam_role.name
 }
 
