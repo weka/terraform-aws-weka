@@ -125,41 +125,33 @@ resource "aws_iam_role" "this" {
 }
 
 # Attach the IAM policy to the IAM role
-resource "aws_iam_policy_attachment" "ec2" {
-  count = var.instance_iam_profile_arn == "" ? 1 : 0
-
-  name       = "${local.base_name}-ec2-policy-attachment"
+resource "aws_iam_role_policy_attachment" "ec2" {
+  count      = var.instance_iam_profile_arn == "" ? 1 : 0
   policy_arn = aws_iam_policy.ec2[0].arn
-  roles      = [aws_iam_role.this[0].name]
+  role       = aws_iam_role.this[0].name
 }
 
-resource "aws_iam_policy_attachment" "logging" {
-  count = var.instance_iam_profile_arn == "" ? 1 : 0
-
-  name       = "${local.base_name}-log-policy-attachment"
+resource "aws_iam_role_policy_attachment" "logging" {
+  count      = var.instance_iam_profile_arn == "" ? 1 : 0
   policy_arn = aws_iam_policy.logging[0].arn
-  roles      = [aws_iam_role.this[0].name]
+  role       = aws_iam_role.this[0].name
 }
 
-resource "aws_iam_policy_attachment" "autoscaling" {
-  count = var.instance_iam_profile_arn == "" ? 1 : 0
-
-  name       = "${local.base_name}-autoscaling-policy-attachment"
+resource "aws_iam_role_policy_attachment" "autoscaling" {
+  count      = var.instance_iam_profile_arn == "" ? 1 : 0
   policy_arn = aws_iam_policy.autoscaling[0].arn
-  roles      = [aws_iam_role.this[0].name]
+  role       = aws_iam_role.this[0].name
 }
 
-resource "aws_iam_policy_attachment" "lambda_invoke" {
-  count = var.instance_iam_profile_arn == "" ? 1 : 0
-
-  name       = "${local.base_name}-lambda-invoke-policy-attachment"
+resource "aws_iam_role_policy_attachment" "lambda_invoke" {
+  count      = var.instance_iam_profile_arn == "" ? 1 : 0
   policy_arn = aws_iam_policy.invoke_lambda_function[0].arn
-  roles      = [aws_iam_role.this[0].name]
+  role       = aws_iam_role.this[0].name
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
   count      = var.instance_iam_profile_arn == "" ? 1 : 0
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
   role       = aws_iam_role.this[0].name
 }
 
