@@ -85,6 +85,19 @@ terraform-aws-weka/
 - **CI**: GitHub Actions (lambda build, terraform-docs, tf-style-checks)
 - **Pre-commit**: terraform_fmt, terraform_tflint
 
+### IAM conventions
+
+- Instance roles attach the AWS managed policy `arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore`.
+  Do **not** reintroduce `AmazonEC2RoleforSSM`: it is deprecated and grants S3 read/write on `Resource: "*"`.
+- Most attachments use `aws_iam_policy_attachment`, which is *exclusive* (it detaches principals it does
+  not track). This is deliberate for now: the policies it attaches are module-created and uniquely named,
+  so the practical risk is low, and converting them forces a disruptive one-time upgrade on every existing
+  deployment. Prefer `aws_iam_role_policy_attachment` for any **new** attachment. See
+  `IAM-MIGRATION-FINDINGS.md` before proposing a bulk conversion.
+- Instance-side permissions come from scoped inline policies (`modules/*/iam.tf`, `modules/iam/ec2.tf`):
+  S3 tiering is limited to the cluster's own OBS bucket, and CloudWatch Logs to `/wekaio/<name>*`.
+  The CloudWatch agent ships logs only (no `metrics` block), so `cloudwatch:PutMetricData` is not needed.
+
 ## Key Variables
 
 | Variable | Default | Purpose |

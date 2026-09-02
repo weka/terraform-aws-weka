@@ -124,29 +124,47 @@ resource "aws_iam_role" "this" {
   })
 }
 
-# Attach the IAM policy to the IAM role
-resource "aws_iam_role_policy_attachment" "ec2" {
-  count      = var.instance_iam_profile_arn == "" ? 1 : 0
+# Attach the IAM policies to the IAM role.
+#
+# These use `aws_iam_policy_attachment`, which is EXCLUSIVE: it owns the complete set of
+# principals attached to a policy and detaches any it does not track. That is safe here
+# only because every policy attached below is created by this module and named per
+# deployment, so nothing else in the account attaches it.
+#
+# Do NOT use it for an AWS-managed policy (arn:aws:iam::aws:policy/...) or any
+# caller-supplied policy ARN - use `aws_iam_role_policy_attachment` instead. Attaching a
+# shared policy with the exclusive resource detaches it from every other role in the
+# account; that is what caused issue #162.
+resource "aws_iam_policy_attachment" "ec2" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name       = "${local.base_name}-ec2-policy-attachment"
   policy_arn = aws_iam_policy.ec2[0].arn
-  role       = aws_iam_role.this[0].name
+  roles      = [aws_iam_role.this[0].name]
 }
 
-resource "aws_iam_role_policy_attachment" "logging" {
-  count      = var.instance_iam_profile_arn == "" ? 1 : 0
+resource "aws_iam_policy_attachment" "logging" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name       = "${local.base_name}-log-policy-attachment"
   policy_arn = aws_iam_policy.logging[0].arn
-  role       = aws_iam_role.this[0].name
+  roles      = [aws_iam_role.this[0].name]
 }
 
-resource "aws_iam_role_policy_attachment" "autoscaling" {
-  count      = var.instance_iam_profile_arn == "" ? 1 : 0
+resource "aws_iam_policy_attachment" "autoscaling" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name       = "${local.base_name}-autoscaling-policy-attachment"
   policy_arn = aws_iam_policy.autoscaling[0].arn
-  role       = aws_iam_role.this[0].name
+  roles      = [aws_iam_role.this[0].name]
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_invoke" {
-  count      = var.instance_iam_profile_arn == "" ? 1 : 0
+resource "aws_iam_policy_attachment" "lambda_invoke" {
+  count = var.instance_iam_profile_arn == "" ? 1 : 0
+
+  name       = "${local.base_name}-lambda-invoke-policy-attachment"
   policy_arn = aws_iam_policy.invoke_lambda_function[0].arn
-  role       = aws_iam_role.this[0].name
+  roles      = [aws_iam_role.this[0].name]
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {
