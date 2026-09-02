@@ -120,32 +120,47 @@ resource "aws_iam_role" "iam_role" {
   tags = local.tags
 }
 
-# Attach the IAM policy to the IAM role
-resource "aws_iam_role_policy_attachment" "backend_eni_role_attachment" {
+# Attach the IAM policies to the IAM role.
+#
+# These use `aws_iam_policy_attachment`, which is EXCLUSIVE: it owns the complete set of
+# principals attached to a policy and detaches any it does not track. That is safe here
+# only because every policy attached below is created by this module and named per
+# deployment, so nothing else in the account attaches it.
+#
+# Do NOT use it for an AWS-managed policy (arn:aws:iam::aws:policy/...) or any
+# caller-supplied policy ARN - use `aws_iam_role_policy_attachment` instead. Attaching a
+# shared policy with the exclusive resource detaches it from every other role in the
+# account; that is what caused issue #162.
+resource "aws_iam_policy_attachment" "backend_eni_role_attachment" {
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_eni_iam_policy.arn
-  role       = aws_iam_role.iam_role.name
+  roles      = [aws_iam_role.iam_role.name]
 }
 
-resource "aws_iam_role_policy_attachment" "backend_obs_role_attachment" {
+resource "aws_iam_policy_attachment" "backend_obs_role_attachment" {
   count      = var.tiering_enable_obs_integration ? 1 : 0
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_obs_iam_policy[0].arn
-  role       = aws_iam_role.iam_role.name
+  roles      = [aws_iam_role.iam_role.name]
 }
 
-resource "aws_iam_role_policy_attachment" "additional" {
+resource "aws_iam_policy_attachment" "additional" {
   count      = var.additional_iam_policy_statement != null ? 1 : 0
+  name       = "${aws_iam_policy.additional[0].name}-attachment"
   policy_arn = aws_iam_policy.additional[0].arn
-  role       = aws_iam_role.iam_role.name
+  roles      = [aws_iam_role.iam_role.name]
 }
 
-resource "aws_iam_role_policy_attachment" "backend_log_role_attachment" {
+resource "aws_iam_policy_attachment" "backend_log_role_attachment" {
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.backend_log_iam_policy.arn
-  role       = aws_iam_role.iam_role.name
+  roles      = [aws_iam_role.iam_role.name]
 }
 
-resource "aws_iam_role_policy_attachment" "invoke_lambda_function_attachment" {
+resource "aws_iam_policy_attachment" "invoke_lambda_function_attachment" {
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.invoke_lambda_function.arn
-  role       = aws_iam_role.iam_role.name
+  roles      = [aws_iam_role.iam_role.name]
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm_attachment" {

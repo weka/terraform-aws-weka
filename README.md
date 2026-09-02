@@ -248,6 +248,8 @@ Instance roles previously received the deprecated `AmazonEC2RoleforSSM`, which a
 `s3:ListBucket` and related actions on `Resource: "*"` - account-wide S3 read **and** write. They now receive
 `AmazonSSMManagedInstanceCore`, which drops all S3 access.
 
+No special upgrade steps are needed: a plain `terraform apply` replaces the attachment in place.
+
 Core SSM functionality, CloudWatch log shipping, ENI operations and lambda invocation are unaffected: those permissions come from
 this module's own scoped inline policies, not from the managed policy. Normal S3 tiering is unaffected too - it has its own policy
 scoped to the cluster's own bucket.
@@ -262,68 +264,7 @@ scoped to the cluster's own bucket.
 - **Custom instance scripts.** Anything you inject via `custom_data` that calls S3 using the instance role needs its own scoped
   policy. `additional_instance_iam_policy_statement` is the supported way to add one.
 
-### IAM policy attachments (`aws_iam_policy_attachment` -> `aws_iam_role_policy_attachment`)
-
-This module previously used `aws_iam_policy_attachment`, which is *exclusive*: it manages the complete set of principals attached to a
-policy and silently detaches any role, user or group it does not track. All such attachments are now the non-exclusive
-`aws_iam_role_policy_attachment`.
-
-**A plain `terraform apply` of this upgrade can fail**, with one error per affected attachment:
-
-```
-Error: reading IAM Role Policy Attachment (<role>:<policy-arn>): empty result
-```
-
-The cause is that the resource type changed, so the old and new resources occupy different Terraform addresses with no dependency
-between them. The new resource creates by calling `AttachRolePolicy`; the outgoing one destroys by calling `DetachRolePolicy` on the
-*same* role and policy. IAM attachment is set membership, not a reference count, so whichever call lands last wins - at the default
-`-parallelism=10` the two overlap and the detach can remove what the attach just added. Which attachments are affected varies from run
-to run, so a run that happens to succeed is not evidence that a plain apply is safe.
-
-The apply stops with a visible error and leaves those policies detached. Re-running `terraform apply` re-attaches them, so the end
-state converges - but in between, the role is missing permissions, and the affected set includes `invoke-lambda-function`, without
-which instances cannot reach the deploy/clusterize/report lambdas. Do not leave a live cluster in that state.
-
-Use one of the two approaches below.
-
-#### Recommended - apply serially
-
-```shell
-terraform apply -parallelism=1
-```
-
-With a single worker each graph node finishes before the next starts, so the destroy and the create for a given attachment cannot
-overlap and there is no race to lose. This serialises the whole apply, which is slower on a large deployment.
-
-#### Alternative - migrate the state first
-
-If you would rather not rely on a serial apply, re-homing the state removes the destroy/create pair altogether, so there is nothing
-to race and the apply has nothing to do:
-
-```shell
-ADDR='module.<your_module_name>.module.iam[0]'
-NAME='backend_eni_role_attachment'
-terraform state rm "$ADDR.aws_iam_policy_attachment.$NAME"
-terraform import "$ADDR.aws_iam_role_policy_attachment.$NAME" '<role-name>/<policy-arn>'
-```
-
-Repeat for each attachment below, then run `terraform plan` and confirm it reports no changes for them. On Terraform >= 1.7 the same
-thing can be expressed declaratively with `removed` and `import` blocks. Note that `terraform import` evaluates the whole
-configuration, so it must be run against a fully applied deployment.
-
-| Module | Attachments |
-|--------|-------------|
-| `module.iam[0]` | `backend_eni_role_attachment`, `backend_obs_role_attachment`, `backend_log_role_attachment`, `invoke_lambda_function_attachment`, `additional`, `lambda_obs_policy_attachment` |
-| `module.clients[*]` | `ec2`, `logging`, `autoscaling` |
-| `module.data_services[*]` | `ec2`, `logging`, `autoscaling`, `lambda_invoke` |
-| `module.*_protocol_gateways[*]` | `ec2`, `logging`, `autoscaling`, `lambda_invoke` |
-
-Only attachments that actually exist in your state need migrating - several are conditional on flags such as
-`tiering_enable_obs_integration`, `additional_instance_iam_policy_statement` and `instance_iam_profile_arn`.
-
-Whichever route you take, prefer to run it while the cluster is steady-state - not mid-scale-up and not mid-clusterization - since the
-affected policies include the ENI-attach, autoscaling and lambda-invoke rights instances use during those operations. After the
-upgrade, confirm the expected policies are attached:
+After upgrading, confirm the expected policies are attached:
 
 ```shell
 aws iam list-attached-role-policies --role-name <prefix>-<cluster_name>-iam-role

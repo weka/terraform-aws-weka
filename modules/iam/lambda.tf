@@ -99,8 +99,11 @@ resource "aws_iam_policy" "lambda_obs_iam_policy" {
   tags = local.tags
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_obs_policy_attachment" {
+# Exclusive attachment - safe only because this policy is module-created (see the note
+# in ec2.tf). Use `aws_iam_role_policy_attachment` for AWS-managed or caller-supplied ARNs.
+resource "aws_iam_policy_attachment" "lambda_obs_policy_attachment" {
   count      = var.tiering_enable_obs_integration && var.tiering_obs_name == "" ? 1 : 0
+  name       = "${local.iam_prefix}-${var.cluster_name}-policy-attachment"
   policy_arn = aws_iam_policy.lambda_obs_iam_policy[0].arn
-  role       = aws_iam_role.lambda_iam_role.name
+  roles      = [aws_iam_role.lambda_iam_role.name]
 }
