@@ -50,6 +50,20 @@ func (d *AWSFuncDef) GetFunctionCmdDefinition(name functions_def.FunctionName) s
 		funcDef = fmt.Sprintf(funcDefTemplate, name, name)
 	} else {
 		// NOTE: here we have kind of a hack to clean the output from the lambda invoke command
+		//
+		// The invoke is retried on a flat interval because amazon-ec2-net-utils reconfigures
+		// the primary NIC whenever the ENI's IP set changes (e.g. when WEKA assigns
+		// interface-group floating IPs). That briefly drops the route to 169.254.169.254, and
+		// the AWS CLI then exits 253 with "Unable to locate credentials". The observed gap is
+		// ~1-2s, so a flat 3s retry clears it on the first attempt. Each IP add is its own
+		// reconfigure and the IPs are assigned incrementally, so several gaps can land back
+		// to back -- the ~1min ceiling is sized for a burst of them, not for a single gap.
+		//
+		// Only rc 253 (credentials/config could not be resolved -- exactly the IMDS route gap)
+		// and rc 255 (catch-all, covers a connection error to the lambda endpoint during the
+		// same gap) are retried. 252 (bad syntax) and 254 (service returned an error) are
+		// deterministic, so they surface immediately rather than burning the full ~1min
+		// re-issuing a call that cannot succeed.
 		funcDefTemplate := `
 		function %s {
 			local json_data=$1
@@ -58,7 +72,21 @@ func (d *AWSFuncDef) GetFunctionCmdDefinition(name functions_def.FunctionName) s
 			if [[ "$aws_version" == aws-cli/2* ]]; then
 				cli_binary_format="--cli-binary-format raw-in-base64-out"
 			fi
-			res=$(aws lambda invoke --region %s --function-name %s $cli_binary_format --payload "$json_data" output)
+			local attempt=1 max_attempts=20 retry_delay=3 rc=0
+			until aws lambda invoke --region %s --function-name %s $cli_binary_format --payload "$json_data" output >/dev/null; do
+				rc=$?
+				if [ "$rc" -ne 253 ] && [ "$rc" -ne 255 ]; then
+					echo "$FUNCNAME: lambda invoke failed with rc=$rc, not a transient credential/connection error - not retrying" >&2
+					return $rc
+				fi
+				if [ "$attempt" -ge "$max_attempts" ]; then
+					echo "$FUNCNAME: lambda invoke failed after $max_attempts attempts (rc=$rc)" >&2
+					return $rc
+				fi
+				echo "$FUNCNAME: lambda invoke failed (rc=$rc), retrying in $retry_delay seconds (attempt $attempt/$max_attempts)" >&2
+				sleep "$retry_delay"
+				attempt=$(( attempt + 1 ))
+			done
 			printf "%%b" "$(cat output | sed 's/^"//' | sed 's/"$//' | sed 's/\\\"/"/g')"
 		}
 		`
