@@ -98,6 +98,21 @@ terraform-aws-weka/
   S3 tiering is limited to the cluster's own OBS bucket, and CloudWatch Logs to `/wekaio/<name>*`.
   The CloudWatch agent ships logs only (no `metrics` block), so `cloudwatch:PutMetricData` is not needed.
 
+### Capacity reservations
+
+Every node type takes either `capacity_reservation_id` (one ODCR) or
+`capacity_reservation_resource_group_arn` (a pool of several), never both — a `lifecycle`
+precondition on each launch template enforces this. A launch template's
+`capacity_reservation_target` only accepts one ID *or* one resource group ARN, so a pool is
+the only way to target several reservations; the module never creates or mutates the pool.
+
+The pool path also sets `capacity_reservation_preference = "capacity-reservations-only"`.
+This is deliberate, not incidental: targeting a single ID already fails the launch when
+capacity runs out, but targeting a pool silently falls back to paid On-Demand unless the
+preference is pinned. The single-ID path must keep emitting **no** preference, so that an
+existing `capacity_reservation_id` deployment produces a byte-identical launch template and
+does not trigger instance replacement.
+
 ## Key Variables
 
 | Variable | Default | Purpose |
@@ -110,6 +125,7 @@ terraform-aws-weka/
 | `prefix` | "weka" | Resource name prefix |
 | `create_alb` | true | Create Application Load Balancer |
 | `tiering_enable_obs_integration` | false | Enable S3 object store tiering |
+| `capacity_reservation_resource_group_arn` | null | ODCR pool to launch backends into (see above) |
 
 ## Key Outputs
 
