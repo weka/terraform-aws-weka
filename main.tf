@@ -25,11 +25,16 @@ locals {
     eni_tags            = jsonencode([for k, v in local.tags : { Key = k, Value = v }])
   })
   backends_placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.placement_group[0].name : var.placement_group_name : null
-  create_ebs_kms_key            = var.ebs_encrypted && var.ebs_kms_key_id == null
-  ebs_kms_key_id                = local.create_ebs_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
-  iam_prefix                    = lookup(var.custom_prefix, "iam", var.prefix)
-  root_device_name              = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
-  alb_dns_name                  = var.create_alb ? (var.alb_dns_name != null ? var.alb_dns_name : (var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : aws_lb.alb[0].dns_name)) : null
+
+  capacity_reservation_id  = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? var.capacity_reservation_id : null
+  capacity_reservation_arn = var.capacity_reservation_resource_group_arn != null && var.capacity_reservation_resource_group_arn != "" ? var.capacity_reservation_resource_group_arn : null
+  use_capacity_reservation = local.capacity_reservation_id != null || local.capacity_reservation_arn != null
+
+  create_ebs_kms_key = var.ebs_encrypted && var.ebs_kms_key_id == null
+  ebs_kms_key_id     = local.create_ebs_kms_key ? aws_kms_key.kms_key[0].arn : var.ebs_kms_key_id
+  iam_prefix         = lookup(var.custom_prefix, "iam", var.prefix)
+  root_device_name   = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
+  alb_dns_name       = var.create_alb ? (var.alb_dns_name != null ? var.alb_dns_name : (var.alb_alias_name != "" ? aws_route53_record.lb_record[0].fqdn : aws_lb.alb[0].dns_name)) : null
 
   # Instance family detection for i8ge vs i3en
   instance_family = split(".", var.instance_type)[0] # Extracts "i3en" or "i8ge"
@@ -234,13 +239,17 @@ resource "aws_launch_template" "launch_template" {
     group_name        = local.backends_placement_group_name
   }
 
-  # Use dynamic block to prevent drift when capacity_reservation_id is null/empty
-  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual ID
+  # Use dynamic block to prevent drift when no capacity reservation is configured
+  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual target
   dynamic "capacity_reservation_specification" {
-    for_each = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? [1] : []
+    for_each = local.use_capacity_reservation ? [1] : []
     content {
+      # Targeting a single reservation already fails the launch when its capacity runs out,
+      # but targeting a pool falls back to On-Demand instead unless we pin the preference.
+      capacity_reservation_preference = local.capacity_reservation_arn != null ? "capacity-reservations-only" : null
       capacity_reservation_target {
-        capacity_reservation_id = var.capacity_reservation_id
+        capacity_reservation_id                 = local.capacity_reservation_id
+        capacity_reservation_resource_group_arn = local.capacity_reservation_arn
       }
     }
   }
@@ -257,6 +266,13 @@ resource "aws_launch_template" "launch_template" {
     }
   }
   user_data = base64encode(local.user_data)
+
+  lifecycle {
+    precondition {
+      condition     = local.capacity_reservation_id == null || local.capacity_reservation_arn == null
+      error_message = "Set either capacity_reservation_id or capacity_reservation_resource_group_arn for the backends, not both."
+    }
+  }
 
   depends_on = [aws_placement_group.placement_group, aws_kms_key.kms_key]
 }

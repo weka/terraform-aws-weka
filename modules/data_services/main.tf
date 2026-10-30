@@ -45,6 +45,10 @@ locals {
 
   placement_group_name = var.use_placement_group ? var.placement_group_name == null ? aws_placement_group.this[0].name : var.placement_group_name : null
   root_device_name     = var.ami_id != null ? data.aws_ami.provided_ami[0].root_device_name : data.aws_ami.amzn_ami[0].root_device_name
+
+  capacity_reservation_id  = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? var.capacity_reservation_id : null
+  capacity_reservation_arn = var.capacity_reservation_resource_group_arn != null && var.capacity_reservation_resource_group_arn != "" ? var.capacity_reservation_resource_group_arn : null
+  use_capacity_reservation = local.capacity_reservation_id != null || local.capacity_reservation_arn != null
 }
 
 resource "aws_placement_group" "this" {
@@ -117,13 +121,17 @@ resource "aws_launch_template" "this" {
     group_name        = local.placement_group_name
   }
 
-  # Use dynamic block to prevent drift when capacity_reservation_id is null/empty
-  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual ID
+  # Use dynamic block to prevent drift when no capacity reservation is configured
+  # AWS doesn't store empty capacity reservation blocks, so we only include this block when there's an actual target
   dynamic "capacity_reservation_specification" {
-    for_each = var.capacity_reservation_id != null && var.capacity_reservation_id != "" ? [1] : []
+    for_each = local.use_capacity_reservation ? [1] : []
     content {
+      # Targeting a single reservation already fails the launch when its capacity runs out,
+      # but targeting a pool falls back to On-Demand instead unless we pin the preference.
+      capacity_reservation_preference = local.capacity_reservation_arn != null ? "capacity-reservations-only" : null
       capacity_reservation_target {
-        capacity_reservation_id = var.capacity_reservation_id
+        capacity_reservation_id                 = local.capacity_reservation_id
+        capacity_reservation_resource_group_arn = local.capacity_reservation_arn
       }
     }
   }
@@ -140,6 +148,13 @@ resource "aws_launch_template" "this" {
     }
   }
   user_data = base64encode(local.init_script)
+
+  lifecycle {
+    precondition {
+      condition     = local.capacity_reservation_id == null || local.capacity_reservation_arn == null
+      error_message = "Set either capacity_reservation_id or capacity_reservation_resource_group_arn for ${var.data_services_name}, not both."
+    }
+  }
 
   depends_on = [aws_placement_group.this]
 }

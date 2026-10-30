@@ -661,7 +661,18 @@ variable "client_arch" {
 variable "client_capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the clients"
+  description = "The ID of the capacity reservation in which to run the clients. Mutually exclusive with client_capacity_reservation_resource_group_arn."
+}
+
+variable "client_capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the clients. Use this instead of client_capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with client_capacity_reservation_id."
+
+  validation {
+    condition     = var.client_capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.client_capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "clients_weka_cgroups_mode" {
@@ -737,7 +748,18 @@ variable "nfs_interface_group_name" {
 variable "nfs_capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the nfs clients"
+  description = "The ID of the capacity reservation in which to run the nfs clients. Mutually exclusive with nfs_capacity_reservation_resource_group_arn."
+}
+
+variable "nfs_capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the nfs clients. Use this instead of nfs_capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with nfs_capacity_reservation_id."
+
+  validation {
+    condition     = var.nfs_capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.nfs_capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "nfs_protocol_gateway_instance_ami_id" {
@@ -837,7 +859,18 @@ variable "smb_domain_name" {
 variable "smb_capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the smb clients"
+  description = "The ID of the capacity reservation in which to run the smb clients. Mutually exclusive with smb_capacity_reservation_resource_group_arn."
+}
+
+variable "smb_capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the smb clients. Use this instead of smb_capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with smb_capacity_reservation_id."
+
+  validation {
+    condition     = var.smb_capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.smb_capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "smb_protocol_gateway_instance_ami_id" {
@@ -908,7 +941,18 @@ variable "s3_setup_protocol" {
 variable "s3_capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the s3 clients"
+  description = "The ID of the capacity reservation in which to run the s3 clients. Mutually exclusive with s3_capacity_reservation_resource_group_arn."
+}
+
+variable "s3_capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the s3 clients. Use this instead of s3_capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with s3_capacity_reservation_id."
+
+  validation {
+    condition     = var.s3_capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.s3_capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "s3_protocol_gateway_instance_ami_id" {
@@ -1021,7 +1065,18 @@ variable "enable_lambda_vpc_config" {
 variable "capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the Capacity Reservation in which to run the backends"
+  description = "The ID of the Capacity Reservation in which to run the backends. Mutually exclusive with capacity_reservation_resource_group_arn."
+}
+
+variable "capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the backends. Use this instead of capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with capacity_reservation_id."
+
+  validation {
+    condition     = var.capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "lambdas_custom_s3_bucket" {
@@ -1085,7 +1140,18 @@ variable "data_services_instance_iam_profile_arn" {
 variable "data_services_capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the data services instances"
+  description = "The ID of the capacity reservation in which to run the data services instances. Mutually exclusive with data_services_capacity_reservation_resource_group_arn."
+}
+
+variable "data_services_capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the data services instances. Use this instead of data_services_capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with data_services_capacity_reservation_id."
+
+  validation {
+    condition     = var.data_services_capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.data_services_capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "data_services_root_volume_size" {

@@ -46,7 +46,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ami id | `string` | n/a | yes |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | n/a | yes |
-| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients | `string` | `null` | no |
+| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the protocol gateways. Mutually exclusive with capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_capacity_reservation_resource_group_arn"></a> [capacity\_reservation\_resource\_group\_arn](#input\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the protocol gateways. Use this instead of capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | n/a | yes |
 | <a name="input_clusterize_finalization_lambda_name"></a> [clusterize\_finalization\_lambda\_name](#input\_clusterize\_finalization\_lambda\_name) | The name of the clusterize finalization function | `string` | n/a | yes |
 | <a name="input_clusterize_lambda_name"></a> [clusterize\_lambda\_name](#input\_clusterize\_lambda\_name) | The name of the clusterize function | `string` | n/a | yes |

@@ -149,7 +149,18 @@ variable "use_placement_group" {
 variable "capacity_reservation_id" {
   type        = string
   default     = null
-  description = "The ID of the capacity reservation in which to run the clients"
+  description = "The ID of the capacity reservation in which to run the clients. Mutually exclusive with capacity_reservation_resource_group_arn."
+}
+
+variable "capacity_reservation_resource_group_arn" {
+  type        = string
+  default     = null
+  description = "The ARN of a capacity reservation resource group (pool) in which to run the clients. Use this instead of capacity_reservation_id to draw from several capacity reservations. Mutually exclusive with capacity_reservation_id."
+
+  validation {
+    condition     = var.capacity_reservation_resource_group_arn == null || can(regex("^arn:[a-z0-9-]+:resource-groups:", var.capacity_reservation_resource_group_arn))
+    error_message = "The capacity reservation resource group ARN must be a resource-groups ARN, for example arn:aws:resource-groups:us-east-1:123456789012:group/my-pool."
+  }
 }
 
 variable "metadata_http_tokens" {
