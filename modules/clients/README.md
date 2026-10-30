@@ -46,7 +46,8 @@ No modules.
 | <a name="input_arch"></a> [arch](#input\_arch) | n/a | `string` | `null` | no |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | `true` | no |
 | <a name="input_backends_asg_name"></a> [backends\_asg\_name](#input\_backends\_asg\_name) | Name of the backends autoscaling group | `string` | n/a | yes |
-| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients | `string` | `null` | no |
+| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients. Mutually exclusive with capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_capacity_reservation_resource_group_arn"></a> [capacity\_reservation\_resource\_group\_arn](#input\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the clients. Use this instead of capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_cert_pem"></a> [cert\_pem](#input\_cert\_pem) | Certificate PEM to use for the ALB when using self-signed certificate. | `string` | `null` | no |
 | <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | The default AMI ID is set to Amazon Linux 2023. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system | `string` | `null` | no |
 | <a name="input_clients_name"></a> [clients\_name](#input\_clients\_name) | The clients name. | `string` | n/a | yes |

@@ -857,6 +857,70 @@ vpc_endpoint_dynamodb_gateway_create = true
 vpc_endpoint_autoscaling_create      = true
 ```
 
+## Capacity Reservations
+Each node type can be launched into On-Demand Capacity Reservations (ODCRs). Two
+mutually exclusive variables are available per node type:
+
+| | variable | use when |
+|---|---|---|
+| single reservation | `capacity_reservation_id` | you have one ODCR |
+| several reservations | `capacity_reservation_resource_group_arn` | you have several ODCRs and want instances to draw from any of them |
+
+The same pair exists for every node type, prefixed accordingly:
+`client_`, `nfs_`, `smb_`, `s3_` and `data_services_`. Setting both the ID and the
+ARN for the same node type fails the plan.
+
+A launch template can only target **one** reservation ID or **one** resource group
+ARN, never a list. So to use several ODCRs you first collect them into a capacity
+reservation resource group (a "pool") and point the module at the pool. EC2 then
+launches into whichever reservation in the pool has matching attributes
+(instance type, platform, Availability Zone, tenancy) and available capacity.
+
+The pool must be created with the AWS CLI — the console can only create tag- and
+stack-based resource groups, not capacity reservation pools:
+
+```bash
+aws resource-groups create-group --name my-weka-backends-pool \
+  --configuration \
+    '{"Type":"AWS::EC2::CapacityReservationPool"}' \
+    '{"Type":"AWS::ResourceGroups::Generic","Parameters":[{"Name":"allowed-resource-types","Values":["AWS::EC2::CapacityReservation"]}]}'
+
+aws resource-groups group-resources --group my-weka-backends-pool --resource-arns \
+  arn:aws:ec2:<region>:<account>:capacity-reservation/cr-aaa \
+  arn:aws:ec2:<region>:<account>:capacity-reservation/cr-bbb
+```
+
+Then reference it:
+```hcl
+capacity_reservation_resource_group_arn = "arn:aws:resource-groups:<region>:<account>:group/my-weka-backends-pool"
+```
+
+Reservations owned by another account and shared with you through AWS RAM can be
+added to the pool as well.
+
+### Things to know
+
+- **Launches fail rather than falling back to On-Demand.** Targeting a pool would
+  normally fall back to paid On-Demand capacity when no reservation matches, so
+  the module pins `capacity-reservations-only`. This keeps the behaviour identical
+  to targeting a single reservation, which already fails in that situation. If a
+  cluster will not reach its desired size, check the Auto Scaling group's activity
+  history for launch failures.
+- **Only reservations in the node type's Availability Zone are usable.** Each node
+  type is pinned to a single subnet, and for backends this is inherent because the
+  cluster placement group requires one AZ. A pool spanning several AZs is harmless
+  but only its same-AZ members will ever be used.
+- **Existing instances do not move.** Changing these variables updates the launch
+  template, which affects only scale-out and instance replacement — running
+  backends keep their current placement. SMB/S3 protocol gateways and clients that
+  are not in an Auto Scaling group ignore launch template changes entirely, so they
+  pick up a new reservation only when recreated.
+- **Pool upkeep is yours, not Terraform's.** The module never creates or modifies
+  resource groups, so no `resource-groups` IAM permissions are needed. AWS removes
+  expired or cancelled reservations from the pool automatically and moves running
+  instances onto another matching member; adding newly purchased ODCRs is a
+  `group-resources` call and needs no Terraform run.
+
 # Terraform output
 The module output contains useful information about the created resources.
 For example: ssh username, weka password secret id etc.
@@ -976,9 +1040,11 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Required only if not specifying subnet\_ids, this zone(s) will be used to create subnet that will be used by weka. Currently limited to single subnet | `list(string)` | `[]` | no |
 | <a name="input_backends_root_volume_size"></a> [backends\_root\_volume\_size](#input\_backends\_root\_volume\_size) | The backends' root disk size. | `number` | `null` | no |
 | <a name="input_backends_weka_volume_size"></a> [backends\_weka\_volume\_size](#input\_backends\_weka\_volume\_size) | The backends' default disk size. | `number` | `48` | no |
-| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the Capacity Reservation in which to run the backends | `string` | `null` | no |
+| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the Capacity Reservation in which to run the backends. Mutually exclusive with capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_capacity_reservation_resource_group_arn"></a> [capacity\_reservation\_resource\_group\_arn](#input\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the backends. Use this instead of capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_client_arch"></a> [client\_arch](#input\_client\_arch) | Use arch for ami id, value can be arm64/x86\_64. | `string` | `null` | no |
-| <a name="input_client_capacity_reservation_id"></a> [client\_capacity\_reservation\_id](#input\_client\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients | `string` | `null` | no |
+| <a name="input_client_capacity_reservation_id"></a> [client\_capacity\_reservation\_id](#input\_client\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients. Mutually exclusive with client\_capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_client_capacity_reservation_resource_group_arn"></a> [client\_capacity\_reservation\_resource\_group\_arn](#input\_client\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the clients. Use this instead of client\_capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with client\_capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_client_frontend_cores"></a> [client\_frontend\_cores](#input\_client\_frontend\_cores) | Number of frontend cores to use on client instances, this number will reflect on number of NICs attached to instance, as each weka core requires dedicated NIC | `number` | `1` | no |
 | <a name="input_client_instance_ami_id"></a> [client\_instance\_ami\_id](#input\_client\_instance\_ami\_id) | The default AMI ID is set to Amazon Linux 2023. For the list of all supported Weka Client OSs please refer to: https://docs.weka.io/planning-and-installation/prerequisites-and-compatibility#operating-system | `string` | `null` | no |
 | <a name="input_client_instance_iam_profile_arn"></a> [client\_instance\_iam\_profile\_arn](#input\_client\_instance\_iam\_profile\_arn) | ARN of IAM Instance Profile to use by client instance. If not specified Instance Profile will be automatically created | `string` | `""` | no |
@@ -1000,7 +1066,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_create_nat_gateway"></a> [create\_nat\_gateway](#input\_create\_nat\_gateway) | NAT needs to be created when no public ip is assigned to the backend, to allow internet access | `bool` | `false` | no |
 | <a name="input_custom_data"></a> [custom\_data](#input\_custom\_data) | Custom data to pass to instances. | `string` | `""` | no |
 | <a name="input_custom_prefix"></a> [custom\_prefix](#input\_custom\_prefix) | Custom prefix for resources. The supported keys are: lb, db, kms, cloudwatch, sfn, lambda, secrets, ec2, iam, obs | `map(string)` | `{}` | no |
-| <a name="input_data_services_capacity_reservation_id"></a> [data\_services\_capacity\_reservation\_id](#input\_data\_services\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the data services instances | `string` | `null` | no |
+| <a name="input_data_services_capacity_reservation_id"></a> [data\_services\_capacity\_reservation\_id](#input\_data\_services\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the data services instances. Mutually exclusive with data\_services\_capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_data_services_capacity_reservation_resource_group_arn"></a> [data\_services\_capacity\_reservation\_resource\_group\_arn](#input\_data\_services\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the data services instances. Use this instead of data\_services\_capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with data\_services\_capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_data_services_instance_ami_id"></a> [data\_services\_instance\_ami\_id](#input\_data\_services\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2023 is the supported OS. | `string` | `null` | no |
 | <a name="input_data_services_instance_iam_profile_arn"></a> [data\_services\_instance\_iam\_profile\_arn](#input\_data\_services\_instance\_iam\_profile\_arn) | The data services instance IAM profile ARN | `string` | `""` | no |
 | <a name="input_data_services_instance_type"></a> [data\_services\_instance\_type](#input\_data\_services\_instance\_type) | The data services instance type to deploy | `string` | `"m6i.xlarge"` | no |
@@ -1032,7 +1099,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_lambdas_version"></a> [lambdas\_version](#input\_lambdas\_version) | Lambdas code version (hash) | `string` | `"8cf4b2be2f323a83400e981c92dee1dd"` | no |
 | <a name="input_metadata_http_tokens"></a> [metadata\_http\_tokens](#input\_metadata\_http\_tokens) | Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2) | `string` | `"required"` | no |
 | <a name="input_nat_public_subnet_cidr"></a> [nat\_public\_subnet\_cidr](#input\_nat\_public\_subnet\_cidr) | CIDR block for public subnet | `string` | `"10.0.2.0/24"` | no |
-| <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients | `string` | `null` | no |
+| <a name="input_nfs_capacity_reservation_id"></a> [nfs\_capacity\_reservation\_id](#input\_nfs\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the nfs clients. Mutually exclusive with nfs\_capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_nfs_capacity_reservation_resource_group_arn"></a> [nfs\_capacity\_reservation\_resource\_group\_arn](#input\_nfs\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the nfs clients. Use this instead of nfs\_capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with nfs\_capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_nfs_interface_group_name"></a> [nfs\_interface\_group\_name](#input\_nfs\_interface\_group\_name) | Interface group name. | `string` | `"weka-ig"` | no |
 | <a name="input_nfs_protocol_gateway_fe_cores_num"></a> [nfs\_protocol\_gateway\_fe\_cores\_num](#input\_nfs\_protocol\_gateway\_fe\_cores\_num) | The protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_nfs_protocol_gateway_instance_ami_id"></a> [nfs\_protocol\_gateway\_instance\_ami\_id](#input\_nfs\_protocol\_gateway\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2023 is the supported OS. | `string` | `null` | no |
@@ -1050,7 +1118,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_prefix"></a> [prefix](#input\_prefix) | Prefix for all resources | `string` | `"weka"` | no |
 | <a name="input_protection_level"></a> [protection\_level](#input\_protection\_level) | Cluster data protection level. | `number` | `2` | no |
 | <a name="input_proxy_url"></a> [proxy\_url](#input\_proxy\_url) | Weka proxy url | `string` | `""` | no |
-| <a name="input_s3_capacity_reservation_id"></a> [s3\_capacity\_reservation\_id](#input\_s3\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the s3 clients | `string` | `null` | no |
+| <a name="input_s3_capacity_reservation_id"></a> [s3\_capacity\_reservation\_id](#input\_s3\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the s3 clients. Mutually exclusive with s3\_capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_s3_capacity_reservation_resource_group_arn"></a> [s3\_capacity\_reservation\_resource\_group\_arn](#input\_s3\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the s3 clients. Use this instead of s3\_capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with s3\_capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_fe_cores_num"></a> [s3\_protocol\_gateway\_fe\_cores\_num](#input\_s3\_protocol\_gateway\_fe\_cores\_num) | S3 protocol gateways' NICs number. | `number` | `1` | no |
 | <a name="input_s3_protocol_gateway_instance_ami_id"></a> [s3\_protocol\_gateway\_instance\_ami\_id](#input\_s3\_protocol\_gateway\_instance\_ami\_id) | AMI ID to use, Amazon Linux 2023 is the supported OS. | `string` | `null` | no |
 | <a name="input_s3_protocol_gateway_instance_iam_profile_arn"></a> [s3\_protocol\_gateway\_instance\_iam\_profile\_arn](#input\_s3\_protocol\_gateway\_instance\_iam\_profile\_arn) | The protocol gateway instance IAM profile ARN | `string` | `""` | no |
@@ -1071,7 +1140,8 @@ The `helper_commands` part in the output provides lambda call that can be used t
 | <a name="input_sfn_iam_role_arn"></a> [sfn\_iam\_role\_arn](#input\_sfn\_iam\_role\_arn) | Step function iam role arn | `string` | `""` | no |
 | <a name="input_sg_custom_ingress_rules"></a> [sg\_custom\_ingress\_rules](#input\_sg\_custom\_ingress\_rules) | Custom inbound rules to be added to the security group. | <pre>list(object({<br>    from_port   = number<br>    to_port     = number<br>    protocol    = string<br>    cidr_blocks = list(string)<br>  }))</pre> | `[]` | no |
 | <a name="input_sg_ids"></a> [sg\_ids](#input\_sg\_ids) | Security group ids | `list(string)` | `[]` | no |
-| <a name="input_smb_capacity_reservation_id"></a> [smb\_capacity\_reservation\_id](#input\_smb\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the smb clients | `string` | `null` | no |
+| <a name="input_smb_capacity_reservation_id"></a> [smb\_capacity\_reservation\_id](#input\_smb\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the smb clients. Mutually exclusive with smb\_capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_smb_capacity_reservation_resource_group_arn"></a> [smb\_capacity\_reservation\_resource\_group\_arn](#input\_smb\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the smb clients. Use this instead of smb\_capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with smb\_capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_smb_cluster_name"></a> [smb\_cluster\_name](#input\_smb\_cluster\_name) | The name of the SMB setup. | `string` | `"Weka-SMB"` | no |
 | <a name="input_smb_domain_name"></a> [smb\_domain\_name](#input\_smb\_domain\_name) | The domain to join the SMB cluster to. | `string` | `""` | no |
 | <a name="input_smb_protocol_gateway_fe_cores_num"></a> [smb\_protocol\_gateway\_fe\_cores\_num](#input\_smb\_protocol\_gateway\_fe\_cores\_num) | The protocol gateways' NICs number. | `number` | `1` | no |
