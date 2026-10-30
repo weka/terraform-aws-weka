@@ -45,7 +45,8 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_ami_id"></a> [ami\_id](#input\_ami\_id) | ami id | `string` | n/a | yes |
 | <a name="input_assign_public_ip"></a> [assign\_public\_ip](#input\_assign\_public\_ip) | Determines whether to assign public ip. | `bool` | n/a | yes |
-| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the clients | `string` | `null` | no |
+| <a name="input_capacity_reservation_id"></a> [capacity\_reservation\_id](#input\_capacity\_reservation\_id) | The ID of the capacity reservation in which to run the data services instances. Mutually exclusive with capacity\_reservation\_resource\_group\_arn. | `string` | `null` | no |
+| <a name="input_capacity_reservation_resource_group_arn"></a> [capacity\_reservation\_resource\_group\_arn](#input\_capacity\_reservation\_resource\_group\_arn) | The ARN of a capacity reservation resource group (pool) in which to run the data services instances. Use this instead of capacity\_reservation\_id to draw from several capacity reservations. Mutually exclusive with capacity\_reservation\_id. | `string` | `null` | no |
 | <a name="input_cluster_name"></a> [cluster\_name](#input\_cluster\_name) | The cluster name. | `string` | n/a | yes |
 | <a name="input_data_services_name"></a> [data\_services\_name](#input\_data\_services\_name) | The  data services name. | `string` | n/a | yes |
 | <a name="input_data_services_number"></a> [data\_services\_number](#input\_data\_services\_number) | The number of virtual machines to deploy as protocol gateways. | `number` | n/a | yes |
