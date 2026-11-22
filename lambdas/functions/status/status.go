@@ -19,7 +19,7 @@ func GetReports(ctx context.Context, stateTable, hashKey, stateKey, clusterName,
 	logger := logging.LoggerFromCtx(ctx)
 	logger.Info().Msg("fetching cluster progress status...")
 
-	state, err := common.GetClusterStateWithoutLock(stateTable, hashKey, stateKey)
+	state, err := common.GetClusterState(stateTable, hashKey, stateKey)
 	if err != nil {
 		return
 	}
@@ -82,7 +82,7 @@ func GetClusterStatus(ctx context.Context, stateTableName, tableHashKey, stateKe
 	logger := logging.LoggerFromCtx(ctx)
 	logger.Info().Msg("fetching cluster status...")
 
-	state, err := common.GetClusterStateWithoutLock(stateTableName, tableHashKey, stateKey)
+	state, err := common.GetClusterState(stateTableName, tableHashKey, stateKey)
 	if err != nil {
 		return
 	}

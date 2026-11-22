@@ -85,6 +85,16 @@ terraform-aws-weka/
 - **CI**: GitHub Actions (lambda build, terraform-docs, tf-style-checks)
 - **Pre-commit**: terraform_fmt, terraform_tflint
 
+### State locking
+
+Cluster state lives in one DynamoDB item per state key (`Key`, `Value`, `Version`). Writes use
+optimistic concurrency on the top-level numeric `Version` attribute through
+`common.UpdateClusterState(ctx, table, hashKey, stateKey, mutate)` (`lambdas/common/common.go`): consistent
+read, `mutate`, conditional `UpdateItem` (`attribute_not_exists(Version) OR Version = old`), and on
+conflict a jittered 50-500ms backoff and retry until a 15s budget runs out (capped at the Lambda ctx
+deadline minus 2s). A missing `Version` counts as 0. Never write `Value` without going through this helper. There is no `Locked` mutex any more; the leftover `Locked` attribute
+on old deployments (and in `state.tf`) is ignored. Reads use `common.GetClusterState` (no lock needed).
+
 ### IAM conventions
 
 - Instance roles attach the AWS managed policy `arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore`.

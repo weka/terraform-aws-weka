@@ -1,6 +1,7 @@
 package clusterize
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -34,22 +35,22 @@ type ClusterizationParams struct {
 	AlbArnSuffix         string
 }
 
-func Clusterize(p ClusterizationParams) (clusterizeScript string, err error) {
+func Clusterize(ctx context.Context, p ClusterizationParams) (clusterizeScript string, err error) {
 	funcDef := aws_functions_def.NewFuncDef()
 
 	if p.Vm.Protocol == protocol.NFS {
-		clusterizeScript, err = doNFSClusterize(p, funcDef)
+		clusterizeScript, err = doNFSClusterize(ctx, p, funcDef)
 	} else if p.Vm.Protocol == protocol.SMB || p.Vm.Protocol == protocol.S3 {
 		msg := fmt.Sprintf("%s protocol gw: %s setup is done", strings.ToUpper(string(p.Vm.Protocol)), p.Vm.Name)
 		clusterizeScript = cloudCommon.GetScriptWithReport(msg, funcDef.GetFunctionCmdDefinition(functions_def.Report), "")
 	} else {
-		clusterizeScript, err = doClusterize(p, funcDef)
+		clusterizeScript, err = doClusterize(ctx, p, funcDef)
 	}
 	return
 }
 
-func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
-	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.StateKey, p.Vm)
+func doClusterize(ctx context.Context, p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
+	state, err := common.AddInstanceToStateInstances(ctx, p.StateTable, p.StateTableHashKey, p.StateKey, p.Vm)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return
@@ -73,6 +74,7 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 			if err != nil {
 				log.Error().Err(err).Send()
 				err = report.Report(
+					ctx,
 					protocol.Report{
 						Type:     "error",
 						Hostname: p.Vm.Name,
@@ -127,8 +129,8 @@ func doClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (cl
 	return
 }
 
-func doNFSClusterize(p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
-	state, err := common.AddInstanceToStateInstances(p.StateTable, p.StateTableHashKey, p.NfsStateKey, p.Vm)
+func doNFSClusterize(ctx context.Context, p ClusterizationParams, funcDef functions_def.FunctionDef) (clusterizeScript string, err error) {
+	state, err := common.AddInstanceToStateInstances(ctx, p.StateTable, p.StateTableHashKey, p.NfsStateKey, p.Vm)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return

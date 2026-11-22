@@ -3,7 +3,9 @@ package common
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbiface"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/lambda"
@@ -25,8 +28,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/semaphore"
 )
-
-var WaitForLockTimeout = time.Minute * 5
 
 const (
 	NfsInterfaceGroupPortKey   = "nfs_interface_group_port"
@@ -38,8 +39,8 @@ const (
 type InstancePrivateIpsSet map[string]types.Nilt
 
 type StateItem struct {
-	Value  protocol.ClusterState `json:"Value"`
-	Locked bool                  `json:"Locked"`
+	Value   protocol.ClusterState `json:"Value"`
+	Version int64                 `json:"Version"`
 }
 
 const FindDrivesScript = `
@@ -58,145 +59,135 @@ type AwsObsParams struct {
 	TieringSsdPercent string
 }
 
-func LockState(table, hashKey, stateKey string) (err error) {
-	client := connectors.GetAWSSession().DynamoDB
-	log.Debug().Msgf("Trying to lock state in table %s", table)
+// Cluster state lives in a single DynamoDB item per state key. Writes use optimistic concurrency
+// on the top-level numeric "Version" attribute: read state+version, mutate, write conditionally on
+// the version being unchanged, retry on conflict. An item without Version counts as version 0.
 
-	for start := time.Now(); time.Since(start) < WaitForLockTimeout; {
-		expr, err := expression.NewBuilder().WithCondition(
-			expression.Equal(expression.Name("Locked"), expression.Value(false)),
-		).WithUpdate(
-			expression.Set(expression.Name("Locked"), expression.Value(true)),
-		).Build()
+const (
+	versionAttr = "Version"
+	valueAttr   = "Value"
+)
+
+// Retry policy for conflicting attempts (package vars so tests can shrink them). Retries are bounded
+// by a time budget rather than an attempt count: the budget is capped at the Lambda context deadline
+// minus a margin, so there is time left to return the error before the Lambda is killed.
+var (
+	stateUpdateBackoffBase    = 50 * time.Millisecond
+	stateUpdateBackoffMax     = 500 * time.Millisecond
+	stateUpdateBudget         = 15 * time.Second
+	stateUpdateDeadlineMargin = 2 * time.Second
+)
+
+var errStateUpdateConflict = errors.New("cluster state update conflict")
+
+func isConditionalCheckFailed(err error) bool {
+	var aerr awserr.Error
+	return errors.As(err, &aerr) && aerr.Code() == dynamodb.ErrCodeConditionalCheckFailedException
+}
+
+// backoffDelay returns a jittered delay in [d/2, d] where d doubles with each (0-based) attempt up to the max.
+func backoffDelay(attempt int) time.Duration {
+	// The clamp only prevents shift overflow; the max applies long before it.
+	d := min(stateUpdateBackoffBase<<min(attempt, 30), stateUpdateBackoffMax)
+	return d/2 + time.Duration(rand.Int63n(int64(d/2)+1))
+}
+
+func readStateItem(client dynamodbiface.DynamoDBAPI, table, hashKey, stateKey string) (item StateItem, err error) {
+	result, err := client.GetItem(&dynamodb.GetItemInput{
+		TableName:      aws.String(table),
+		Key:            map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
+		ConsistentRead: aws.Bool(true),
+	})
+	if err != nil {
+		return
+	}
+	if len(result.Item) == 0 {
+		err = fmt.Errorf("state item %s not found in table %s", stateKey, table)
+		return
+	}
+	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
+	return
+}
+
+func GetClusterState(table, hashKey, stateKey string) (state protocol.ClusterState, err error) {
+	log.Info().Msgf("Fetching cluster state %s from dynamodb", stateKey)
+	item, err := readStateItem(connectors.GetAWSSession().DynamoDB, table, hashKey, stateKey)
+	if err != nil {
+		log.Error().Err(err).Send()
+		return
+	}
+	return item.Value, nil
+}
+
+// UpdateClusterState atomically read-modify-writes the cluster state using optimistic locking.
+// mutate may be called several times (once per attempt) and must be idempotent on its input;
+// an error from mutate aborts immediately without writing or retrying.
+// Conflicts are retried with jittered backoff until stateUpdateBudget elapses, or until
+// stateUpdateDeadlineMargin before ctx's deadline if that is sooner, or ctx is cancelled;
+// then errStateUpdateConflict is returned.
+// Returns the state as written.
+func UpdateClusterState(ctx context.Context, table, hashKey, stateKey string, mutate func(*protocol.ClusterState) error) (protocol.ClusterState, error) {
+	return updateClusterState(ctx, connectors.GetAWSSession().DynamoDB, table, hashKey, stateKey, mutate)
+}
+
+func updateClusterState(ctx context.Context, client dynamodbiface.DynamoDBAPI, table, hashKey, stateKey string, mutate func(*protocol.ClusterState) error) (protocol.ClusterState, error) {
+	deadline := time.Now().Add(stateUpdateBudget)
+	if ctxDeadline, ok := ctx.Deadline(); ok {
+		if capped := ctxDeadline.Add(-stateUpdateDeadlineMargin); capped.Before(deadline) {
+			deadline = capped
+		}
+	}
+	ctx, cancel := context.WithDeadline(ctx, deadline)
+	defer cancel()
+
+	for attempt := 0; ; attempt++ {
+		item, err := readStateItem(client, table, hashKey, stateKey)
 		if err != nil {
-			log.Error().Err(err).Send()
-			return err
+			return protocol.ClusterState{}, err
+		}
+		state := item.Value
+		if err := mutate(&state); err != nil {
+			return state, err
 		}
 
-		input := &dynamodb.UpdateItemInput{
+		value, err := dynamodbattribute.Marshal(state)
+		if err != nil {
+			return state, err
+		}
+		expr, err := expression.NewBuilder().WithCondition(
+			expression.Or(
+				expression.AttributeNotExists(expression.Name(versionAttr)),
+				expression.Equal(expression.Name(versionAttr), expression.Value(item.Version)),
+			),
+		).WithUpdate(
+			expression.Set(expression.Name(valueAttr), expression.Value(value)).
+				Set(expression.Name(versionAttr), expression.Value(item.Version+1)),
+		).Build()
+		if err != nil {
+			return state, err
+		}
+
+		_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
 			TableName:                 aws.String(table),
 			Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
 			UpdateExpression:          expr.Update(),
 			ConditionExpression:       expr.Condition(),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
+		})
+		if err == nil {
+			return state, nil
 		}
-		_, err = client.UpdateItem(input)
-		// get aws error code
-		if err != nil && err.(awserr.Error).Code() == dynamodb.ErrCodeConditionalCheckFailedException {
-			// wait for state being unlocked
-			log.Info().Msg("State is locked, waiting for a second")
-			time.Sleep(time.Second)
-			continue
+		if !isConditionalCheckFailed(err) {
+			return state, fmt.Errorf("failed to update state: %w", err)
 		}
-		if err != nil {
-			err = fmt.Errorf("failed to lock state: %v", err)
-			log.Debug().Err(err).Send()
-			return err
-		} else {
-			log.Debug().Msg("Locked state")
-			break
+		log.Info().Msgf("State %s changed concurrently, retrying (attempt %d)", stateKey, attempt+1)
+		select {
+		case <-ctx.Done():
+			return protocol.ClusterState{}, fmt.Errorf("%w: state %s still changing after %d attempts", errStateUpdateConflict, stateKey, attempt+1)
+		case <-time.After(backoffDelay(attempt)):
 		}
 	}
-	return
-}
-
-func UnlockState(table, hashKey, stateKey string) (err error) {
-	client := connectors.GetAWSSession().DynamoDB
-
-	expr, err := expression.NewBuilder().WithUpdate(
-		expression.Set(expression.Name("Locked"), expression.Value(false)),
-	).Build()
-	if err != nil {
-		log.Error().Err(err).Send()
-		return err
-	}
-
-	input := &dynamodb.UpdateItemInput{
-		TableName:                 aws.String(table),
-		Key:                       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
-		UpdateExpression:          expr.Update(),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-	}
-	_, err = client.UpdateItem(input)
-
-	if err == nil {
-		log.Debug().Msg("Unlocked state")
-	}
-	return
-}
-
-func GetClusterStateWithoutLock(table, hashKey, stateKey string) (state protocol.ClusterState, err error) {
-	client := connectors.GetAWSSession().DynamoDB
-	input := dynamodb.GetItemInput{
-		TableName:      aws.String(table),
-		Key:            map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
-		ConsistentRead: aws.Bool(true),
-	}
-
-	result, err := client.GetItem(&input)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return state, err
-	}
-
-	var stateItem StateItem
-	err = dynamodbattribute.UnmarshalMap(result.Item, &stateItem)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return
-	}
-	state = stateItem.Value
-	return
-}
-
-func GetClusterState(table, hashKey, stateKey string) (state protocol.ClusterState, err error) {
-	log.Info().Msgf("Fetching cluster state %s from dynamodb", stateKey)
-
-	err = LockState(table, hashKey, stateKey)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return state, err
-	}
-
-	state, err = GetClusterStateWithoutLock(table, hashKey, stateKey)
-
-	unlockErr := UnlockState(table, hashKey, stateKey)
-	if unlockErr != nil {
-		// expand existing error
-		err = fmt.Errorf("%v; %v", err, unlockErr)
-	}
-
-	if err != nil {
-		log.Error().Err(err).Send()
-		return state, err
-	}
-
-	log.Info().Msg("Fetched cluster state successfully")
-	return
-}
-
-func UpdateClusterState(table, hashKey, stateKey string, state protocol.ClusterState) (err error) {
-	client := connectors.GetAWSSession().DynamoDB
-
-	value, err := dynamodbattribute.Marshal(state)
-	if err != nil {
-		log.Error().Err(err).Send()
-		return err
-	}
-
-	_, err = client.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String(table),
-		Key:       map[string]*dynamodb.AttributeValue{hashKey: {S: aws.String(stateKey)}},
-		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
-			"Value": {
-				Action: aws.String("PUT"),
-				Value:  value,
-			},
-		},
-	})
-	return
 }
 
 func GetWekaIoToken(tokenId string) (token string, err error) {
@@ -271,51 +262,22 @@ func GetBackendWekaVolumeId(InstanceId string) (volumeId string, err error) {
 	return
 }
 
-func AddInstanceToStateInstances(table, hashKey, stateKey string, newInstance protocol.Vm) (state protocol.ClusterState, err error) {
-	err = LockState(table, hashKey, stateKey)
-	if err != nil {
-		return
-	}
-
-	state, err = addInstanceToStateInstances(table, hashKey, stateKey, newInstance)
-	if err != nil {
-		log.Error().Err(err).Send()
-	}
-
-	unlockErr := UnlockState(table, hashKey, stateKey)
-	if unlockErr != nil {
-		// expand existing error
-		err = fmt.Errorf("%v; %v", err, unlockErr)
-	}
-	return
-}
-
-// NOTE: Modifies state in dynamodb
-// This function should be called only using Lock and Unlock state functions surrounding it
-func addInstanceToStateInstances(table, hashKey, stateKey string, newInstance protocol.Vm) (state protocol.ClusterState, err error) {
-	state, err = GetClusterStateWithoutLock(table, hashKey, stateKey)
+func AddInstanceToStateInstances(ctx context.Context, table, hashKey, stateKey string, newInstance protocol.Vm) (protocol.ClusterState, error) {
+	state, err := UpdateClusterState(ctx, table, hashKey, stateKey, func(state *protocol.ClusterState) error {
+		if state.Clusterized {
+			return fmt.Errorf("not adding instance %s to state instances list (this extra instance was created before the end of clusterization)", newInstance)
+		}
+		if len(state.Instances) == state.InitialSize {
+			// This might happen if someone increases the desired number before the clusterization id done
+			return fmt.Errorf("number of instances is already the initial size, not adding instance %s to state instances list", newInstance)
+		}
+		state.Instances = append(state.Instances, newInstance)
+		return nil
+	})
 	if err != nil {
 		log.Error().Err(err).Send()
-		return
 	}
-
-	if state.Clusterized {
-		err = fmt.Errorf("not adding instance %s to state instances list (this extra instance was created before the end of clusterization)", newInstance)
-		log.Error().Err(err).Send()
-		return
-	}
-
-	if len(state.Instances) == state.InitialSize {
-		// This might happen if someone increases the desired number before the clusterization id done
-		err = fmt.Errorf("number of instances is already the initial size, not adding instance %s to state instances list", newInstance)
-		log.Error().Err(err).Send()
-		return
-	}
-	state.Instances = append(state.Instances, newInstance)
-
-	err = UpdateClusterState(table, hashKey, stateKey, state)
-
-	return
+	return state, err
 }
 
 func UnpackASGInstanceIds(asgInstances []*autoscaling.Instance) (instanceIds []*string) {

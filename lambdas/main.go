@@ -54,7 +54,7 @@ func clusterizeFinalizationHandler(ctx context.Context, VmProtocol Protocol) (st
 	if VmProtocol.Protocol == protocol.NFS {
 		stateKey = os.Getenv("NFS_STATE_KEY")
 
-		state, err := common.GetClusterStateWithoutLock(stateTable, stateTableHashKey, stateKey)
+		state, err := common.GetClusterState(stateTable, stateTableHashKey, stateKey)
 		if err != nil {
 			logger.Error().Err(err).Send()
 			return err.Error(), err
@@ -81,7 +81,7 @@ func clusterizeFinalizationHandler(ctx context.Context, VmProtocol Protocol) (st
 		stateKey = os.Getenv("STATE_KEY")
 	}
 
-	err := clusterize_finalization.ClusterizeFinalization(stateTable, stateTableHashKey, stateKey)
+	err := clusterize_finalization.ClusterizeFinalization(ctx, stateTable, stateTableHashKey, stateKey)
 
 	if err != nil {
 		logger.Error().Err(err).Send()
@@ -188,7 +188,7 @@ func clusterizeHandler(ctx context.Context, vm protocol.Vm) (string, error) {
 		AlbArnSuffix: albArnSuffix,
 	}
 
-	return clusterize.Clusterize(params)
+	return clusterize.Clusterize(ctx, params)
 }
 
 func deployHandler(ctx context.Context, vm protocol.Vm) (string, error) {
@@ -272,7 +272,7 @@ func reportHandler(ctx context.Context, currentReport protocol.Report) (string, 
 		stateKey = os.Getenv("NFS_STATE_KEY")
 	}
 
-	err := report.Report(currentReport, stateTable, stateTableHashKey, stateKey)
+	err := report.Report(ctx, currentReport, stateTable, stateTableHashKey, stateKey)
 	if err != nil {
 		log.Error().Err(err).Send()
 		return "Failed adding report to state table", err
